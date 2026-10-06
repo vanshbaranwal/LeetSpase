@@ -16,9 +16,11 @@ const Navbar = ()=>{
       <div className="flex w-full justify-between mx-auto max-w-4xl bg-black/15 shadow-lg shadow-neutral-600/5 backdrop-blur-lg border border-gray-200/10 p-4 rounded-2xl">
         {/* Logo Section */}
         <Link to="/" className="flex items-center gap-3 cursor-pointer">
-          <img src="/leetlab.svg" className="h-18 w-18 bg-primary/20 text-primary border-none px-2 py-2 rounded-full" />
+          <div className="h-10 w-10 bg-primary/20 text-primary border-none p-2 rounded-full flex items-center justify-center">
+            <Code className="h-6 w-6" />
+          </div>
           <span className="text-lg md:text-2xl font-bold tracking-tight text-white hidden md:block">
-          Leetlab 
+          LeetSpase
           </span>
         </Link>
 
@@ -26,15 +28,8 @@ const Navbar = ()=>{
         <div className="flex items-center gap-8">
           <div className="dropdown dropdown-end">
             <label tabIndex={0} className="btn btn-ghost btn-circle avatar flex flex-row ">
-              <div className="w-10 rounded-full ">
-                <img
-                  src={
-                    authUser?.image ||
-                    "https://avatar.iran.liara.run/public/boy"
-                  }
-                  alt="User Avatar"
-                  className="object-cover"
-                />
+              <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center">
+                <User className="w-5 h-5" aria-label="User menu" />
               </div>
            
             </label>

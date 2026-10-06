@@ -1,5 +1,67 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes: monochrome;
+}
+
+@plugin "daisyui/theme" {
+  name: "monochrome";
+  default: true;
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: #1c1c1c;
+  --color-base-200: #1c1c1c;
+  --color-base-300: #000000;
+  --color-base-content: #ffffff;
+  --color-primary: #ffffff;
+  --color-primary-content: #000000;
+  --color-secondary: #e6e6e6;
+  --color-secondary-content: #000000;
+  --color-accent: #f2f2f2;
+  --color-accent-content: #000000;
+  --color-neutral: #000000;
+  --color-neutral-content: #ffffff;
+  --color-info: #e6e6e6;
+  --color-success: #e6e6e6;
+  --color-warning: #f2f2f2;
+  --color-error: #ffffff;
+}
+
+:root {
+  --brand-black: #000000;
+  --brand-dark: #111111;
+  --brand-surface: #1c1c1c;
+  --brand-white: #ffffff;
+  --brand-light: #f2f2f2;
+  --brand-gray: #e6e6e6;
+}
+
+body {
+  background-color: var(--brand-black);
+  background-image:
+    repeating-linear-gradient(112deg, transparent 0 9px, rgba(0, 0, 0, 0.24) 10px 11px, transparent 12px 21px),
+    repeating-linear-gradient(108deg, transparent 0 34px, rgba(0, 0, 0, 0.16) 35px 37px, transparent 38px 62px),
+    repeating-linear-gradient(116deg, rgba(255, 255, 255, 0.008) 0 1px, transparent 2px 28px),
+    linear-gradient(112deg, #030303, #0d0d0d 48%, #050505);
+  background-size: 240px 100%, 470px 100%, 130px 100%, 100% 100%;
+  background-position: 0 0, 80px 0, 20px 0, 0 0;
+  background-attachment: fixed;
+  color: var(--brand-white);
+}
+
+button.btn,
+a.btn {
+  background-color: #ffffff;
+  border-color: #ffffff;
+  color: #000000;
+}
+
+button.btn:hover,
+a.btn:hover {
+  background-color: #e6e6e6;
+  border-color: #e6e6e6;
+  color: #000000;
+}
 
 @keyframes blink {
     0%,
