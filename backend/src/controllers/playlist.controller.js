@@ -38,6 +38,13 @@ export const createPlaylist = async(req, res) => {
     } catch (error) {
         console.error("error creating the playlist: ", error);
 
+        if (error.code === "P2002") {
+            return res.status(409).json({
+                success: false,
+                error: "you already have a playlist with this name"
+            });
+        }
+
         return res.status(500).json({
             success: false,
             error: "failed to create the playlist"
@@ -130,9 +137,45 @@ export const addProblemToPlaylist = async(req, res) => {
             });
         }
 
+        // check whether the playlist exists and belongs to the currently logged-in user
+
+        const playlist = await db.playlist.findUnique({
+            where: {
+                id: playlistId,
+                userId: req.user.id
+            }
+        });
+
+        if (!playlist) {
+            return res.status(404).json({
+                success: false,
+                error: "playlist not found"
+            });
+        }
+
+        // check whether every problem ID sent by the user actually exists in the database
+
+        const existingProblems = await db.problem.findMany({
+            where: {
+                id: {
+                    in: problemIds
+                }
+            },
+            select: {
+                id: true
+            }
+        });
+
+        if (existingProblems.length !== problemIds.length) {
+            return res.status(400).json({
+                success: false,
+                error: "one or more problem IDs do not exist"
+            });
+        }
+
         // creating records for the each problems in the playlist
         
-        const problemsInPlaylist = await db.problemsInPlaylist.createMany({
+        const problemsInPlaylist = await db.problemInPlaylist.createMany({
             data: problemIds.map((problemId) => ({
                 playListId: playlistId,
                 problemId
@@ -143,7 +186,7 @@ export const addProblemToPlaylist = async(req, res) => {
         return res.status(201).json({
             success: true,
             message: "problems added to playlist successfully",
-            problemsInPlaylist
+            addedCount: problemsInPlaylist.count
         });
 
     } catch (error) {
@@ -194,7 +237,7 @@ export const removeProblemFromPlaylist = async(req, res) => {
             });
         }
 
-        const deletedProblem = await db.problemsInPlaylist.deleteMany({
+        const deletedProblem = await db.problemInPlaylist.deleteMany({
             where: {
                 playlistId,
                 problemId: {
