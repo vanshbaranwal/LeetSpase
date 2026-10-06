@@ -1,4 +1,3 @@
-import React from 'react';
 import { CheckCircle2, XCircle, Clock, MemoryStick as Memory } from 'lucide-react';
 
 const SubmissionResults = ({ submission }) => {

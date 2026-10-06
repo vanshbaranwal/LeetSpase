@@ -1,4 +1,3 @@
-import React from 'react'
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {z} from "zod"
@@ -51,7 +50,7 @@ const problemSchema = z.object({
       explanation: z.string().optional(),
     }),
   }),
-  codeSnippets: z.object({
+  codeSnippet: z.object({
     JAVASCRIPT: z.string().min(1, "JavaScript code snippet is required"),
     PYTHON: z.string().min(1, "Python code snippet is required"),
     JAVA: z.string().min(1, "Java solution is required"),
@@ -110,7 +109,7 @@ const sampledpData = {
         "There are five ways to climb to the top:\n1. 1 step + 1 step + 1 step + 1 step\n2. 1 step + 1 step + 2 steps\n3. 1 step + 2 steps + 1 step\n4. 2 steps + 1 step + 1 step\n5. 2 steps + 2 steps",
     },
   },
-  codeSnippets: {
+  codeSnippet: {
     JAVASCRIPT: `/**
 * @param {number} n
 * @return {number}
@@ -354,7 +353,7 @@ const sampleStringProblem = {
       explanation: '"amanaplanacanalpanama" is a palindrome.',
     },
   },
-  codeSnippets: {
+  codeSnippet: {
     JAVASCRIPT: `/**
    * @param {string} s
    * @return {boolean}
@@ -525,7 +524,7 @@ const CreateProblemForm = () => {
         PYTHON: { input: "", output: "", explanation: "" },
         JAVA: { input: "", output: "", explanation: "" },
       },
-      codeSnippets: {
+      codeSnippet: {
         JAVASCRIPT: "function solution() {\n  // Write your code here\n}",
         PYTHON: "def solution():\n    # Write your code here\n    pass",
         JAVA: "public class Solution {\n    public static void main(String[] args) {\n        // Write your code here\n    }\n}",
@@ -848,7 +847,7 @@ const CreateProblemForm = () => {
                         </h4>
                         <div className="border rounded-md overflow-hidden">
                           <Controller
-                            name={`codeSnippets.${language}`}
+                            name={`codeSnippet.${language}`}
                             control={control}
                             render={({ field }) => (
                               <Editor
@@ -869,10 +868,10 @@ const CreateProblemForm = () => {
                             )}
                           />
                         </div>
-                        {errors.codeSnippets?.[language] && (
+                        {errors.codeSnippet?.[language] && (
                           <div className="mt-2">
                             <span className="text-error text-sm">
-                              {errors.codeSnippets[language].message}
+                              {errors.codeSnippet[language].message}
                             </span>
                           </div>
                         )}

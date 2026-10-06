@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Plus, Loader } from 'lucide-react';
 import { usePlaylistStore } from '../store/usePlaylistStore';
 
@@ -10,7 +10,7 @@ const AddToPlaylistModal = ({ isOpen, onClose, problemId }) => {
     if (isOpen) {
       getAllPlaylists();
     }
-  }, [isOpen]);
+  }, [isOpen, getAllPlaylists]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

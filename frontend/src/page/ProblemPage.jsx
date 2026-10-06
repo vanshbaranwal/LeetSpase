@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import {
   Play,
@@ -9,7 +9,6 @@ import {
   Share2,
   Clock,
   ChevronRight,
-  BookOpen,
   Terminal,
   Code2,
   Users,
@@ -38,7 +37,7 @@ const ProblemPage = () => {
 
   const [code, setCode] = useState("");
   const [activeTab, setActiveTab] = useState("description");
-  const [selectedLanguage, setSelectedLanguage] = useState("javascript");
+  const [selectedLanguage, setSelectedLanguage] = useState("JAVASCRIPT");
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [testcases, setTestCases] = useState([]);
 
@@ -47,12 +46,13 @@ const ProblemPage = () => {
   useEffect(() => {
     getProblemById(id);
     getSubmissionCountForProblem(id);
-  }, [id]);
+  }, [id, getProblemById, getSubmissionCountForProblem]);
 
   useEffect(() => {
     if (problem) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCode(
-        problem.codeSnippets?.[selectedLanguage] || submission?.sourceCode || ""
+        problem.codeSnippet?.[selectedLanguage] || submission?.sourceCode || ""
       );
       setTestCases(
         problem.testcases?.map((tc) => ({
@@ -61,20 +61,20 @@ const ProblemPage = () => {
         })) || []
       );
     }
-  }, [problem, selectedLanguage]);
+  }, [problem, selectedLanguage, submission?.sourceCode]);
 
   useEffect(() => {
     if (activeTab === "submissions" && id) {
       getSubmissionForProblem(id);
     }
-  }, [activeTab, id]);
+  }, [activeTab, id, getSubmissionForProblem]);
 
   console.log("submission", submissions);
 
   const handleLanguageChange = (e) => {
     const lang = e.target.value;
     setSelectedLanguage(lang);
-    setCode(problem.codeSnippets?.[lang] || "");
+    setCode(problem.codeSnippet?.[lang] || "");
   };
 
   const handleRunCode = (e) => {
@@ -111,7 +111,7 @@ const ProblemPage = () => {
               <>
                 <h3 className="text-xl font-bold mb-4">Examples:</h3>
                 {Object.entries(problem.examples).map(
-                  ([lang, example], idx) => (
+                  ([lang, example]) => (
                     <div
                       key={lang}
                       className="bg-base-200 p-6 rounded-xl mb-6 font-mono"
@@ -240,7 +240,7 @@ const ProblemPage = () => {
             value={selectedLanguage}
             onChange={handleLanguageChange}
           >
-            {Object.keys(problem.codeSnippets || {}).map((lang) => (
+            {Object.keys(problem.codeSnippet || {}).map((lang) => (
               <option key={lang} value={lang}>
                 {lang.charAt(0).toUpperCase() + lang.slice(1)}
               </option>
