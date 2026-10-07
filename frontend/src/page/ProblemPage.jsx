@@ -195,7 +195,7 @@ const ProblemPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-base-300 to-base-200 max-w-7xl w-full">
+    <div className="min-h-screen bg-base-100 max-w-7xl w-full">
       <nav className="navbar bg-base-100 shadow-lg px-4">
         <div className="flex-1 gap-2">
           <Link to={"/"} className="flex items-center gap-2 text-primary">

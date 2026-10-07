@@ -63,6 +63,22 @@ a.btn:hover {
   color: #000000;
 }
 
+@keyframes landing-code-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+.landing-code-float {
+  animation: landing-code-float 8s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-code-float {
+    animation: none;
+  }
+}
+
 @keyframes blink {
     0%,
     100% {

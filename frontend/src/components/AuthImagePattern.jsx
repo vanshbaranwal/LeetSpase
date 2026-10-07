@@ -67,7 +67,7 @@ function reverseList(head) {
   }, [codeSnippets.length])
 
   return (
-    <div className="hidden lg:flex flex-col items-center justify-center bg-slate-900 text-white p-12 relative overflow-hidden">
+    <div className="hidden lg:flex flex-col items-center justify-center bg-base-100 text-white p-12 relative overflow-hidden">
       {/* Animated code symbols in background */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-[10%] left-[15%] animate-pulse">
