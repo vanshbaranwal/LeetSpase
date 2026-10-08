@@ -51,54 +51,60 @@ const Navbar = () => {
           )}
         </div>
 
-        {authUser ? (
-          <div className="flex items-center gap-3">
-            {isProblemsPage ? (
-              <label className="relative block">
-                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
-                <input
-                  type="search"
-                  value={problemSearch}
-                  onChange={handleProblemSearch}
-                  placeholder="Search problems..."
-                  aria-label="Search problems by name"
-                  className="h-12 w-36 rounded-md border border-white/10 bg-white/[0.06] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-white/30 focus:bg-white/[0.08] sm:w-52 sm:pr-4 lg:w-72"
-                />
-              </label>
-            ) : (
-              <Link to="/problems" className="hidden rounded-md border border-white/10 bg-white/[0.06] px-6 py-3 font-mono text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-white/10 sm:block">
-                Problems
+        <div className="flex shrink-0 items-center gap-2.5">
+          {isProblemsPage && (
+            <label className="relative block">
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
+              <input
+                type="search"
+                value={problemSearch}
+                onChange={handleProblemSearch}
+                placeholder="Search problems..."
+                aria-label="Search problems by name"
+                className="h-12 w-36 rounded-md border border-white/10 bg-white/[0.06] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-white/30 focus:bg-white/[0.08] sm:w-52 sm:pr-4 lg:w-72"
+              />
+            </label>
+          )}
+
+          {authUser ? (
+            <>
+              {!isProblemsPage && (
+                <Link to="/problems" className="hidden rounded-md border border-white/10 bg-white/[0.06] px-6 py-3 font-mono text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-white/10 sm:block">
+                  Problems
+                </Link>
+              )}
+              <div className="dropdown dropdown-end">
+                <button type="button" tabIndex={0} className="grid h-12 w-12 place-items-center rounded-md bg-white text-black transition-colors hover:bg-[#e6e6e6]" aria-label="Open user menu">
+                  <User className="h-6 w-6" />
+                </button>
+                <ul tabIndex={0} className="menu dropdown-content z-[1] mt-3 w-56 space-y-1 rounded-xl border border-white/10 bg-[#111111] p-3 text-white shadow-2xl">
+                  <li className="mb-2 border-b border-white/10 pb-2">
+                    <span className="block cursor-default hover:bg-transparent">
+                      <span className="block truncate font-semibold">{authUser.name || "Coder"}</span>
+                      <span className="block text-xs font-normal text-white/45">{authUser.email}</span>
+                    </span>
+                  </li>
+                  <li><Link to="/profile" className="rounded-lg hover:bg-white/10 hover:text-white"><User className="h-4 w-4" /> My profile</Link></li>
+                  {authUser.role === "ADMIN" && (
+                    <li><Link to="/add-problem" className="rounded-lg hover:bg-white/10 hover:text-white"><Plus className="h-4 w-4" /> Add problem</Link></li>
+                  )}
+                  <li><LogoutButton><LogOut className="h-4 w-4" /> Logout</LogoutButton></li>
+                </ul>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2.5 font-mono text-xs font-semibold">
+              <Link to="/login" className="rounded-md border border-white/10 bg-white/[0.06] px-4 py-3 text-white transition-colors hover:bg-white/10 sm:px-6">
+                Sign in
               </Link>
-            )}
-            <div className="dropdown dropdown-end">
-              <button type="button" tabIndex={0} className="grid h-12 w-12 place-items-center rounded-md bg-white text-black transition-colors hover:bg-[#e6e6e6]" aria-label="Open user menu">
-                <User className="h-6 w-6" />
-              </button>
-              <ul tabIndex={0} className="menu dropdown-content z-[1] mt-3 w-56 space-y-1 rounded-xl border border-white/10 bg-[#111111] p-3 text-white shadow-2xl">
-                <li className="mb-2 border-b border-white/10 pb-2">
-                  <span className="block cursor-default hover:bg-transparent">
-                    <span className="block truncate font-semibold">{authUser.name || "Coder"}</span>
-                    <span className="block text-xs font-normal text-white/45">{authUser.email}</span>
-                  </span>
-                </li>
-                <li><Link to="/profile" className="rounded-lg hover:bg-white/10 hover:text-white"><User className="h-4 w-4" /> My profile</Link></li>
-                {authUser.role === "ADMIN" && (
-                  <li><Link to="/add-problem" className="rounded-lg hover:bg-white/10 hover:text-white"><Plus className="h-4 w-4" /> Add problem</Link></li>
-                )}
-                <li><LogoutButton><LogOut className="h-4 w-4" /> Logout</LogoutButton></li>
-              </ul>
+              {!isProblemsPage && (
+                <Link to="/signup" className="hidden rounded-md bg-white px-6 py-3 text-black transition-colors hover:bg-[#e6e6e6] sm:block">
+                  Get started
+                </Link>
+              )}
             </div>
-          </div>
-        ) : (
-          <div className="flex shrink-0 items-center gap-2.5 font-mono text-xs font-semibold">
-            <Link to="/login" className="rounded-md border border-white/10 bg-white/[0.06] px-5 py-3 text-white transition-colors hover:bg-white/10 sm:px-6">
-              Sign in
-            </Link>
-            <Link to="/signup" className="hidden rounded-md bg-white px-6 py-3 text-black transition-colors hover:bg-[#e6e6e6] sm:block">
-              Get started
-            </Link>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </nav>
   );

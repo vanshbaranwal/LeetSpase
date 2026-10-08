@@ -2,9 +2,9 @@ import CreateProblemForm from '../components/CreateProblemForm'
 
 const AddProblem = () => {
   return (
-    <div>
+    <main className="min-h-screen w-full">
       <CreateProblemForm/>
-    </div>
+    </main>
   )
 }
 

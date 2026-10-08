@@ -39,7 +39,7 @@ const App = () => {
           />
           <Route
             path="problems"
-            element={authUser ? <ProblemsPage /> : <Navigate to="/login" />}
+            element={<ProblemsPage />}
           />
         </Route>
 

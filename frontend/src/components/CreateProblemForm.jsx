@@ -10,6 +10,11 @@ import {
   BookOpen,
   CheckCircle2,
   Download,
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  FlaskConical,
+  Tags,
 } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { useState } from 'react';
@@ -510,8 +515,25 @@ public class Main {
   },
 };
 
+const formTabs = [
+  { id: "basics", label: "Title & Description", caption: "Problem statement", icon: FileText },
+  { id: "classification", label: "Difficulty & Tags", caption: "Discovery details", icon: Tags },
+  { id: "testcases", label: "Test Cases", caption: "Validation inputs", icon: FlaskConical },
+  { id: "python", label: "Python", caption: "Template and solution", icon: Code2 },
+  { id: "java", label: "Java", caption: "Template and solution", icon: Code2 },
+  { id: "javascript", label: "JavaScript", caption: "Template and solution", icon: Code2 },
+  { id: "additional", label: "Additional Info", caption: "Constraints and guidance", icon: Lightbulb },
+];
+
+const languageByTab = {
+  javascript: "JAVASCRIPT",
+  python: "PYTHON",
+  java: "JAVA",
+};
+
 const CreateProblemForm = () => {
-    const [sampleType , setSampleType] = useState("DP")
+    const sampleType = "DP";
+    const [activeTab, setActiveTab] = useState("basics");
     const navigation = useNavigate();
     const {register , control , handleSubmit , reset , formState:{errors}} = useForm(
         {
@@ -566,7 +588,7 @@ const CreateProblemForm = () => {
     const res = await axiosInstance.post("/problems/create-problem" , value)
     console.log(res.data);
     toast.success(res.data.message || "Problem Created successfully⚡");
-    navigation("/");
+    navigation("/problems");
 
    } catch (error) {
     console.log(error);
@@ -587,52 +609,126 @@ const CreateProblemForm = () => {
     reset(sampleData);
 }
 
+  const activeTabIndex = formTabs.findIndex((tab) => tab.id === activeTab);
+  const activeTabDetails = formTabs[activeTabIndex];
+  const activeLanguage = languageByTab[activeTab];
+
+  const tabHasError = (tabId) => {
+    if (tabId === "basics") return Boolean(errors.title || errors.description);
+    if (tabId === "classification") return Boolean(errors.difficulty || errors.tags);
+    if (tabId === "testcases") return Boolean(errors.testcases);
+    if (tabId === "additional") return Boolean(errors.constraints || errors.hints || errors.editorial);
+
+    const language = languageByTab[tabId];
+    return Boolean(
+      language &&
+      (errors.codeSnippet?.[language] ||
+        errors.referenceSolutions?.[language] ||
+        errors.examples?.[language])
+    );
+  };
+
+  const handleInvalidForm = (validationErrors) => {
+    if (validationErrors.title || validationErrors.description) setActiveTab("basics");
+    else if (validationErrors.difficulty || validationErrors.tags) setActiveTab("classification");
+    else if (validationErrors.testcases) setActiveTab("testcases");
+    else if (
+      validationErrors.codeSnippet?.PYTHON ||
+      validationErrors.referenceSolutions?.PYTHON ||
+      validationErrors.examples?.PYTHON
+    ) setActiveTab("python");
+    else if (
+      validationErrors.codeSnippet?.JAVA ||
+      validationErrors.referenceSolutions?.JAVA ||
+      validationErrors.examples?.JAVA
+    ) setActiveTab("java");
+    else if (
+      validationErrors.codeSnippet?.JAVASCRIPT ||
+      validationErrors.referenceSolutions?.JAVASCRIPT ||
+      validationErrors.examples?.JAVASCRIPT
+    ) setActiveTab("javascript");
+    else setActiveTab("additional");
+
+    toast.error("Complete the highlighted fields before creating the problem");
+  };
+
   return (
-    <div className='container mx-auto py-8 px-4 max-w-7xl'>
-  <div className="card bg-base-100 shadow-xl">
-        <div className="card-body p-6 md:p-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 pb-4 border-b">
+    <div className="h-screen w-full overflow-hidden bg-[#080808] text-white">
+      <div className="flex h-full w-full flex-col">
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex shrink-0 flex-col items-start justify-between gap-5 border-b border-white/10 bg-[#0d0d0d] px-5 py-6 md:flex-row md:items-center md:px-8 lg:px-10">
             <h2 className="card-title text-2xl md:text-3xl flex items-center gap-3">
               <FileText className="w-6 h-6 md:w-8 md:h-8 text-primary" />
               Create Problem
             </h2>
 
             <div className="flex flex-col md:flex-row gap-3 mt-4 md:mt-0">
-              <div className="join">
-                <button
-                  type="button"
-                  className={`btn join-item ${
-                    sampleType === "DP" ? "btn-active" : ""
-                  }`}
-                  onClick={() => setSampleType("array")}
-                >
-                  DP Problem
-                </button>
-                <button
-                  type="button"
-                  className={`btn join-item ${
-                    sampleType === "string" ? "btn-active" : ""
-                  }`}
-                  onClick={() => setSampleType("string")}
-                >
-                  String Problem
-                </button>
-              </div>
               <button
                 type="button"
                 className="btn btn-secondary gap-2"
                 onClick={loadSampleData}
               >
                 <Download className="w-4 h-4" />
-                Load Sample
+                Load Sample Problem
               </button>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={handleSubmit(onSubmit, handleInvalidForm)} className="grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] overflow-hidden lg:grid-cols-[280px_minmax(0,1fr)] lg:grid-rows-1">
+            <aside className="overflow-y-auto border-b border-white/10 bg-black/35 p-4 lg:border-b-0 lg:border-r lg:p-5">
+              <button
+                type="button"
+                onClick={() => navigation("/problems")}
+                className="mb-5 inline-flex items-center gap-2 px-2 text-sm text-white/45 transition-colors hover:text-white"
+              >
+                <ArrowLeft className="h-4 w-4" /> Back to problems
+              </button>
+
+              <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-1" aria-label="Problem form sections">
+                {formTabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  const hasError = tabHasError(tab.id);
+
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`group flex min-h-16 items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors ${
+                        isActive
+                          ? "border-white/20 bg-white/[0.08] text-white"
+                          : "border-transparent text-white/45 hover:border-white/10 hover:bg-white/[0.035] hover:text-white/80"
+                      }`}
+                    >
+                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg border ${isActive ? "border-white/15 bg-white text-black" : "border-white/10 bg-white/[0.04]"}`}>
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="flex items-center gap-2 text-sm font-semibold">
+                          <span className="truncate">{tab.label}</span>
+                          {hasError && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" aria-label="Section has an error" />}
+                        </span>
+                        <span className="mt-0.5 hidden truncate text-xs font-normal text-white/30 lg:block">{tab.caption}</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </aside>
+
+            <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
+              <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-8 lg:p-10">
+                <div className="mb-8 flex items-end justify-between gap-4 border-b border-white/10 pb-6">
+                  <div>
+                    <h1 className="text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">{activeTabDetails.label}</h1>
+                    <p className="mt-2 text-sm text-white/40">{activeTabDetails.caption}</p>
+                  </div>
+                </div>
+
             {/* Basic Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="form-control md:col-span-2">
+            <div className={`grid grid-cols-1 gap-6 md:grid-cols-2 ${activeTab !== "basics" && activeTab !== "classification" ? "hidden" : ""}`}>
+              <div className={`form-control md:col-span-2 ${activeTab !== "basics" ? "hidden" : ""}`}>
                 <label className="label">
                   <span className="label-text text-base md:text-lg font-semibold">
                     Title
@@ -653,7 +749,7 @@ const CreateProblemForm = () => {
                 )}
               </div>
 
-              <div className="form-control md:col-span-2">
+              <div className={`form-control md:col-span-2 ${activeTab !== "basics" ? "hidden" : ""}`}>
                 <label className="label">
                   <span className="label-text text-base md:text-lg font-semibold">
                     Description
@@ -673,7 +769,7 @@ const CreateProblemForm = () => {
                 )}
               </div>
 
-              <div className="form-control">
+              <div className={`form-control md:col-span-2 ${activeTab !== "classification" ? "hidden" : ""}`}>
                 <label className="label">
                   <span className="label-text text-base md:text-lg font-semibold">
                     Difficulty
@@ -698,7 +794,7 @@ const CreateProblemForm = () => {
             </div>
 
             {/* Tags */}
-            <div className="card bg-base-200 p-4 md:p-6 shadow-md">
+            <div className={`card mt-6 bg-base-200 p-4 shadow-md md:p-6 ${activeTab !== "classification" ? "hidden" : ""}`}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg md:text-xl font-semibold flex items-center gap-2">
                   <BookOpen className="w-5 h-5" />
@@ -742,7 +838,7 @@ const CreateProblemForm = () => {
             </div>
 
             {/* Test Cases */}
-            <div className="card bg-base-200 p-4 md:p-6 shadow-md">
+            <div className={`card bg-base-200 p-4 shadow-md md:p-6 ${activeTab !== "testcases" ? "hidden" : ""}`}>
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg md:text-xl font-semibold flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5" />
@@ -827,8 +923,8 @@ const CreateProblemForm = () => {
             </div>
 
             {/* Code Editor Sections */}
-            <div className="space-y-8">
-              {["JAVASCRIPT", "PYTHON", "JAVA"].map((language) => (
+            <div className={`space-y-8 ${!activeLanguage ? "hidden" : ""}`}>
+              {[activeLanguage].filter(Boolean).map((language) => (
                 <div
                   key={language}
                   className="card bg-base-200 p-4 md:p-6 shadow-md"
@@ -984,7 +1080,7 @@ const CreateProblemForm = () => {
             </div>
 
             {/* Additional Information */}
-            <div className="card bg-base-200 p-4 md:p-6 shadow-md">
+            <div className={`card bg-base-200 p-4 shadow-md md:p-6 ${activeTab !== "additional" ? "hidden" : ""}`}>
               <h3 className="text-lg md:text-xl font-semibold mb-6 flex items-center gap-2">
                 <Lightbulb className="w-5 h-5 text-warning" />
                 Additional Information
@@ -1034,17 +1130,40 @@ const CreateProblemForm = () => {
               </div>
             </div>
 
-            <div className="card-actions justify-end pt-4 border-t">
-              <button type="submit" className="btn btn-primary btn-lg gap-2">
-                {isLoading ? (
-                  <span className="loading loading-spinner text-white"></span>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-5 h-5" />
-                    Create Problem
-                  </>
-                )}
-              </button>
+              </div>
+
+              <div className="shrink-0 border-t border-white/10 bg-[#0d0d0d]/95 px-5 py-4 backdrop-blur sm:px-8 lg:px-10">
+                <div className="flex items-center justify-between gap-4">
+                  <button
+                    type="button"
+                    disabled={activeTabIndex === 0}
+                    onClick={() => setActiveTab(formTabs[activeTabIndex - 1].id)}
+                    className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2.5 text-sm font-semibold text-white/65 transition-colors hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-25"
+                  >
+                    <ChevronLeft className="h-4 w-4" /> Previous
+                  </button>
+
+                  {activeTabIndex < formTabs.length - 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab(formTabs[activeTabIndex + 1].id)}
+                      className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-[#e6e6e6]"
+                    >
+                      Next <ChevronRight className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <button type="submit" disabled={isLoading} className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-[#e6e6e6] disabled:cursor-not-allowed disabled:opacity-50">
+                      {isLoading ? (
+                        <span className="loading loading-spinner loading-sm"></span>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-4 w-4" /> Create Problem
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </form>
         </div>

@@ -59,14 +59,14 @@ const languageExamples = {
 };
 
 const syntaxColors = {
-  comment: "#6A9955",
-  string: "#CE9178",
-  number: "#B5CEA8",
-  keyword: "#C586C0",
-  declaration: "#569CD6",
-  type: "#4EC9B0",
-  function: "#DCDCAA",
-  literal: "#569CD6",
+  comment: "#008000",
+  string: "#A31515",
+  number: "#098658",
+  keyword: "#AF00DB",
+  declaration: "#0000FF",
+  type: "#267F99",
+  function: "#795E26",
+  literal: "#0000FF",
 };
 
 const commonSyntaxRules = [
@@ -197,7 +197,7 @@ const HomePage = () => {
             {authUser ? (
               <Link to="/problems" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition-transform hover:-translate-y-0.5">Explore problems <ArrowRight className="h-4 w-4" /></Link>
             ) : (
-              <Link to="/signup" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition-transform hover:-translate-y-0.5">Start solving free <ArrowRight className="h-4 w-4" /></Link>
+              <Link to="/problems" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition-transform hover:-translate-y-0.5">Start solving free <ArrowRight className="h-4 w-4" /></Link>
             )}
             <a href="#features" className="rounded-xl border border-white/15 px-5 py-3 text-sm font-medium text-white/75 transition-colors hover:border-white/30 hover:text-white">See what’s inside</a>
           </div>
@@ -229,7 +229,7 @@ const HomePage = () => {
 
             <div className="relative m-2 grid min-h-80 grid-cols-[42px_1fr] overflow-hidden rounded-xl border border-white/10 bg-[#1c1c1c] font-mono text-xs sm:m-3 sm:text-sm">
               <div className="select-none border-r border-white/5 bg-black/75 py-6 text-center leading-7 text-white/20">{activeExample.code.split("\n").map((_, index) => <div key={index}>{index + 1}</div>)}</div>
-              <pre key={selectedLanguage} className="landing-code-float overflow-auto p-6 leading-7 text-[#d4d4d4]"><code>{activeExample.code.split("\n").map((line, index) => <span key={index} className="block min-h-7">{highlightCodeLine(line, selectedLanguage)}</span>)}</code></pre>
+              <pre key={selectedLanguage} className="landing-code-float overflow-auto bg-[#e6e6e6] p-6 leading-7 text-[#1c1c1c]"><code>{activeExample.code.split("\n").map((line, index) => <span key={index} className="block min-h-7">{highlightCodeLine(line, selectedLanguage)}</span>)}</code></pre>
             </div>
 
             <div className="flex items-center justify-between border-t border-white/10 bg-black/75 px-5 py-4">

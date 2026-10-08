@@ -89,3 +89,36 @@ export const checkAdmin = async(req, res, next) => {
         });
     }
 };
+
+export const optionalAuthMiddleware = async (req, res, next) => {
+    const token = req.cookies.jwt;
+
+    if (!token) {
+        return next();
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await db.user.findUnique({
+            where: {
+                id: decoded.id
+            },
+            select: {
+                id: true,
+                image: true,
+                name: true,
+                email: true,
+                role: true
+            }
+        });
+
+        if (user) {
+            req.user = user;
+        }
+    } catch {
+        // Invalid or expired tokens are treated as guest access.
+    }
+
+    next();
+};

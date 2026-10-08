@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Link } from "react-router-dom";
-import { Bookmark, PencilIcon, TrashIcon, Plus } from "lucide-react";
+import { Bookmark, LockKeyhole, LogIn, PencilIcon, Plus, TrashIcon, UserPlus, X } from "lucide-react";
 import { useActions } from "../store/useAction";
 import AddToPlaylistModal from "./AddToPlaylist";
 import CreatePlaylistModal from "./CreatePlaylistModal";
@@ -17,6 +17,7 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
+  const [isAuthPromptOpen, setIsAuthPromptOpen] = useState(false);
   const [selectedProblemId, setSelectedProblemId] = useState(null);
 
   // Extract all unique tags from problems
@@ -64,8 +65,22 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
   };
 
   const handleAddToPlaylist = (problemId) => {
+    if (!authUser) {
+      setIsAuthPromptOpen(true);
+      return;
+    }
+
     setSelectedProblemId(problemId);
     setIsAddToPlaylistModalOpen(true);
+  };
+
+  const handleCreatePlaylistClick = () => {
+    if (!authUser) {
+      setIsAuthPromptOpen(true);
+      return;
+    }
+
+    setIsCreateModalOpen(true);
   };
 
   return (
@@ -75,7 +90,7 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
         <h2 className="text-2xl font-bold">Problems</h2>
         <button
           className="btn btn-primary gap-2"
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={handleCreatePlaylistClick}
         >
           <Plus className="w-4 h-4" />
           Create Playlist
@@ -131,9 +146,9 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
           <tbody>
             {paginatedProblems.length > 0 ? (
               paginatedProblems.map((problem) => {
-                const isSolved = problem.solvedBy.some(
+                const isSolved = problem.solvedBy?.some(
                   (user) => user.userId === authUser?.id
-                );
+                ) ?? false;
                 return (
                   <tr key={problem.id}>
                     <td className="text-center">
@@ -145,9 +160,20 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
                       />
                     </td>
                     <td className="text-center">
-                      <Link to={`/problem/${problem.id}`} className="font-semibold hover:underline">
-                        {problem.title}
-                      </Link>
+                      {authUser ? (
+                        <Link to={`/problem/${problem.id}`} className="font-semibold hover:underline">
+                          {problem.title}
+                        </Link>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setIsAuthPromptOpen(true)}
+                          className="inline-flex items-center justify-center gap-2 font-semibold text-white transition-colors hover:text-white/70 hover:underline"
+                        >
+                          <LockKeyhole className="h-4 w-4 text-white/40" aria-hidden="true" />
+                          {problem.title}
+                        </button>
+                      )}
                     </td>
                     <td className="text-center">
                       <div className="flex flex-wrap justify-center gap-1">
@@ -234,17 +260,62 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
       </div>
 
       {/* Modals */}
-      <CreatePlaylistModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSubmit={handleCreatePlaylist}
-      />
-      
-      <AddToPlaylistModal
-        isOpen={isAddToPlaylistModalOpen}
-        onClose={() => setIsAddToPlaylistModalOpen(false)}
-        problemId={selectedProblemId}
-      />
+      {isAuthPromptOpen && (
+        <div
+          className="fixed inset-0 z-[100] grid place-items-center bg-black/75 px-4 backdrop-blur-sm"
+          role="presentation"
+          onClick={() => setIsAuthPromptOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="auth-required-title"
+            className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#111111] p-7 shadow-2xl shadow-black sm:p-8"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setIsAuthPromptOpen(false)}
+              aria-label="Close login prompt"
+              className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-lg border border-red-500/35 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/35">Authentication required</p>
+            <h3 id="auth-required-title" className="mt-4 pr-10 text-2xl font-semibold tracking-[-0.03em] text-white">
+              Ready to solve this problem?
+            </h3>
+            <p className="mt-3 text-sm leading-6 text-white/50">
+              Log in to continue with your account, or sign up to start solving and track your progress.
+            </p>
+
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              <Link to="/login" className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#e6e6e6]">
+                <LogIn className="h-4 w-4" /> Log in
+              </Link>
+              <Link to="/signup" className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-4 py-3 text-sm font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.05]">
+                <UserPlus className="h-4 w-4" /> Sign up
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {authUser && (
+        <>
+          <CreatePlaylistModal
+            isOpen={isCreateModalOpen}
+            onClose={() => setIsCreateModalOpen(false)}
+            onSubmit={handleCreatePlaylist}
+          />
+          <AddToPlaylistModal
+            isOpen={isAddToPlaylistModalOpen}
+            onClose={() => setIsAddToPlaylistModalOpen(false)}
+            problemId={selectedProblemId}
+          />
+        </>
+      )}
     </div>
   );
 };
