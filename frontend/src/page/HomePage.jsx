@@ -58,6 +58,96 @@ const languageExamples = {
   },
 };
 
+const syntaxColors = {
+  comment: "#6A9955",
+  string: "#CE9178",
+  number: "#B5CEA8",
+  keyword: "#C586C0",
+  declaration: "#569CD6",
+  type: "#4EC9B0",
+  function: "#DCDCAA",
+  literal: "#569CD6",
+};
+
+const commonSyntaxRules = [
+  ["string", /(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/y],
+  ["number", /\b\d+(?:\.\d+)?\b/y],
+];
+
+const syntaxRules = {
+  PYTHON: [
+    ["comment", /#.*/y],
+    ...commonSyntaxRules,
+    ["declaration", /\b(?:def|class|import|from|as)\b/y],
+    ["keyword", /\b(?:for|while|in|if|elif|else|return|and|or|not|is|break|continue|pass)\b/y],
+    ["literal", /\b(?:True|False|None)\b/y],
+    ["function", /\b[A-Za-z_]\w*(?=\s*\()/y],
+  ],
+  JAVA: [
+    ["comment", /\/\/.*|\/\*.*?\*\//y],
+    ...commonSyntaxRules,
+    ["declaration", /\b(?:class|public|private|protected|static|final|new|extends|implements)\b/y],
+    ["keyword", /\b(?:for|while|if|else|return|break|continue|throw|throws|try|catch)\b/y],
+    ["type", /\b(?:void|int|long|double|float|boolean|char|String|Integer|Map|HashMap|List|ArrayList)\b/y],
+    ["literal", /\b(?:true|false|null)\b/y],
+    ["function", /\b[A-Za-z_]\w*(?=\s*\()/y],
+  ],
+  JAVASCRIPT: [
+    ["comment", /\/\/.*|\/\*.*?\*\//y],
+    ...commonSyntaxRules,
+    ["declaration", /\b(?:function|const|let|var|class|new|async|await|import|export|from)\b/y],
+    ["keyword", /\b(?:for|while|if|else|return|break|continue|of|in|try|catch|throw)\b/y],
+    ["type", /\b(?:Map|Set|Promise|Array|Object)\b/y],
+    ["literal", /\b(?:true|false|null|undefined)\b/y],
+    ["function", /\b[A-Za-z_$][\w$]*(?=\s*\()/y],
+  ],
+};
+
+const highlightCodeLine = (line, language) => {
+  const highlightedParts = [];
+  const rules = syntaxRules[language];
+  let cursor = 0;
+  let plainTextStart = 0;
+
+  while (cursor < line.length) {
+    let matchedToken = null;
+
+    for (const [tokenType, pattern] of rules) {
+      pattern.lastIndex = cursor;
+      const match = pattern.exec(line);
+
+      if (match) {
+        matchedToken = { tokenType, value: match[0] };
+        break;
+      }
+    }
+
+    if (!matchedToken) {
+      cursor += 1;
+      continue;
+    }
+
+    if (plainTextStart < cursor) {
+      highlightedParts.push(line.slice(plainTextStart, cursor));
+    }
+
+    highlightedParts.push(
+      <span key={`${cursor}-${matchedToken.tokenType}`} style={{ color: syntaxColors[matchedToken.tokenType] }}>
+        {matchedToken.value}
+      </span>
+    );
+
+    cursor += matchedToken.value.length;
+    plainTextStart = cursor;
+  }
+
+  if (plainTextStart < line.length) {
+    highlightedParts.push(line.slice(plainTextStart));
+  }
+
+  return highlightedParts.length > 0 ? highlightedParts : " ";
+};
+
 const LanguageLogo = ({ language }) => {
   if (language === "javascript") {
     return (
@@ -139,7 +229,7 @@ const HomePage = () => {
 
             <div className="relative m-2 grid min-h-80 grid-cols-[42px_1fr] overflow-hidden rounded-xl border border-white/10 bg-[#1c1c1c] font-mono text-xs sm:m-3 sm:text-sm">
               <div className="select-none border-r border-white/5 bg-black/75 py-6 text-center leading-7 text-white/20">{activeExample.code.split("\n").map((_, index) => <div key={index}>{index + 1}</div>)}</div>
-              <pre key={selectedLanguage} className="landing-code-float overflow-auto p-6 leading-7 text-white/75"><code>{activeExample.code}</code></pre>
+              <pre key={selectedLanguage} className="landing-code-float overflow-auto p-6 leading-7 text-[#d4d4d4]"><code>{activeExample.code.split("\n").map((line, index) => <span key={index} className="block min-h-7">{highlightCodeLine(line, selectedLanguage)}</span>)}</code></pre>
             </div>
 
             <div className="flex items-center justify-between border-t border-white/10 bg-black/75 px-5 py-4">
