@@ -14,7 +14,6 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
   const { createPlaylist } = usePlaylistStore();
   const [difficulty, setDifficulty] = useState("ALL");
   const [selectedTag, setSelectedTag] = useState("ALL");
-  const [currentPage, setCurrentPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
   const [isAuthPromptOpen, setIsAuthPromptOpen] = useState(false);
@@ -31,9 +30,24 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
   // Define allowed difficulties
   const difficulties = ["EASY", "MEDIUM", "HARD"];
 
+  const sortedProblems = useMemo(() => {
+    return [...(problems || [])].sort((firstProblem, secondProblem) =>
+      firstProblem.title.localeCompare(secondProblem.title, undefined, {
+        sensitivity: "base",
+        numeric: true,
+      })
+    );
+  }, [problems]);
+
+  const problemNumberById = useMemo(() => {
+    return new Map(
+      sortedProblems.map((problem, index) => [problem.id, index + 1])
+    );
+  }, [sortedProblems]);
+
   // Filter problems based on search, difficulty, and tags
   const filteredProblems = useMemo(() => {
-    return (problems || [])
+    return sortedProblems
       .filter((problem) =>
         problem.title.toLowerCase().includes(searchQuery.trim().toLowerCase())
       )
@@ -43,18 +57,7 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
       .filter((problem) =>
         selectedTag === "ALL" ? true : problem.tags?.includes(selectedTag)
       );
-  }, [problems, searchQuery, difficulty, selectedTag]);
-
-  // Pagination logic
-  const itemsPerPage = 5;
-  const totalPages = Math.max(1, Math.ceil(filteredProblems.length / itemsPerPage));
-  const visiblePage = Math.min(currentPage, totalPages);
-  const paginatedProblems = useMemo(() => {
-    return filteredProblems.slice(
-      (visiblePage - 1) * itemsPerPage,
-      visiblePage * itemsPerPage
-    );
-  }, [filteredProblems, visiblePage]);
+  }, [sortedProblems, searchQuery, difficulty, selectedTag]);
 
   const handleDelete = (id) => {
     onDeleteProblem(id);
@@ -102,10 +105,7 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
         <select
           className="select select-bordered bg-base-200"
           value={difficulty}
-          onChange={(e) => {
-            setDifficulty(e.target.value);
-            setCurrentPage(1);
-          }}
+          onChange={(e) => setDifficulty(e.target.value)}
         >
           <option value="ALL">All Difficulties</option>
           {difficulties.map((diff) => (
@@ -117,10 +117,7 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
         <select
           className="select select-bordered bg-base-200"
           value={selectedTag}
-          onChange={(e) => {
-            setSelectedTag(e.target.value);
-            setCurrentPage(1);
-          }}
+          onChange={(e) => setSelectedTag(e.target.value)}
         >
           <option value="ALL">All Tags</option>
           {allTags.map((tag) => (
@@ -136,6 +133,7 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
         <table className="table table-zebra table-lg bg-base-200 text-base-content">
           <thead className="bg-base-300 text-center">
             <tr>
+              <th>#</th>
               <th>Solved</th>
               <th>Title</th>
               <th>Tags</th>
@@ -144,13 +142,16 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
             </tr>
           </thead>
           <tbody>
-            {paginatedProblems.length > 0 ? (
-              paginatedProblems.map((problem) => {
+            {filteredProblems.length > 0 ? (
+              filteredProblems.map((problem) => {
                 const isSolved = problem.solvedBy?.some(
                   (user) => user.userId === authUser?.id
                 ) ?? false;
                 return (
                   <tr key={problem.id}>
+                    <td className="text-center font-mono text-sm text-white/45">
+                      {problemNumberById.get(problem.id)}
+                    </td>
                     <td className="text-center">
                       <input
                         type="checkbox"
@@ -229,34 +230,13 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
               })
             ) : (
               <tr>
-                <td colSpan={5} className="text-center py-6 text-gray-500">
+                <td colSpan={6} className="text-center py-6 text-gray-500">
                   No problems found.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* Pagination */}
-      <div className="flex justify-center mt-6 gap-2">
-        <button
-          className="btn btn-sm"
-          disabled={visiblePage === 1}
-          onClick={() => setCurrentPage((prev) => prev - 1)}
-        >
-          Prev
-        </button>
-        <span className="btn btn-ghost btn-sm">
-          {visiblePage} / {totalPages}
-        </span>
-        <button
-          className="btn btn-sm"
-          disabled={visiblePage === totalPages}
-          onClick={() => setCurrentPage((prev) => prev + 1)}
-        >
-          Next
-        </button>
       </div>
 
       {/* Modals */}

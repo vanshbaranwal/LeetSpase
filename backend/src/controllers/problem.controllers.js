@@ -1,12 +1,22 @@
 import { db } from "../libs/db.js";
 import { getJudge0LanguageId, pollBatchResults, submitBatch } from "../libs/judge0.lib.js";
 import { publicProblemSelect, publicProblemSummarySelect } from "../libs/problem-selects.js";
+import { cleanProblemTitle, createProblemTitleKey } from "../libs/problem-title.js";
 
 
 
 export const createProblem = async(req, res) => {
     
     const { title, description, difficulty, tags, examples, constraints, testcases, codeSnippet, referenceSolutions } = req.body;
+
+    if(typeof title !== "string" || !title.trim()){
+        return res.status(400).json({
+            error: "problem title is required"
+        });
+    }
+
+    const cleanedTitle = cleanProblemTitle(title);
+    const titleKey = createProblemTitleKey(title);
     
     // using middleware checkadmin in routes
     // if(req.user.role !== "ADMIN"){
@@ -16,6 +26,17 @@ export const createProblem = async(req, res) => {
     // };
 
     try {
+        const existingTitle = await db.problem.findUnique({
+            where: { titleKey },
+            select: { id: true }
+        });
+
+        if(existingTitle){
+            return res.status(409).json({
+                error: "a problem with this title already exists"
+            });
+        }
+
         for(const [language, solutionCode] of Object.entries(referenceSolutions)){
             const languageId = getJudge0LanguageId(language);
 
@@ -53,7 +74,8 @@ export const createProblem = async(req, res) => {
         
         const newProblem = await db.problem.create({
             data: {
-                title,
+                title: cleanedTitle,
+                titleKey,
                 description,
                 difficulty,
                 tags,
@@ -75,6 +97,13 @@ export const createProblem = async(req, res) => {
         
     } catch (error) {
         console.log(error);
+
+        if(error.code === "P2002" && error.meta?.target?.includes("titleKey")){
+            return res.status(409).json({
+                error: "a problem with this title already exists"
+            });
+        }
+
         return res.status(500).json({
             error: "error while creating problem",
         });
@@ -153,12 +182,32 @@ export const updateProblem = async(req, res) => {
 
     const { title, description, difficulty, tags, examples, constraints, testcases, codeSnippet, referenceSolutions } = req.body;
 
+    if(typeof title !== "string" || !title.trim()){
+        return res.status(400).json({
+            error: "problem title is required"
+        });
+    }
+
+    const cleanedTitle = cleanProblemTitle(title);
+    const titleKey = createProblemTitleKey(title);
+
     try {
         const existingProblem = await db.problem.findUnique({ where: { id } });
 
         if(!existingProblem){
             return res.status(404).json({
                 error: "problem not found"
+            });
+        }
+
+        const existingTitle = await db.problem.findUnique({
+            where: { titleKey },
+            select: { id: true }
+        });
+
+        if(existingTitle && existingTitle.id !== id){
+            return res.status(409).json({
+                error: "a problem with this title already exists"
             });
         }
 
@@ -211,7 +260,8 @@ export const updateProblem = async(req, res) => {
         const updatedProblem = await db.problem.update({
             where: { id },
             data: {
-                title,
+                title: cleanedTitle,
+                titleKey,
                 description,
                 difficulty,
                 tags,
@@ -232,6 +282,12 @@ export const updateProblem = async(req, res) => {
 
     } catch (error) {
         console.error(`error updating problem: ${error}`);
+
+        if(error.code === "P2002" && error.meta?.target?.includes("titleKey")){
+            return res.status(409).json({
+                error: "a problem with this title already exists"
+            });
+        }
 
         return res.status(500).json({
             error: "error while updating problem"

@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "validate:foundations": "node scripts/validate-foundation-problems.js foundation-problems.postman_data.json",
+    "validate:easy-dsa": "node scripts/validate-foundation-problems.js easy-dsa-problems.postman_data.json",
+    "validate:medium-dsa": "node scripts/validate-foundation-problems.js medium-dsa-problems.postman_data.json",
+    "validate:hard-dsa": "node scripts/validate-foundation-problems.js hard-dsa-problems.postman_data.json"
   },
   "keywords": [],
   "author": "",
