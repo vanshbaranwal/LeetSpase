@@ -74,8 +74,17 @@ const Navbar = () => {
                 </Link>
               )}
               <div className="dropdown dropdown-end">
-                <button type="button" tabIndex={0} className="grid h-12 w-12 place-items-center rounded-md bg-white text-black transition-colors hover:bg-[#e6e6e6]" aria-label="Open user menu">
-                  <User className="h-6 w-6" />
+                <button type="button" tabIndex={0} className="grid h-10 w-10 overflow-hidden place-items-center rounded-full bg-white text-black" aria-label="Open user menu">
+                  {authUser.image ? (
+                    <img
+                      src={authUser.image}
+                      alt={`${authUser.name || "User"} profile`}
+                      className="h-full w-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <User className="h-6 w-6" />
+                  )}
                 </button>
                 <ul tabIndex={0} className="menu dropdown-content z-[1] mt-3 w-56 space-y-1 rounded-xl border border-white/10 bg-[#111111] p-3 text-white shadow-2xl">
                   <li className="mb-2 border-b border-white/10 pb-2">

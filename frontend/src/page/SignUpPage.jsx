@@ -13,6 +13,7 @@ import {
 
 import {z} from "zod";
 import AuthImagePattern from '../components/AuthImagePattern';
+import GoogleAuthButton from '../components/GoogleAuthButton';
 import { useAuthStore } from "../store/useAuthStore";
 
 const SignUpSchema = z.object({
@@ -155,10 +156,20 @@ const SignUpPage = () => {
                   Loading...
                 </>
               ) : (
-                "Sign in"
+                "Sign up"
               )}
             </button>
           </form>
+
+          <div className="flex items-center gap-3" aria-hidden="true">
+            <span className="h-px flex-1 bg-base-content/15" />
+            <span className="text-xs font-medium uppercase tracking-widest text-base-content/50">
+              or
+            </span>
+            <span className="h-px flex-1 bg-base-content/15" />
+          </div>
+
+          <GoogleAuthButton />
 
           {/* Footer */}
           <div className="text-center">
