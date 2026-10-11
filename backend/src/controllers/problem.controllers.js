@@ -1,8 +1,6 @@
-import { error } from "node:console";
 import { db } from "../libs/db.js";
 import { getJudge0LanguageId, pollBatchResults, submitBatch } from "../libs/judge0.lib.js";
-import { objectEnumValues } from "../generated/prisma/runtime/library.js";
-import { stdin } from "node:process";
+import { publicProblemSelect, publicProblemSummarySelect } from "../libs/problem-selects.js";
 
 
 
@@ -66,6 +64,7 @@ export const createProblem = async(req, res) => {
                 referenceSolutions,
                 userId: req.user.id,
             },
+            select: publicProblemSelect,
         });
 
         return res.status(201).json({
@@ -87,10 +86,7 @@ export const getAllProblems = async (req, res) => {
     try {
         const problems = await db.problem.findMany({
             select: {
-                id: true,
-                title: true,
-                difficulty: true,
-                tags: true,
+                ...publicProblemSummarySelect,
                 solvedBy: req.user
                     ? {
                         where: {
@@ -123,7 +119,10 @@ export const getProblemById = async(req, res) => {
     const { id } = req.params;
 
     try {
-        const problem = await db.problem.findUnique({ where: { id } });
+        const problem = await db.problem.findUnique({
+            where: { id },
+            select: publicProblemSelect,
+        });
 
         if(!problem){
             return res.status(404).json({
@@ -222,6 +221,7 @@ export const updateProblem = async(req, res) => {
                 codeSnippet,
                 referenceSolutions
             },
+            select: publicProblemSelect,
         });
 
         return res.status(200).json({
@@ -282,11 +282,15 @@ export const getAllProblemsSolvedByUser = async(req, res) => {
                     userId: req.user.id
                 }
             },
-            include: {
+            select: {
+                ...publicProblemSelect,
                 solvedBy: {
                     where: {
                         userId: req.user.id
-                    }
+                    },
+                    select: {
+                        userId: true,
+                    },
                 }
             }
         });

@@ -1,4 +1,15 @@
 import { db } from "../libs/db.js";
+import { publicProblemSelect } from "../libs/problem-selects.js";
+
+const playlistProblemSelect = {
+    id: true,
+    playListId: true,
+    problemId: true,
+    createdAt: true,
+    problem: {
+        select: publicProblemSelect,
+    },
+};
 
 
 export const createPlaylist = async(req, res) => {
@@ -60,9 +71,7 @@ export const getAllListDetails = async(req, res) => {
             },
             include: {
                 problems: {
-                    include: {
-                        problem: true
-                    }
+                    select: playlistProblemSelect,
                 }
             }
         });
@@ -94,9 +103,7 @@ export const getPlaylistDetails = async(req, res) => {
             },
             include: {
                 problems: {
-                    include: {
-                        problem: true
-                    }
+                    select: playlistProblemSelect,
                 }
             }
         });

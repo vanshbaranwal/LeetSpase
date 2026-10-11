@@ -6,17 +6,22 @@ const SubmissionResults = ({ submission }) => {
   const timeArr = JSON.parse(submission.time || '[]');
 
   // Calculate averages
-  const avgMemory = memoryArr
-    .map(m => parseFloat(m)) // remove ' KB' using parseFloat
-    .reduce((a, b) => a + b, 0) / memoryArr.length;
+  const avgMemory = memoryArr.length
+    ? memoryArr
+        .map(m => parseFloat(m)) // remove ' KB' using parseFloat
+        .reduce((a, b) => a + b, 0) / memoryArr.length
+    : 0;
 
-  const avgTime = timeArr
-    .map(t => parseFloat(t)) // remove ' s' using parseFloat
-    .reduce((a, b) => a + b, 0) / timeArr.length;
+  const avgTime = timeArr.length
+    ? timeArr
+        .map(t => parseFloat(t)) // remove ' s' using parseFloat
+        .reduce((a, b) => a + b, 0) / timeArr.length
+    : 0;
 
   const passedTests = submission.testCases.filter(tc => tc.passed).length;
   const totalTests = submission.testCases.length;
-  const successRate = (passedTests / totalTests) * 100;
+  const successRate = totalTests ? (passedTests / totalTests) * 100 : 0;
+  const isAccepted = submission.status?.toLowerCase() === 'accepted';
 
   return (
     <div className="space-y-6">
@@ -26,7 +31,7 @@ const SubmissionResults = ({ submission }) => {
           <div className="card-body p-4">
             <h3 className="card-title text-sm">Status</h3>
             <div className={`text-lg font-bold ${
-              submission.status === 'Accepted' ? 'text-success' : 'text-error'
+              isAccepted ? 'text-success' : 'text-error'
             }`}>
               {submission.status}
             </div>
@@ -76,7 +81,7 @@ const SubmissionResults = ({ submission }) => {
               <thead>
                 <tr>
                   <th>Status</th>
-                  <th>Expected Output</th>
+                  <th>Test Case</th>
                   <th>Your Output</th>
                   <th>Memory</th>
                   <th>Time</th>
@@ -84,7 +89,7 @@ const SubmissionResults = ({ submission }) => {
               </thead>
               <tbody>
                 {submission.testCases.map((testCase) => (
-                  <tr key={testCase.id}>
+                  <tr key={testCase.id || testCase.testCase}>
                     <td>
                       {testCase.passed ? (
                         <div className="flex items-center gap-2 text-success">
@@ -98,7 +103,7 @@ const SubmissionResults = ({ submission }) => {
                         </div>
                       )}
                     </td>
-                    <td className="font-mono">{testCase.expected}</td>
+                    <td className="font-mono">#{testCase.testCase}</td>
                     <td className="font-mono">{testCase.stdout || 'null'}</td>
                     <td>{testCase.memory}</td>
                     <td>{testCase.time}</td>

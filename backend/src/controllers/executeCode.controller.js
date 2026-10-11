@@ -4,28 +4,75 @@ import { db } from "../libs/db.js";
 
 export const executeCode = async(req, res) => {
     try {
-        const { source_code, language_id, stdin, expected_outputs, problemId } = req.body;
+        const { source_code, language_id, problemId } = req.body;
 
         const userId = req.user.id;
 
-        // validate testcases (the output that is coming is in the form of array or not)
-        if(
-            !Array.isArray(stdin) ||
-            stdin.length === 0 ||
-            !Array.isArray(expected_outputs) ||
-            expected_outputs.length !== stdin.length
-        ){
+        if(typeof source_code !== "string" || !source_code.trim()){
             return res.status(400).json({
-                error: "invalid or missing testcases"
+                error: "source code is required"
             });
         }
 
+        if(typeof problemId !== "string" || !problemId.trim()){
+            return res.status(400).json({
+                error: "problem ID is required"
+            });
+        }
+
+        const language = getLanguageName(language_id);
+
+        if(language === "unknown"){
+            return res.status(400).json({
+                error: "unsupported language"
+            });
+        }
+
+        // Hidden inputs and expected outputs are loaded only inside the backend.
+        const problem = await db.problem.findUnique({
+            where: {
+                id: problemId
+            },
+            select: {
+                testcases: true
+            }
+        });
+
+        if(!problem){
+            return res.status(404).json({
+                error: "problem not found"
+            });
+        }
+
+        if(!Array.isArray(problem.testcases) || problem.testcases.length === 0){
+            return res.status(500).json({
+                error: "problem test cases are not configured"
+            });
+        }
+
+        const hasInvalidTestcase = problem.testcases.some((testcase) =>
+            !testcase ||
+            typeof testcase.input !== "string" ||
+            typeof testcase.output !== "string"
+        );
+
+        if(hasInvalidTestcase){
+            return res.status(500).json({
+                error: "problem test cases are not configured correctly"
+            });
+        }
+
+        const hiddenTestcases = problem.testcases.map(({ input, output }) => ({
+            input,
+            output
+        }));
 
         // prepare each testcase for judge0 batch submission
-        const submissions = stdin.map((input) => ({
+        const submissions = hiddenTestcases.map(({ input, output }) => ({
             source_code,
             language_id,
-            stdin: input
+            stdin: input,
+            expected_output: output
         }));
 
         // send batch of submissions to judge0
@@ -43,8 +90,8 @@ export const executeCode = async(req, res) => {
         let allPassed = true;
         const detailedResults = results.map((result, i) => {
             const stdout = result.stdout?.trim();
-            const expected_output = expected_outputs[i]?.trim(); 
-            const passed = stdout === expected_output;
+            const expected_output = hiddenTestcases[i].output.trim();
+            const passed = result.status?.id === 3 && stdout === expected_output;
 
             if(!passed) allPassed = false;
 
@@ -55,7 +102,7 @@ export const executeCode = async(req, res) => {
                 expected: expected_output,
                 stderr: result.stderr || null,
                 compile_output: result.compile_output || null,
-                status: result.status.description,
+                status: result.status?.description || "Unknown",
                 memory: result.memory ? `${result.memory} KB` : undefined,
                 time: result.time ? `${result.time} s` : undefined
             };
@@ -77,8 +124,8 @@ export const executeCode = async(req, res) => {
                 userId,
                 problemId,
                 sourceCode: source_code,
-                language: getLanguageName(language_id),
-                stdin: stdin.join("\n"),
+                language,
+                stdin: hiddenTestcases.map((testcase) => testcase.input).join("\n"),
                 stdout: JSON.stringify(detailedResults.map((r) => r.stdout)),
                 stderr: detailedResults.some((r) => r.stderr) ? JSON.stringify(detailedResults.map((r) => r.stderr)) : null,
                 compileOutput: detailedResults.some((r) => r.compile_output) ? JSON.stringify(detailedResults.map((r) => r.compile_output)) : null,
@@ -125,28 +172,36 @@ export const executeCode = async(req, res) => {
             data: testCaseResults
         });
 
-        const submissionWithTestCase = await db.submission.findUnique({
-            where: {
-                id: submission.id
-            },
-            include: {
-                testCases: true
-            }
-        });
-
-
         res.status(200).json({
             success: true,
             message: "code executed! successfully",
-            submission: submissionWithTestCase
+            submission: {
+                id: submission.id,
+                problemId: submission.problemId,
+                sourceCode: submission.sourceCode,
+                language: submission.language,
+                status: submission.status,
+                memory: submission.memory,
+                time: submission.time,
+                createdAt: submission.createdAt,
+                testCases: detailedResults.map((result) => ({
+                    testCase: result.testCase,
+                    passed: result.passed,
+                    stdout: result.stdout,
+                    stderr: result.stderr,
+                    compileOutput: result.compile_output,
+                    status: result.status,
+                    memory: result.memory,
+                    time: result.time
+                }))
+            }
         });
     } catch (error) {
         console.error("error while executing the code: ", error);
         
         return res.status(500).json({
             success: false,
-            error: "error while executing the code",
-            message: error.message
+            error: "error while executing the code"
         });
     }
 };

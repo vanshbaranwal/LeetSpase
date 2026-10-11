@@ -17,7 +17,7 @@ import {
   Tags,
 } from "lucide-react";
 import Editor from "@monaco-editor/react";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {axiosInstance} from "../lib/axios"
 import toast from "react-hot-toast";
 import {useNavigate} from "react-router-dom";
@@ -26,7 +26,9 @@ const problemSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   difficulty: z.enum(["EASY", "MEDIUM", "HARD"]),
-  tags: z.array(z.string()).min(1, "At least one tag is required"),
+  tags: z
+    .array(z.string().trim().min(1, "Tag cannot be empty"))
+    .min(1, "At least one tag is required"),
   constraints: z.string().min(1, "Constraints are required"),
   hints: z.string().optional(),
   editorial: z.string().optional(),
@@ -531,32 +533,80 @@ const languageByTab = {
   java: "JAVA",
 };
 
+const difficultyOptions = [
+  {
+    value: "EASY",
+    label: "Easy",
+    activeClass: "border-emerald-400/70 bg-emerald-400/15 text-emerald-300",
+    inactiveClass: "border-emerald-500/20 bg-emerald-500/[0.04] text-emerald-400/60 hover:border-emerald-400/45 hover:bg-emerald-400/10 hover:text-emerald-300",
+  },
+  {
+    value: "MEDIUM",
+    label: "Medium",
+    activeClass: "border-orange-400/70 bg-orange-400/15 text-orange-300",
+    inactiveClass: "border-orange-500/20 bg-orange-500/[0.04] text-orange-400/60 hover:border-orange-400/45 hover:bg-orange-400/10 hover:text-orange-300",
+  },
+  {
+    value: "HARD",
+    label: "Hard",
+    activeClass: "border-red-400/70 bg-red-400/15 text-red-300",
+    inactiveClass: "border-red-500/20 bg-red-500/[0.04] text-red-400/60 hover:border-red-400/45 hover:bg-red-400/10 hover:text-red-300",
+  },
+];
+
+const CREATE_PROBLEM_DRAFT_KEY = "leetspase:create-problem-draft:v1";
+const CREATE_PROBLEM_TAB_KEY = "leetspase:create-problem-tab:v1";
+
+const createEmptyProblemFormValues = () => ({
+  testcases: [{ input: "", output: "" }],
+  tags: ["", "", ""],
+  examples: {
+    JAVASCRIPT: { input: "", output: "", explanation: "" },
+    PYTHON: { input: "", output: "", explanation: "" },
+    JAVA: { input: "", output: "", explanation: "" },
+  },
+  codeSnippet: {
+    JAVASCRIPT: "function solution() {\n  // Write your code here\n}",
+    PYTHON: "def solution():\n    # Write your code here\n    pass",
+    JAVA: "public class Solution {\n    public static void main(String[] args) {\n        // Write your code here\n    }\n}",
+  },
+  referenceSolutions: {
+    JAVASCRIPT: "// Add your reference solution here",
+    PYTHON: "# Add your reference solution here",
+    JAVA: "// Add your reference solution here",
+  },
+});
+
+const getInitialProblemFormValues = () => {
+  const emptyValues = createEmptyProblemFormValues();
+
+  try {
+    const savedDraft = sessionStorage.getItem(CREATE_PROBLEM_DRAFT_KEY);
+    if (!savedDraft) return emptyValues;
+
+    const parsedDraft = JSON.parse(savedDraft);
+    return parsedDraft && typeof parsedDraft === "object"
+      ? { ...emptyValues, ...parsedDraft }
+      : emptyValues;
+  } catch {
+    sessionStorage.removeItem(CREATE_PROBLEM_DRAFT_KEY);
+    return emptyValues;
+  }
+};
+
+const getInitialProblemFormTab = () => {
+  const savedTab = sessionStorage.getItem(CREATE_PROBLEM_TAB_KEY);
+  return formTabs.some((tab) => tab.id === savedTab) ? savedTab : "basics";
+};
+
 const CreateProblemForm = () => {
     const sampleType = "DP";
-    const [activeTab, setActiveTab] = useState("basics");
+    const [activeTab, setActiveTab] = useState(getInitialProblemFormTab);
     const navigation = useNavigate();
-    const {register , control , handleSubmit , reset , formState:{errors}} = useForm(
+    const {register , control , handleSubmit , reset , subscribe, formState:{errors}} = useForm(
         {
             resolver:zodResolver(problemSchema),
-            defaultValues:{
-                 testcases: [{ input: "", output: "" }],
-      tags: [""],
-      examples: {
-        JAVASCRIPT: { input: "", output: "", explanation: "" },
-        PYTHON: { input: "", output: "", explanation: "" },
-        JAVA: { input: "", output: "", explanation: "" },
-      },
-      codeSnippet: {
-        JAVASCRIPT: "function solution() {\n  // Write your code here\n}",
-        PYTHON: "def solution():\n    # Write your code here\n    pass",
-        JAVA: "public class Solution {\n    public static void main(String[] args) {\n        // Write your code here\n    }\n}",
-      },
-      referenceSolutions: {
-        JAVASCRIPT: "// Add your reference solution here",
-        PYTHON: "# Add your reference solution here",
-        JAVA: "// Add your reference solution here",
-      },
-            }
+            defaultValues: getInitialProblemFormValues(),
         }
     )
 
@@ -570,23 +620,31 @@ const CreateProblemForm = () => {
     name: "testcases",
   });
 
-  const {
-    fields: tagFields,
-    append: appendTag,
-    remove: removeTag,
-    replace: replaceTags,
-  } = useFieldArray({
-    control,
-    name: "tags",
-  });
-
   const [isLoading , setIsLoading] = useState(false);
+
+  useEffect(() => {
+    return subscribe({
+      formState: { values: true },
+      callback: ({ values }) => {
+        sessionStorage.setItem(
+          CREATE_PROBLEM_DRAFT_KEY,
+          JSON.stringify(values)
+        );
+      },
+    });
+  }, [subscribe]);
+
+  useEffect(() => {
+    sessionStorage.setItem(CREATE_PROBLEM_TAB_KEY, activeTab);
+  }, [activeTab]);
 
   const onSubmit = async (value)=>{
    try {
     setIsLoading(true)
     const res = await axiosInstance.post("/problems/create-problem" , value)
     console.log(res.data);
+    sessionStorage.removeItem(CREATE_PROBLEM_DRAFT_KEY);
+    sessionStorage.removeItem(CREATE_PROBLEM_TAB_KEY);
     toast.success(res.data.message || "Problem Created successfully⚡");
     navigation("/problems");
 
@@ -602,7 +660,6 @@ const CreateProblemForm = () => {
   const loadSampleData=()=>{
     const sampleData = sampleType === "DP" ? sampledpData : sampleStringProblem
   
-   replaceTags(sampleData.tags.map((tag) => tag));
     replacetestcases(sampleData.testcases.map((tc) => tc));
 
    // Reset the form with sample data
@@ -674,7 +731,7 @@ const CreateProblemForm = () => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit, handleInvalidForm)} className="grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] overflow-hidden lg:grid-cols-[280px_minmax(0,1fr)] lg:grid-rows-1">
+          <form onSubmit={handleSubmit(onSubmit, handleInvalidForm)} className="create-problem-form grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] overflow-hidden lg:grid-cols-[280px_minmax(0,1fr)] lg:grid-rows-1">
             <aside className="overflow-y-auto border-b border-white/10 bg-black/35 p-4 lg:border-b-0 lg:border-r lg:p-5">
               <button
                 type="button"
@@ -756,7 +813,7 @@ const CreateProblemForm = () => {
                   </span>
                 </label>
                 <textarea
-                  className="textarea textarea-bordered min-h-32 w-full text-base md:text-lg p-4 resize-y"
+                  className="problem-description-textarea textarea textarea-bordered w-full p-4 text-base md:text-lg"
                   {...register("description")}
                   placeholder="Enter problem description"
                 />
@@ -775,14 +832,37 @@ const CreateProblemForm = () => {
                     Difficulty
                   </span>
                 </label>
-                <select
-                  className="select select-bordered w-full text-base md:text-lg"
-                  {...register("difficulty")}
-                >
-                  <option value="EASY">Easy</option>
-                  <option value="MEDIUM">Medium</option>
-                  <option value="HARD">Hard</option>
-                </select>
+                <Controller
+                  name="difficulty"
+                  control={control}
+                  render={({ field }) => (
+                    <div
+                      className="grid grid-cols-1 gap-3 sm:grid-cols-3"
+                      role="radiogroup"
+                      aria-label="Problem difficulty"
+                    >
+                      {difficultyOptions.map((option) => {
+                        const isSelected = field.value === option.value;
+
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            role="radio"
+                            aria-checked={isSelected}
+                            onClick={() => field.onChange(option.value)}
+                            onBlur={field.onBlur}
+                            className={`rounded-xl border px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] transition-colors focus:outline-none ${
+                              isSelected ? option.activeClass : option.inactiveClass
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                />
                 {errors.difficulty && (
                   <label className="label">
                     <span className="label-text-alt text-error">
@@ -795,39 +875,77 @@ const CreateProblemForm = () => {
 
             {/* Tags */}
             <div className={`card mt-6 bg-base-200 p-4 shadow-md md:p-6 ${activeTab !== "classification" ? "hidden" : ""}`}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg md:text-xl font-semibold flex items-center gap-2">
-                  <BookOpen className="w-5 h-5" />
-                  Tags
-                </h3>
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  onClick={() => appendTag("")}
-                >
-                  <Plus className="w-4 h-4 mr-1" /> Add Tag
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {tagFields.map((field, index) => (
-                  <div key={field.id} className="flex gap-2 items-center">
-                    <input
-                      type="text"
-                      className="input input-bordered flex-1"
-                      {...register(`tags.${index}`)}
-                      placeholder="Enter tag"
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-square btn-sm"
-                      onClick={() => removeTag(index)}
-                      disabled={tagFields.length === 1}
-                    >
-                      <Trash2 className="w-4 h-4 text-error" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+              <Controller
+                name="tags"
+                control={control}
+                render={({ field }) => {
+                  const tags = Array.isArray(field.value) && field.value.length > 0
+                    ? field.value
+                    : [""];
+
+                  const updateTag = (index, value) => {
+                    const nextTags = [...tags];
+                    nextTags[index] = value;
+                    field.onChange(nextTags);
+                  };
+
+                  const removeTag = (index) => {
+                    if (tags.length === 1) return;
+                    field.onChange(tags.filter((_, tagIndex) => tagIndex !== index));
+                  };
+
+                  return (
+                    <>
+                      <div className="mb-4 flex items-center justify-between">
+                        <h3 className="flex items-center gap-2 text-lg font-semibold md:text-xl">
+                          <BookOpen className="h-5 w-5" />
+                          Tags
+                        </h3>
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          onClick={() => field.onChange([...tags, ""])}
+                        >
+                          <Plus className="mr-1 h-4 w-4" /> Add Tag
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {tags.map((tag, index) => (
+                          <div key={`tag-${index}`}>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                name={`${field.name}.${index}`}
+                                value={tag}
+                                onChange={(event) => updateTag(index, event.target.value)}
+                                onBlur={field.onBlur}
+                                className="input input-bordered min-w-0 flex-1"
+                                placeholder="Enter tag"
+                              />
+                              <button
+                                type="button"
+                                className="tag-remove-button btn btn-ghost btn-square btn-sm"
+                                onClick={() => removeTag(index)}
+                                disabled={tags.length === 1}
+                                aria-label={`Remove tag ${index + 1}`}
+                                title="Remove tag"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                            {errors.tags?.[index]?.message && (
+                              <p className="mt-1 text-sm text-error">
+                                {errors.tags[index].message}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  );
+                }}
+              />
               {errors.tags && (
                 <div className="mt-2">
                   <span className="text-error text-sm">
@@ -1091,7 +1209,7 @@ const CreateProblemForm = () => {
                     <span className="label-text font-medium">Constraints</span>
                   </label>
                   <textarea
-                    className="textarea textarea-bordered min-h-24 w-full p-3 resize-y"
+                    className="additional-info-textarea constraints-textarea textarea textarea-bordered w-full p-4 text-base leading-7"
                     {...register("constraints")}
                     placeholder="Enter problem constraints"
                   />
@@ -1110,7 +1228,7 @@ const CreateProblemForm = () => {
                     </span>
                   </label>
                   <textarea
-                    className="textarea textarea-bordered min-h-24 w-full p-3 resize-y"
+                    className="additional-info-textarea hints-textarea textarea textarea-bordered w-full p-4 text-base leading-7"
                     {...register("hints")}
                     placeholder="Enter hints for solving the problem"
                   />
@@ -1122,7 +1240,7 @@ const CreateProblemForm = () => {
                     </span>
                   </label>
                   <textarea
-                    className="textarea textarea-bordered min-h-32 w-full p-3 resize-y"
+                    className="additional-info-textarea editorial-textarea textarea textarea-bordered w-full p-4 text-base leading-7"
                     {...register("editorial")}
                     placeholder="Enter problem editorial/solution explanation"
                   />

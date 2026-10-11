@@ -2,26 +2,35 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 
+let activeAuthCheck = null;
+
 export const useAuthStore = create((set) => ({
   authUser: null,
   isSigninUp: false,
   isLoggingIn: false,
   isGoogleLoggingIn: false,
-  isCheckingAuth: false,
+  isCheckingAuth: true,
 
-  checkAuth: async () => {
+  checkAuth: () => {
+    if (activeAuthCheck) return activeAuthCheck;
+
     set({ isCheckingAuth: true });
-    try {
-      const res = await axiosInstance.get("/auth/check");
-      console.log("checkauth response", res.data);
+    activeAuthCheck = axiosInstance
+      .get("/auth/check")
+      .then((res) => {
+        console.log("checkauth response", res.data);
+        set({ authUser: res.data.user });
+      })
+      .catch((error) => {
+        console.log("❌ Error checking auth:", error);
+        set({ authUser: null });
+      })
+      .finally(() => {
+        set({ isCheckingAuth: false });
+        activeAuthCheck = null;
+      });
 
-      set({ authUser: res.data.user });
-    } catch (error) {
-      console.log("❌ Error checking auth:", error);
-      set({ authUser: null });
-    } finally {
-      set({ isCheckingAuth: false });
-    }
+    return activeAuthCheck;
   },
 
   signup: async (data) => {

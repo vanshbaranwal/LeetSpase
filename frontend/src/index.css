@@ -36,6 +36,23 @@
   --brand-gray: #e6e6e6;
 }
 
+/* Keep every area scrollable while hiding browser scrollbar chrome. */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Monaco renders its own scrollbar elements instead of native scrollbars. */
+.monaco-editor .scrollbar {
+  display: none !important;
+}
+
 body {
   background-color: var(--brand-black);
   background-image:
@@ -61,6 +78,62 @@ a.btn:hover {
   background-color: #e6e6e6;
   border-color: #e6e6e6;
   color: #000000;
+}
+
+/* Keep the create-problem fields neutral instead of showing DaisyUI's white focus ring. */
+.create-problem-form :where(.input, .textarea, .select):focus,
+.create-problem-form :where(.input, .textarea, .select):focus-visible {
+  border-color: #3a3a3a !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.create-problem-form .monaco-editor.focused,
+.create-problem-form .monaco-editor textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Text areas keep a consistent layout and cannot be manually stretched. */
+.create-problem-form textarea {
+  resize: none !important;
+}
+
+.create-problem-form .problem-description-textarea {
+  height: clamp(20rem, 55vh, 38rem);
+}
+
+.create-problem-form .additional-info-textarea {
+  min-height: 12rem;
+  background-color: #181818;
+}
+
+.create-problem-form .hints-textarea {
+  min-height: 14rem;
+}
+
+.create-problem-form .editorial-textarea {
+  min-height: 24rem;
+}
+
+.create-problem-form .tag-remove-button {
+  border-color: transparent !important;
+  background: transparent !important;
+  color: #a3a3a3 !important;
+}
+
+.create-problem-form .tag-remove-button svg {
+  color: #a3a3a3 !important;
+}
+
+.create-problem-form .tag-remove-button:hover:not(:disabled) {
+  border-color: rgba(248, 113, 113, 0.22) !important;
+  background: rgba(248, 113, 113, 0.08) !important;
+  color: #f87171 !important;
+}
+
+.create-problem-form .tag-remove-button:hover:not(:disabled) svg {
+  color: #f87171 !important;
 }
 
 @keyframes landing-code-float {

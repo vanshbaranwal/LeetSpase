@@ -55,10 +55,10 @@ const ProblemPage = () => {
         problem.codeSnippet?.[selectedLanguage] || submission?.sourceCode || ""
       );
       setTestCases(
-        problem.testcases?.map((tc) => ({
-          input: tc.input,
-          output: tc.output,
-        })) || []
+        Object.values(problem.examples || {}).map((example) => ({
+          input: example.input,
+          output: example.output,
+        }))
       );
     }
   }, [problem, selectedLanguage, submission?.sourceCode]);
@@ -81,9 +81,7 @@ const ProblemPage = () => {
     e.preventDefault();
     try {
       const language_id = getLanguageId(selectedLanguage);
-      const stdin = problem.testcases.map((tc) => tc.input);
-      const expected_outputs = problem.testcases.map((tc) => tc.output);
-      executeCode(code, language_id, stdin, expected_outputs, id);
+      executeCode(code, language_id, id);
     } catch (error) {
       console.log("Error executing code", error);
     }
@@ -352,7 +350,7 @@ const ProblemPage = () => {
             ) : (
               <>
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold">Test Cases</h3>
+                  <h3 className="text-xl font-bold">Sample Test Cases</h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="table table-zebra w-full">

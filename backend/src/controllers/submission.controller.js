@@ -1,5 +1,16 @@
 import { db } from "../libs/db.js";
 
+const publicSubmissionSelect = {
+    id: true,
+    problemId: true,
+    sourceCode: true,
+    language: true,
+    status: true,
+    memory: true,
+    time: true,
+    createdAt: true,
+    updatedAt: true,
+};
 
 
 
@@ -10,7 +21,11 @@ export const getAllSubmission = async(req, res) => {
         const submissions = await db.submission.findMany({
             where: {
                 userId: userId
-            }
+            },
+            select: publicSubmissionSelect,
+            orderBy: {
+                createdAt: "desc"
+            },
         });
 
         return res.status(200).json({
@@ -36,7 +51,11 @@ export const getSubmissionsForProblem = async(req, res) => {
             where: {
                 userId: userId,
                 problemId: problemId
-            }
+            },
+            select: publicSubmissionSelect,
+            orderBy: {
+                createdAt: "desc"
+            },
         });
 
         return res.status(200).json({
