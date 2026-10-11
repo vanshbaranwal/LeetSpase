@@ -3,6 +3,23 @@ import { getJudge0LanguageId, pollBatchResults, submitBatch } from "../libs/judg
 import { publicProblemSelect, publicProblemSummarySelect } from "../libs/problem-selects.js";
 import { cleanProblemTitle, createProblemTitleKey } from "../libs/problem-title.js";
 
+const getDailyChallengeDate = () => {
+    const timeZone = process.env.DAILY_CHALLENGE_TIMEZONE || "Asia/Kolkata";
+    const dateParts = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+    }).formatToParts(new Date());
+    const date = Object.fromEntries(
+        dateParts
+            .filter(({ type }) => type !== "literal")
+            .map(({ type, value }) => [type, value])
+    );
+
+    return new Date(`${date.year}-${date.month}-${date.day}T00:00:00.000Z`);
+};
+
 
 
 export const createProblem = async(req, res) => {
@@ -140,6 +157,75 @@ export const getAllProblems = async (req, res) => {
         return res.status(500).json({
             success: false,
             error: "error while fetching problems"
+        });
+    }
+};
+
+export const getProblemOfTheDay = async (req, res) => {
+    const challengeDate = getDailyChallengeDate();
+
+    const dailyChallengeSelect = {
+        challengeDate: true,
+        problem: {
+            select: publicProblemSummarySelect
+        }
+    };
+
+    try {
+        let dailyChallenge = await db.dailyChallenge.findUnique({
+            where: { challengeDate },
+            select: dailyChallengeSelect
+        });
+
+        if(!dailyChallenge){
+            const problemCount = await db.problem.count();
+
+            if(problemCount === 0){
+                return res.status(404).json({
+                    success: false,
+                    error: "no problems are available for today's challenge"
+                });
+            }
+
+            const randomOffset = Math.floor(Math.random() * problemCount);
+            const selectedProblem = await db.problem.findFirst({
+                orderBy: { id: "asc" },
+                skip: randomOffset,
+                select: { id: true }
+            });
+
+            try {
+                dailyChallenge = await db.dailyChallenge.create({
+                    data: {
+                        challengeDate,
+                        problemId: selectedProblem.id
+                    },
+                    select: dailyChallengeSelect
+                });
+            } catch (error) {
+                if(error.code !== "P2002") throw error;
+
+                // Another request created today's record first. Return that
+                // record so every user still receives the same challenge.
+                dailyChallenge = await db.dailyChallenge.findUnique({
+                    where: { challengeDate },
+                    select: dailyChallengeSelect
+                });
+            }
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "problem of the day fetched successfully",
+            challengeDate: dailyChallenge.challengeDate,
+            problem: dailyChallenge.problem
+        });
+    } catch (error) {
+        console.error("error fetching problem of the day:", error);
+
+        return res.status(500).json({
+            success: false,
+            error: "failed to fetch problem of the day"
         });
     }
 };

@@ -1,34 +1,56 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Link } from "react-router-dom";
-import { Bookmark, LockKeyhole, LogIn, PencilIcon, Plus, TrashIcon, UserPlus, X } from "lucide-react";
+import { BarChart3, Bookmark, Check, ChevronDown, LockKeyhole, LogIn, PencilIcon, Plus, Search, TrashIcon, UserPlus, X } from "lucide-react";
 import { useActions } from "../store/useAction";
 import AddToPlaylistModal from "./AddToPlaylist";
 import CreatePlaylistModal from "./CreatePlaylistModal";
 import { usePlaylistStore } from "../store/usePlaylistStore";
 
 
-const ProblemsTable = ({ problems, searchQuery = "" }) => {
+const ProblemsTable = ({
+  problems,
+  numberingProblems = problems,
+  searchQuery = "",
+  onSearchChange,
+  selectedTag = "ALL",
+  title = "Problems",
+  emptyMessage = "No problems found.",
+}) => {
   const { authUser } = useAuthStore();
   const { onDeleteProblem } = useActions();
   const { createPlaylist } = usePlaylistStore();
   const [difficulty, setDifficulty] = useState("ALL");
-  const [selectedTag, setSelectedTag] = useState("ALL");
+  const [isDifficultyOpen, setIsDifficultyOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
   const [isAuthPromptOpen, setIsAuthPromptOpen] = useState(false);
   const [selectedProblemId, setSelectedProblemId] = useState(null);
-
-  // Extract all unique tags from problems
-  const allTags = useMemo(() => {
-    if (!Array.isArray(problems)) return [];
-    const tagsSet = new Set();
-    problems.forEach((p) => p.tags?.forEach((t) => tagsSet.add(t)));
-    return Array.from(tagsSet);
-  }, [problems]);
+  const difficultyMenuRef = useRef(null);
 
   // Define allowed difficulties
   const difficulties = ["EASY", "MEDIUM", "HARD"];
+  const difficultyOptions = ["ALL", ...difficulties];
+
+  useEffect(() => {
+    const closeDifficultyMenu = (event) => {
+      if (!difficultyMenuRef.current?.contains(event.target)) {
+        setIsDifficultyOpen(false);
+      }
+    };
+
+    const closeDifficultyMenuOnEscape = (event) => {
+      if (event.key === "Escape") setIsDifficultyOpen(false);
+    };
+
+    document.addEventListener("mousedown", closeDifficultyMenu);
+    document.addEventListener("keydown", closeDifficultyMenuOnEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", closeDifficultyMenu);
+      document.removeEventListener("keydown", closeDifficultyMenuOnEscape);
+    };
+  }, []);
 
   const sortedProblems = useMemo(() => {
     return [...(problems || [])].sort((firstProblem, secondProblem) =>
@@ -40,10 +62,18 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
   }, [problems]);
 
   const problemNumberById = useMemo(() => {
-    return new Map(
-      sortedProblems.map((problem, index) => [problem.id, index + 1])
+    const sortedNumberingProblems = [...(numberingProblems || [])].sort(
+      (firstProblem, secondProblem) =>
+        firstProblem.title.localeCompare(secondProblem.title, undefined, {
+          sensitivity: "base",
+          numeric: true,
+        })
     );
-  }, [sortedProblems]);
+
+    return new Map(
+      sortedNumberingProblems.map((problem, index) => [problem.id, index + 1])
+    );
+  }, [numberingProblems]);
 
   // Filter problems based on search, difficulty, and tags
   const filteredProblems = useMemo(() => {
@@ -55,7 +85,11 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
         difficulty === "ALL" ? true : problem.difficulty === difficulty
       )
       .filter((problem) =>
-        selectedTag === "ALL" ? true : problem.tags?.includes(selectedTag)
+        selectedTag === "ALL"
+          ? true
+          : problem.tags?.some(
+              (tag) => tag.toLowerCase() === selectedTag.toLowerCase()
+            )
       );
   }, [sortedProblems, searchQuery, difficulty, selectedTag]);
 
@@ -87,45 +121,100 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto mt-10">
-      {/* Header with Create Playlist Button */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Problems</h2>
+    <div className="w-full">
+      {/* Header */}
+      <div className="mb-6">
+        <div>
+          <h2 className="text-2xl font-bold">{title}</h2>
+          <p className="mt-1 text-xs text-white/35">{filteredProblems.length} problems</p>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div ref={difficultyMenuRef} className="relative w-44 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsDifficultyOpen((isOpen) => !isOpen)}
+              aria-haspopup="listbox"
+              aria-expanded={isDifficultyOpen}
+              className="flex h-10 w-full items-center gap-2 rounded-full border border-white/10 bg-base-200 px-4 text-sm font-medium text-white/75 outline-none transition-colors hover:border-white/20 hover:text-white focus:border-white/10 focus:outline-none"
+            >
+              <BarChart3 className="h-4 w-4 text-white/45" />
+              <span className="flex-1 text-left">Difficulty</span>
+              <ChevronDown className={`h-4 w-4 text-white/45 transition-transform ${isDifficultyOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {isDifficultyOpen && (
+              <div
+                role="listbox"
+                aria-label="Filter problems by difficulty"
+                className="absolute left-0 top-[calc(100%+0.55rem)] z-40 w-48 overflow-hidden rounded-2xl border border-white/10 bg-[#151515] p-2 shadow-2xl shadow-black/60"
+              >
+                {difficultyOptions.map((option) => {
+                  const isSelected = difficulty === option;
+                  const label = option === "ALL"
+                    ? "All"
+                    : option.charAt(0) + option.slice(1).toLowerCase();
+                  const optionColor = option === "EASY"
+                    ? "text-emerald-400"
+                    : option === "MEDIUM"
+                      ? "text-orange-400"
+                      : option === "HARD"
+                        ? "text-red-400"
+                        : "text-white/55";
+
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      onClick={() => {
+                        setDifficulty(option);
+                        setIsDifficultyOpen(false);
+                      }}
+                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition-colors ${optionColor} ${
+                        isSelected
+                          ? "bg-white/[0.08]"
+                          : "hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <span className={`grid h-5 w-5 place-items-center rounded border ${
+                        isSelected
+                          ? "border-white/70 bg-white text-black"
+                          : "border-white/20 bg-transparent"
+                      }`}>
+                        {isSelected && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
+                      </span>
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <label className="flex h-10 w-48 min-w-0 items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.07] px-3.5 focus-within:border-white/20 focus-within:bg-white/[0.09] sm:w-56">
+            <Search className="h-4 w-4 shrink-0 text-white/45" />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={onSearchChange}
+              placeholder="Search problems"
+              aria-label="Search problems by name"
+              className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/30"
+            />
+          </label>
+        </div>
         <button
           className="btn btn-primary gap-2"
           onClick={handleCreatePlaylistClick}
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="h-4 w-4" />
           Create Playlist
         </button>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
-        <select
-          className="select select-bordered bg-base-200"
-          value={difficulty}
-          onChange={(e) => setDifficulty(e.target.value)}
-        >
-          <option value="ALL">All Difficulties</option>
-          {difficulties.map((diff) => (
-            <option key={diff} value={diff}>
-              {diff.charAt(0).toUpperCase() + diff.slice(1).toLowerCase()}
-            </option>
-          ))}
-        </select>
-        <select
-          className="select select-bordered bg-base-200"
-          value={selectedTag}
-          onChange={(e) => setSelectedTag(e.target.value)}
-        >
-          <option value="ALL">All Tags</option>
-          {allTags.map((tag) => (
-            <option key={tag} value={tag}>
-              {tag}
-            </option>
-          ))}
-        </select>
       </div>
 
       {/* Table */}
@@ -150,7 +239,7 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
                 return (
                   <tr key={problem.id}>
                     <td className="text-center font-mono text-sm text-white/45">
-                      {problemNumberById.get(problem.id)}
+                      {problemNumberById.get(problem.id) ?? "—"}
                     </td>
                     <td className="text-center">
                       <input
@@ -231,7 +320,7 @@ const ProblemsTable = ({ problems, searchQuery = "" }) => {
             ) : (
               <tr>
                 <td colSpan={6} className="text-center py-6 text-gray-500">
-                  No problems found.
+                  {emptyMessage}
                 </td>
               </tr>
             )}

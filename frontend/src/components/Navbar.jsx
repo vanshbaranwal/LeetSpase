@@ -1,31 +1,23 @@
-import { Code2, LogOut, Plus, Search, User } from "lucide-react";
-import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
+import { Code2, LoaderCircle, LogOut, Plus, User } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
+import { useProblemStore } from "../store/useProblemStore";
 import LogoutButton from "./LogoutButton";
 
 const Navbar = () => {
   const { authUser } = useAuthStore();
+  const { dailyProblem, getProblemOfTheDay, isDailyProblemLoading } = useProblemStore();
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
   const isProblemsPage = location.pathname === "/problems";
-  const problemSearch = searchParams.get("search") || "";
 
-  const handleProblemSearch = (event) => {
-    const nextSearchParams = new URLSearchParams(searchParams);
-    const value = event.target.value;
-
-    if (value) {
-      nextSearchParams.set("search", value);
-    } else {
-      nextSearchParams.delete("search");
-    }
-
-    setSearchParams(nextSearchParams, { replace: true });
-  };
+  useEffect(() => {
+    if (isProblemsPage) getProblemOfTheDay();
+  }, [getProblemOfTheDay, isProblemsPage]);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#070707] px-5 sm:px-8">
-      <div className="mx-auto flex h-[96px] w-full max-w-7xl items-center justify-between">
+    <nav className={`sticky top-0 z-50 w-full border-b border-white/10 bg-[#070707] ${isProblemsPage ? "px-4 sm:px-5" : "px-5 sm:px-8"}`}>
+      <div className={`mx-auto flex w-full items-center justify-between ${isProblemsPage ? "h-20 max-w-none" : "h-[96px] max-w-7xl"}`}>
         <div className="flex min-w-0 items-center gap-8">
           <Link to="/" className="group flex shrink-0 items-center gap-2.5" aria-label="LeetSpase home">
             <Code2 className="h-8 w-8 text-white transition-transform duration-300 group-hover:-rotate-6" strokeWidth={2.3} />
@@ -34,38 +26,46 @@ const Navbar = () => {
             </span>
           </Link>
 
-          <span className="hidden text-2xl font-light text-white/35 sm:block">/</span>
-
-          {isProblemsPage ? (
-            <div className="hidden items-center gap-8 font-mono text-sm font-semibold uppercase tracking-[0.06em] md:flex">
-              <Link to="/problems" className="text-white">Problems</Link>
-              <span className="cursor-default text-white/45" title="Discussion is coming soon">Discussion</span>
-            </div>
-          ) : (
-            <div className="hidden items-center gap-8 font-mono text-sm font-semibold uppercase tracking-[0.06em] text-white/80 lg:flex">
-              <a href="/#features" className="transition-colors hover:text-white">Features</a>
-              <a href="/#how-it-works" className="transition-colors hover:text-white">How it works</a>
-              <Link to="/problems" className="transition-colors hover:text-white">Problems</Link>
-              <a href="/#about" className="transition-colors hover:text-white">About</a>
-            </div>
+          {!isProblemsPage && (
+            <>
+              <span className="hidden text-2xl font-light text-white/35 sm:block">/</span>
+              <div className="hidden items-center gap-8 font-mono text-sm font-semibold uppercase tracking-[0.06em] text-white/80 lg:flex">
+                <a href="/#features" className="transition-colors hover:text-white">Features</a>
+                <a href="/#how-it-works" className="transition-colors hover:text-white">How it works</a>
+                <Link to="/problems" className="transition-colors hover:text-white">Problems</Link>
+                <a href="/#about" className="transition-colors hover:text-white">About</a>
+              </div>
+            </>
           )}
         </div>
 
         <div className="flex shrink-0 items-center gap-2.5">
           {isProblemsPage && (
-            <label className="relative block">
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
-              <input
-                type="search"
-                value={problemSearch}
-                onChange={handleProblemSearch}
-                placeholder="Search problems..."
-                aria-label="Search problems by name"
-                className="h-12 w-36 rounded-md border border-white/10 bg-white/[0.06] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-white/30 focus:bg-white/[0.08] sm:w-52 sm:pr-4 lg:w-72"
-              />
-            </label>
+            <div className="mr-5 hidden items-center gap-8 font-mono text-sm font-semibold uppercase tracking-[0.06em] md:flex">
+              <Link to="/problems" className="text-white">Problems</Link>
+              <span className="cursor-default text-white/45" title="Discussion is coming soon">Discussion</span>
+              <span className="cursor-default text-white/45" title="Contest is coming soon">Contest</span>
+              {dailyProblem ? (
+                <Link
+                  to={`/problem/${dailyProblem.id}`}
+                  aria-label="Open the problem of the day"
+                  className="text-orange-400 transition-colors hover:text-orange-300"
+                >
+                  Problem of the Day
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  title={isDailyProblemLoading ? "Loading today's challenge" : "Daily challenge is unavailable"}
+                  className="inline-flex items-center gap-2 text-orange-400/40"
+                >
+                  {isDailyProblemLoading && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                  Problem of the Day
+                </button>
+              )}
+            </div>
           )}
-
           {authUser ? (
             <>
               {!isProblemsPage && (

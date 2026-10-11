@@ -1,0 +1,182 @@
+import { ChevronRight, Library, ListMusic, LockKeyhole } from "lucide-react";
+import { FaJava, FaJs, FaPython } from "react-icons/fa";
+
+const languageTracks = [
+  { id: "python", name: "Python" },
+  { id: "java", name: "Java" },
+  { id: "javascript", name: "JavaScript" },
+];
+
+const LanguageMark = ({ language }) => {
+  if (language === "python") {
+    return <FaPython className="h-6 w-6 text-[#3776ab]" aria-hidden="true" />;
+  }
+
+  if (language === "java") {
+    return <FaJava className="h-6 w-6 text-[#e76f00]" aria-hidden="true" />;
+  }
+
+  return <FaJs className="h-6 w-6 text-[#f7df1e]" aria-hidden="true" />;
+};
+
+const selectionKey = (selection) => `${selection?.type}:${selection?.id}`;
+
+const PlaylistButton = ({ active, icon, name, caption, count, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-pressed={active}
+    className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors ${
+      active
+        ? "border-white/20 bg-white/[0.09] text-white"
+        : "border-transparent text-white/55 hover:border-white/10 hover:bg-white/[0.045] hover:text-white"
+    }`}
+  >
+    <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg border ${active ? "border-white/15 bg-white/[0.08]" : "border-white/10 bg-white/[0.035]"}`}>
+      {icon}
+    </span>
+    <span className="min-w-0 flex-1">
+      <span className="block truncate text-sm font-semibold">{name}</span>
+      <span className="mt-0.5 block truncate text-[11px] text-white/35">{caption}</span>
+    </span>
+    <span className="shrink-0 rounded-md bg-white/[0.05] px-2 py-1 font-mono text-[10px] text-white/40">{count}</span>
+  </button>
+);
+
+const PlaylistSidebar = ({
+  playlists,
+  selectedCollection,
+  onSelectCollection,
+  allProblemCount,
+  problemCount,
+  isAuthenticated,
+  isLoading,
+  tags,
+  selectedTag,
+  onSelectTag,
+}) => {
+  const activeKey = selectionKey(selectedCollection);
+
+  return (
+    <aside className="order-first self-start lg:order-last lg:sticky lg:top-28">
+      <div className="max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl border border-white/10 bg-[#101010]/90 p-3 shadow-2xl shadow-black/25">
+        <div className="px-2 pb-2 pt-1">
+          <p className="text-sm font-semibold text-white">Playlists</p>
+        </div>
+
+        <PlaylistButton
+          active={activeKey === "all:all"}
+          icon={<Library className="h-5 w-5 text-sky-400" />}
+          name="All Problems"
+          caption="General problem library"
+          count={allProblemCount}
+          onClick={() => onSelectCollection({ type: "all", id: "all" })}
+        />
+
+        <div className="my-3 border-t border-white/[0.07]" />
+
+        <div className="px-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">Language tracks</p>
+          <p className="mt-2 text-[11px] leading-5 text-white/40">
+            Exclusive problem sets, distinct from &apos;All Problems&apos;.
+          </p>
+        </div>
+        <div className="mt-3 space-y-2">
+          {languageTracks.map((track) => {
+            const active = activeKey === `track:${track.id}`;
+            const iconStyle = track.id === "python"
+              ? "border-[#3776ab]/35 bg-[#3776ab]/10"
+              : track.id === "java"
+                ? "border-[#e76f00]/35 bg-[#e76f00]/10"
+                : "border-[#f7df1e]/35 bg-[#f7df1e]/10";
+            return (
+              <button
+                key={track.id}
+                type="button"
+                onClick={() => onSelectCollection({ type: "track", id: track.id })}
+                aria-pressed={active}
+                className={`group flex w-full min-w-0 items-center gap-3 rounded-xl border px-3 py-3 text-left transition-all ${active ? "border-white/20 bg-white/[0.09] text-white" : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/15 hover:bg-white/[0.055] hover:text-white"}`}
+              >
+                <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl border ${iconStyle} ${active ? "brightness-125" : ""}`}>
+                  <LanguageMark language={track.id} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold">{track.name}</span>
+                  <span className="mt-1 block truncate text-[10px] text-white/40">30 exclusive questions · Learning path</span>
+                </span>
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/10 text-white/35 transition-colors group-hover:text-white/70">
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="my-3 border-t border-white/[0.07]" />
+
+        <p className="px-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">Your playlists</p>
+        <div className="mt-2 max-h-72 space-y-1 overflow-y-auto">
+          {isLoading ? (
+            <p className="px-2 py-3 text-xs text-white/35">Loading playlists...</p>
+          ) : !isAuthenticated ? (
+            <div className="flex gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] p-3 text-xs leading-5 text-white/40">
+              <LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              Sign in to view your personal playlists.
+            </div>
+          ) : playlists.length > 0 ? (
+            playlists.map((playlist) => (
+              <PlaylistButton
+                key={playlist.id}
+                active={activeKey === `playlist:${playlist.id}`}
+                icon={<ListMusic className="h-4 w-4" />}
+                name={playlist.name}
+                caption={playlist.description || "Personal playlist"}
+                count={playlist.problems?.length ?? 0}
+                onClick={() => onSelectCollection({ type: "playlist", id: playlist.id })}
+              />
+            ))
+          ) : (
+            <p className="px-2 py-3 text-xs leading-5 text-white/35">Your created playlists will appear here.</p>
+          )}
+        </div>
+
+        <div className="my-3 border-t border-white/[0.07]" />
+
+        <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">Tags</p>
+        <div className="mt-3 flex flex-wrap gap-x-3.5 gap-y-3 px-2">
+          <button
+            type="button"
+            onClick={() => onSelectTag("")}
+            className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${!selectedTag ? "text-white" : "text-white/70 hover:text-white"}`}
+          >
+            All
+            <span className={`rounded-full border px-2 py-0.5 font-mono text-[11px] ${!selectedTag ? "border-white/20 bg-white/[0.16] text-white/80" : "border-white/10 bg-white/[0.1] text-white/65"}`}>
+              {problemCount}
+            </span>
+          </button>
+
+          {tags.map(({ name, count }) => {
+            const active = selectedTag === name;
+            return (
+              <button
+                key={name}
+                type="button"
+                onClick={() => onSelectTag(active ? "" : name)}
+                className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${active ? "text-white" : "text-white/70 hover:text-white"}`}
+              >
+                {name}
+                <span className={`rounded-full border px-2 py-0.5 font-mono text-[11px] ${active ? "border-white/20 bg-white/[0.16] text-white/80" : "border-white/10 bg-white/[0.1] text-white/60"}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+
+          {tags.length === 0 && <p className="text-xs text-white/35">No tags in this collection.</p>}
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+export default PlaylistSidebar;

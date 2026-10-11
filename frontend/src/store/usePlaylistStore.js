@@ -66,6 +66,8 @@ export const usePlaylistStore = create((set, get) => ({
 
       toast.success("Problem added to playlist");
 
+      await get().getAllPlaylists();
+
       // Refresh the playlist details
       if (get().currentPlaylist?.id === playlistId) {
         await get().getPlaylistDetails(playlistId);
@@ -86,6 +88,8 @@ export const usePlaylistStore = create((set, get) => ({
       });
 
       toast.success("Problem removed from playlist");
+
+      await get().getAllPlaylists();
 
       // Refresh the playlist details
       if (get().currentPlaylist?.id === playlistId) {

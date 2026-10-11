@@ -68,6 +68,18 @@ model Problem {
   submission        Submission[]
   solvedBy          ProblemSolved[]
   problemsPlaylists ProblemInPlaylist[]
+  dailyChallenges   DailyChallenge[]
+}
+
+model DailyChallenge {
+  id            String   @id @default(uuid())
+  challengeDate DateTime @unique @db.Date
+  problemId     String
+  createdAt     DateTime @default(now())
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@index([problemId])
 }
 
 model Submission {

@@ -1,46 +1,147 @@
-import { useEffect } from "react";
-import { Code2, Loader } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Loader } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import ProblemTable from "../components/ProblemTable";
+import PlaylistSidebar from "../components/PlaylistSidebar";
+import { useAuthStore } from "../store/useAuthStore";
+import { usePlaylistStore } from "../store/usePlaylistStore";
 import { useProblemStore } from "../store/useProblemStore";
 
+const trackIds = new Set(["python", "java", "javascript"]);
+
+const getProblemTrack = (problem) => {
+  const track = problem.track || problem.languageTrack || problem.collection;
+  return typeof track === "string" ? track.toLowerCase() : "";
+};
+
 const ProblemsPage = () => {
+  const { authUser } = useAuthStore();
   const { getAllProblems, problems, isProblemsLoading } = useProblemStore();
-  const [searchParams] = useSearchParams();
+  const { getAllPlaylists, playlists, isLoading: isPlaylistsLoading } = usePlaylistStore();
+  const [selectedCollection, setSelectedCollection] = useState({
+    type: "all",
+    id: "all",
+    name: "All Problems",
+  });
+  const [selectedTag, setSelectedTag] = useState("ALL");
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
+
+  const handleProblemSearch = (event) => {
+    const nextSearchParams = new URLSearchParams(searchParams);
+    const value = event.target.value;
+
+    if (value) {
+      nextSearchParams.set("search", value);
+    } else {
+      nextSearchParams.delete("search");
+    }
+
+    setSearchParams(nextSearchParams, { replace: true });
+  };
 
   useEffect(() => {
     getAllProblems();
   }, [getAllProblems]);
 
-  return (
-    <main className="mx-auto min-h-screen w-full max-w-7xl px-4 pb-24 pt-14 text-white sm:px-6">
-      <div className="mx-auto max-w-2xl text-center">
-        <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/[0.05]">
-          <Code2 className="h-5 w-5 text-white/80" />
-        </div>
-        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.28em] text-white/40">
-          Problem library
-        </p>
-        <h1 className="mt-4 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
-          Choose your next challenge.
-        </h1>
-        <p className="mt-4 text-white/50">
-          Search, filter, solve, and save problems to your personal playlists.
-        </p>
-      </div>
+  useEffect(() => {
+    if (authUser) getAllPlaylists();
+  }, [authUser, getAllPlaylists]);
 
-      {isProblemsLoading ? (
-        <div className="grid min-h-80 place-items-center">
-          <Loader className="h-8 w-8 animate-spin text-white/60" />
-        </div>
-      ) : problems.length > 0 ? (
-        <ProblemTable problems={problems} searchQuery={searchQuery} />
-      ) : (
-        <div className="mt-14 rounded-2xl border border-dashed border-white/15 p-12 text-center text-white/45">
-          No problems found yet.
-        </div>
-      )}
+  const generalProblems = useMemo(
+    () => problems.filter((problem) => !trackIds.has(getProblemTrack(problem))),
+    [problems]
+  );
+
+  const selectedPlaylist = useMemo(() => {
+    if (selectedCollection.type !== "playlist") return null;
+    return playlists.find((playlist) => playlist.id === selectedCollection.id) || null;
+  }, [playlists, selectedCollection]);
+
+  const displayedProblems = useMemo(() => {
+    if (selectedCollection.type === "track") {
+      return problems.filter(
+        (problem) => getProblemTrack(problem) === selectedCollection.id
+      );
+    }
+
+    if (selectedCollection.type === "playlist") {
+      return (selectedPlaylist?.problems || [])
+        .map((playlistProblem) => playlistProblem.problem)
+        .filter(Boolean);
+    }
+
+    return generalProblems;
+  }, [generalProblems, problems, selectedCollection, selectedPlaylist]);
+
+  const tags = useMemo(() => {
+    const counts = new Map();
+
+    displayedProblems.forEach((problem) => {
+      (problem.tags || []).forEach((tag) => {
+        const normalizedTag = tag.trim();
+        if (!normalizedTag) return;
+
+        const key = normalizedTag.toLowerCase();
+        const existingTag = counts.get(key);
+        counts.set(key, {
+          name: existingTag?.name || normalizedTag,
+          count: (existingTag?.count || 0) + 1,
+        });
+      });
+    });
+
+    return Array.from(counts.values()).sort(
+      (firstTag, secondTag) =>
+        secondTag.count - firstTag.count || firstTag.name.localeCompare(secondTag.name)
+    );
+  }, [displayedProblems]);
+
+  const handleSelectCollection = (collection) => {
+    setSelectedCollection(collection);
+    setSelectedTag("ALL");
+  };
+
+  const emptyMessage = selectedCollection.type === "track"
+    ? `${selectedCollection.name} questions have not been added yet.`
+    : selectedCollection.type === "playlist"
+      ? "This playlist does not contain any problems yet."
+      : "No problems found.";
+
+  return (
+    <main className="mx-auto min-h-screen w-full max-w-[1500px] px-4 pb-24 pt-10 text-white sm:px-6">
+      <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <section className="min-w-0">
+          {isProblemsLoading ? (
+            <div className="grid min-h-80 place-items-center">
+              <Loader className="h-8 w-8 animate-spin text-white/60" />
+            </div>
+          ) : (
+            <ProblemTable
+              problems={displayedProblems}
+              numberingProblems={selectedCollection.type === "track" ? displayedProblems : generalProblems}
+              searchQuery={searchQuery}
+              onSearchChange={handleProblemSearch}
+              selectedTag={selectedTag}
+              title={selectedCollection.name}
+              emptyMessage={emptyMessage}
+            />
+          )}
+        </section>
+
+        <PlaylistSidebar
+          playlists={playlists}
+          selectedCollection={selectedCollection}
+          onSelectCollection={handleSelectCollection}
+          allProblemCount={generalProblems.length}
+          problemCount={displayedProblems.length}
+          isAuthenticated={Boolean(authUser)}
+          isLoading={isPlaylistsLoading}
+          tags={tags}
+          selectedTag={selectedTag}
+          onSelectTag={setSelectedTag}
+        />
+      </div>
     </main>
   );
 };

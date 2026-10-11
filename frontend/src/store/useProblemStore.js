@@ -5,9 +5,11 @@ import { toast } from "react-hot-toast";
 export const useProblemStore = create((set) => ({
   problems: [],
   problem: null,
+  dailyProblem: null,
   solvedProblems: [],
   isProblemsLoading: false,
   isProblemLoading: false,
+  isDailyProblemLoading: false,
 
   getAllProblems: async () => {
     try {
@@ -38,6 +40,23 @@ export const useProblemStore = create((set) => ({
       toast.error("Error in getting problems");
     } finally {
       set({ isProblemLoading: false });
+    }
+  },
+
+  getProblemOfTheDay: async () => {
+    try {
+      set({ isDailyProblemLoading: true });
+
+      const res = await axiosInstance.get("/problems/problem-of-the-day");
+
+      set({ dailyProblem: res.data.problem });
+      return res.data.problem;
+    } catch (error) {
+      console.error("Error getting problem of the day", error);
+      set({ dailyProblem: null });
+      return null;
+    } finally {
+      set({ isDailyProblemLoading: false });
     }
   },
 
