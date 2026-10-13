@@ -11,6 +11,12 @@ export const useAuthStore = create((set) => ({
   isGoogleLoggingIn: false,
   isCheckingAuth: true,
 
+  updateAuthUser: (updates) => set((state) => ({
+    authUser: state.authUser ? { ...state.authUser, ...updates } : state.authUser,
+  })),
+
+  clearAuthUser: () => set({ authUser: null }),
+
   checkAuth: () => {
     if (activeAuthCheck) return activeAuthCheck;
 

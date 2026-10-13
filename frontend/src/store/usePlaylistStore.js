@@ -60,11 +60,15 @@ export const usePlaylistStore = create((set, get) => ({
   addProblemToPlaylist: async (playlistId, problemIds) => {
     try {
       set({ isLoading: true });
-      await axiosInstance.post(`/playlist/${playlistId}/add-problem`, {
+      const response = await axiosInstance.post(`/playlist/${playlistId}/add-problem`, {
         problemIds,
       });
 
-      toast.success("Problem added to playlist");
+      if (response.data.addedCount === 0) {
+        toast("Problem is already in this playlist");
+      } else {
+        toast.success("Problem added to playlist");
+      }
 
       await get().getAllPlaylists();
 
@@ -72,9 +76,12 @@ export const usePlaylistStore = create((set, get) => ({
       if (get().currentPlaylist?.id === playlistId) {
         await get().getPlaylistDetails(playlistId);
       }
+
+      return true;
     } catch (error) {
       console.error("Error adding problem to playlist:", error);
-      toast.error("Failed to add problem to playlist");
+      toast.error(error.response?.data?.error || "Failed to add problem to playlist");
+      return false;
     } finally {
       set({ isLoading: false });
     }

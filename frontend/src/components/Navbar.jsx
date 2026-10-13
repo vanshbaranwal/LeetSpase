@@ -1,15 +1,15 @@
 import { useEffect } from "react";
-import { Code2, LoaderCircle, LogOut, Plus, User } from "lucide-react";
+import { Code2, LayoutDashboard, LoaderCircle, LogOut, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useProblemStore } from "../store/useProblemStore";
 import LogoutButton from "./LogoutButton";
 
-const Navbar = () => {
+const Navbar = ({ variant = "default" }) => {
   const { authUser } = useAuthStore();
   const { dailyProblem, getProblemOfTheDay, isDailyProblemLoading } = useProblemStore();
   const location = useLocation();
-  const isProblemsPage = location.pathname === "/problems";
+  const isProblemsPage = location.pathname === "/problems" || variant === "problems";
 
   useEffect(() => {
     if (isProblemsPage) getProblemOfTheDay();
@@ -86,19 +86,60 @@ const Navbar = () => {
                     <User className="h-6 w-6" />
                   )}
                 </button>
-                <ul tabIndex={0} className="menu dropdown-content z-[1] mt-3 w-56 space-y-1 rounded-xl border border-white/10 bg-[#111111] p-3 text-white shadow-2xl">
-                  <li className="mb-2 border-b border-white/10 pb-2">
-                    <span className="block cursor-default hover:bg-transparent">
-                      <span className="block truncate font-semibold">{authUser.name || "Coder"}</span>
-                      <span className="block text-xs font-normal text-white/45">{authUser.email}</span>
+                <div tabIndex={0} className="dropdown-content z-[1] mt-3 w-72 overflow-hidden rounded-2xl border border-white/10 bg-[#111111] p-2 text-white shadow-2xl shadow-black/60">
+                  <div className="flex items-center gap-3 px-3 py-3">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-sm font-semibold text-black">
+                      {authUser.image ? (
+                        <img
+                          src={authUser.image}
+                          alt=""
+                          className="h-full w-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        (authUser.name?.[0] || "U").toUpperCase()
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate text-sm font-semibold text-white">{authUser.name || "Coder"}</p>
+                        {authUser.role === "ADMIN" && (
+                          <span className="shrink-0 rounded-full border border-violet-400/20 bg-violet-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-300">
+                            Admin
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="my-1 h-px bg-white/[0.08]" />
+
+                  <div className="space-y-1 py-1">
+                    <Link to="/profile" className="flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white">
+                      <span className="grid h-8 w-8 place-items-center rounded-lg border border-white/[0.08] bg-white/[0.035]">
+                        <User className="h-4 w-4" />
+                      </span>
+                      My profile
+                    </Link>
+                    {authUser.role === "ADMIN" && (
+                      <Link to="/admin" className="flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white">
+                        <span className="grid h-8 w-8 place-items-center rounded-lg border border-white/[0.08] bg-white/[0.035]">
+                          <LayoutDashboard className="h-4 w-4" />
+                        </span>
+                        Admin dashboard
+                      </Link>
+                    )}
+                  </div>
+
+                  <div className="my-1 h-px bg-white/[0.08]" />
+
+                  <LogoutButton className="flex h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-red-300/80 transition-colors hover:bg-red-500/10 hover:text-red-300">
+                    <span className="grid h-8 w-8 place-items-center rounded-lg border border-red-400/15 bg-red-400/[0.06]">
+                      <LogOut className="h-4 w-4" />
                     </span>
-                  </li>
-                  <li><Link to="/profile" className="rounded-lg hover:bg-white/10 hover:text-white"><User className="h-4 w-4" /> My profile</Link></li>
-                  {authUser.role === "ADMIN" && (
-                    <li><Link to="/add-problem" className="rounded-lg hover:bg-white/10 hover:text-white"><Plus className="h-4 w-4" /> Add problem</Link></li>
-                  )}
-                  <li><LogoutButton><LogOut className="h-4 w-4" /> Logout</LogoutButton></li>
-                </ul>
+                    Logout
+                  </LogoutButton>
+                </div>
               </div>
             </>
           ) : (

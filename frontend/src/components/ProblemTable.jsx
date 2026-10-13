@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Link } from "react-router-dom";
-import { BarChart3, Bookmark, Check, ChevronDown, LockKeyhole, LogIn, PencilIcon, Plus, Search, TrashIcon, UserPlus, X } from "lucide-react";
+import { Check, ChevronDown, LockKeyhole, LogIn, PencilIcon, Search, TrashIcon, UserPlus, X } from "lucide-react";
 import { useActions } from "../store/useAction";
 import AddToPlaylistModal from "./AddToPlaylist";
 import CreatePlaylistModal from "./CreatePlaylistModal";
@@ -18,7 +18,7 @@ const ProblemsTable = ({
   emptyMessage = "No problems found.",
 }) => {
   const { authUser } = useAuthStore();
-  const { onDeleteProblem } = useActions();
+  const { onDeleteProblem, isDeletingProblem } = useActions();
   const { createPlaylist } = usePlaylistStore();
   const [difficulty, setDifficulty] = useState("ALL");
   const [isDifficultyOpen, setIsDifficultyOpen] = useState(false);
@@ -26,6 +26,7 @@ const ProblemsTable = ({
   const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
   const [isAuthPromptOpen, setIsAuthPromptOpen] = useState(false);
   const [selectedProblemId, setSelectedProblemId] = useState(null);
+  const [problemPendingDeletion, setProblemPendingDeletion] = useState(null);
   const difficultyMenuRef = useRef(null);
 
   // Define allowed difficulties
@@ -93,8 +94,14 @@ const ProblemsTable = ({
       );
   }, [sortedProblems, searchQuery, difficulty, selectedTag]);
 
-  const handleDelete = (id) => {
-    onDeleteProblem(id);
+  const handleDelete = (problem) => {
+    setProblemPendingDeletion(problem);
+  };
+
+  const confirmDelete = async () => {
+    const wasDeleted = await onDeleteProblem(problemPendingDeletion.id);
+
+    if (wasDeleted) setProblemPendingDeletion(null);
   };
 
   const handleCreatePlaylist = async (data) => {
@@ -141,7 +148,6 @@ const ProblemsTable = ({
               aria-expanded={isDifficultyOpen}
               className="flex h-10 w-full items-center gap-2 rounded-full border border-white/10 bg-base-200 px-4 text-sm font-medium text-white/75 outline-none transition-colors hover:border-white/20 hover:text-white focus:border-white/10 focus:outline-none"
             >
-              <BarChart3 className="h-4 w-4 text-white/45" />
               <span className="flex-1 text-left">Difficulty</span>
               <ChevronDown className={`h-4 w-4 text-white/45 transition-transform ${isDifficultyOpen ? "rotate-180" : ""}`} />
             </button>
@@ -209,10 +215,10 @@ const ProblemsTable = ({
           </label>
         </div>
         <button
-          className="btn btn-primary gap-2"
+          type="button"
+          className="inline-flex h-10 items-center justify-center rounded-full border border-white bg-white px-5 text-sm font-semibold text-black shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-[#e6e6e6] hover:bg-[#e6e6e6] active:translate-y-0"
           onClick={handleCreatePlaylistClick}
         >
-          <Plus className="h-4 w-4" />
           Create Playlist
         </button>
       </div>
@@ -251,8 +257,13 @@ const ProblemsTable = ({
                     </td>
                     <td className="text-center">
                       {authUser ? (
-                        <Link to={`/problem/${problem.id}`} className="font-semibold hover:underline">
-                          {problem.title}
+                        <Link to={`/problem/${problem.id}`} className="inline-flex items-center justify-center gap-2 font-semibold hover:underline">
+                          <span>{problem.title}</span>
+                          {problem.isDemo && (
+                            <span className="rounded-full border border-sky-400/25 bg-sky-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-300">
+                              Demo
+                            </span>
+                          )}
                         </Link>
                       ) : (
                         <button
@@ -261,7 +272,12 @@ const ProblemsTable = ({
                           className="inline-flex items-center justify-center gap-2 font-semibold text-white transition-colors hover:text-white/70 hover:underline"
                         >
                           <LockKeyhole className="h-4 w-4 text-white/40" aria-hidden="true" />
-                          {problem.title}
+                          <span>{problem.title}</span>
+                          {problem.isDemo && (
+                            <span className="rounded-full border border-sky-400/25 bg-sky-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-300">
+                              Demo
+                            </span>
+                          )}
                         </button>
                       )}
                     </td>
@@ -295,22 +311,30 @@ const ProblemsTable = ({
                         {authUser?.role === "ADMIN" && (
                           <div className="flex gap-2">
                             <button
-                              onClick={() => handleDelete(problem.id)}
-                              className="btn btn-sm btn-error"
+                              type="button"
+                              onClick={() => handleDelete(problem)}
+                              title="Delete problem"
+                              aria-label={`Delete ${problem.title}`}
+                              className="grid h-10 w-10 place-items-center rounded-lg border border-red-400/25 bg-red-500/15 text-red-400 shadow-sm shadow-red-950/20 transition-all duration-200 hover:border-red-400/45 hover:bg-red-500/25 hover:text-red-300"
                             >
-                              <TrashIcon className="h-4 w-4 text-black" />
+                              <TrashIcon className="h-[18px] w-[18px]" strokeWidth={2.2} />
                             </button>
-                            <button disabled className="btn btn-sm btn-warning">
-                              <PencilIcon className="h-4 w-4 text-black" />
+                            <button
+                              type="button"
+                              disabled
+                              title="Problem editing is not available yet"
+                              aria-label="Edit problem unavailable"
+                              className="grid h-10 w-10 cursor-not-allowed place-items-center rounded-lg border border-amber-400/25 bg-amber-400/15 text-amber-300 opacity-65 shadow-sm shadow-amber-950/20"
+                            >
+                              <PencilIcon className="h-[18px] w-[18px]" strokeWidth={2.2} />
                             </button>
                           </div>
                         )}
                         <button
-                          className="btn btn-sm btn-outline flex gap-2 items-center"
+                          className="btn btn-sm rounded-full border border-white/10 bg-[#000000] text-[#FFFFFF] hover:border-white/20 hover:bg-[#101010] hover:text-[#FFFFFF]"
                           onClick={() => handleAddToPlaylist(problem.id)}
                         >
-                          <Bookmark className="w-4 h-4" />
-                          <span className="hidden sm:inline">Save to Playlist</span>
+                          <span>Save to Playlist</span>
                         </button>
                       </div>
                     </td>
@@ -329,6 +353,61 @@ const ProblemsTable = ({
       </div>
 
       {/* Modals */}
+      {problemPendingDeletion && (
+        <div
+          className="fixed inset-0 z-[110] grid place-items-center bg-black/75 px-4 backdrop-blur-sm"
+          role="presentation"
+          onClick={() => !isDeletingProblem && setProblemPendingDeletion(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-problem-title"
+            className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#111111] p-7 text-left shadow-2xl shadow-black sm:p-8"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setProblemPendingDeletion(null)}
+              disabled={isDeletingProblem}
+              aria-label="Close delete confirmation"
+              className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full border border-white/10 text-white/45 transition-colors hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-red-400/70">
+              Delete problem
+            </p>
+            <h3 id="delete-problem-title" className="mt-4 pr-10 text-2xl font-semibold tracking-[-0.03em] text-white">
+              Are you sure you want to delete the problem?
+            </h3>
+            <p className="mt-3 text-sm leading-6 text-white/50">
+              <span className="font-semibold text-white/75">{problemPendingDeletion.title}</span> and its related data will be permanently removed. This action cannot be undone.
+            </p>
+
+            <div className="mt-7 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setProblemPendingDeletion(null)}
+                disabled={isDeletingProblem}
+                className="h-10 rounded-full border border-white/10 px-5 text-sm font-semibold text-white/65 transition-colors hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={isDeletingProblem}
+                className="h-10 rounded-full bg-red-500 px-5 text-sm font-semibold text-white transition-colors hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isDeletingProblem ? "Deleting..." : "Delete problem"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isAuthPromptOpen && (
         <div
           className="fixed inset-0 z-[100] grid place-items-center bg-black/75 px-4 backdrop-blur-sm"

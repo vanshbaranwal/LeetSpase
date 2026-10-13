@@ -131,6 +131,69 @@ export const getPlaylistDetails = async(req, res) => {
     }
 };
 
+export const updatePlaylist = async(req, res) => {
+    const { playlistId } = req.params;
+    const { name, description } = req.body;
+
+    if(typeof name !== "string" || !name.trim()){
+        return res.status(400).json({
+            success: false,
+            error: "playlist name is required",
+        });
+    }
+
+    if(description !== undefined && typeof description !== "string"){
+        return res.status(400).json({
+            success: false,
+            error: "playlist description must be a string",
+        });
+    }
+
+    try {
+        const result = await db.playlist.updateMany({
+            where: {
+                id: playlistId,
+                userId: req.user.id,
+            },
+            data: {
+                name: name.trim(),
+                description: description?.trim() || null,
+            },
+        });
+
+        if(!result.count){
+            return res.status(404).json({
+                success: false,
+                error: "playlist not found",
+            });
+        }
+
+        const playlist = await db.playlist.findUnique({
+            where: { id: playlistId },
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "playlist updated successfully",
+            playlist,
+        });
+    } catch (error) {
+        console.error("error updating the playlist: ", error);
+
+        if(error.code === "P2002"){
+            return res.status(409).json({
+                success: false,
+                error: "you already have a playlist with this name",
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            error: "failed to update the playlist",
+        });
+    }
+};
+
 export const addProblemToPlaylist = async(req, res) => {
     const { playlistId } = req.params;
     const { problemIds } = req.body;
@@ -210,16 +273,24 @@ export const deletePlaylist = async(req, res) => {
     const { playlistId } = req.params;
     
     try {
-        const deletedPlaylist = await db.playlist.delete({
+        const deletedPlaylist = await db.playlist.deleteMany({
             where: {
-                id: playlistId
+                id: playlistId,
+                userId: req.user.id,
             }
         });
+
+        if(!deletedPlaylist.count){
+            return res.status(404).json({
+                success: false,
+                error: "playlist not found",
+            });
+        }
 
         return res.status(200).json({
             success: true,
             message: "playlist deleted successfully",
-            deletedPlaylist
+            deletedCount: deletedPlaylist.count
         });
 
     } catch (error) {
@@ -244,9 +315,24 @@ export const removeProblemFromPlaylist = async(req, res) => {
             });
         }
 
+        const playlist = await db.playlist.findUnique({
+            where: {
+                id: playlistId,
+                userId: req.user.id,
+            },
+            select: { id: true },
+        });
+
+        if(!playlist){
+            return res.status(404).json({
+                success: false,
+                error: "playlist not found",
+            });
+        }
+
         const deletedProblem = await db.problemInPlaylist.deleteMany({
             where: {
-                playlistId,
+                playListId: playlistId,
                 problemId: {
                     in: problemIds
                 }
@@ -264,7 +350,7 @@ export const removeProblemFromPlaylist = async(req, res) => {
 
         return res.status(500).json({
             success: false,
-            error: "failed to remove problem fromm the playlist"
+            error: "failed to remove problem from the playlist"
         });
     }
 };

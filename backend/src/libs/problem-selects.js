@@ -2,6 +2,7 @@ export const publicProblemSummarySelect = {
     id: true,
     title: true,
     difficulty: true,
+    isDemo: true,
     tags: true,
 };
 

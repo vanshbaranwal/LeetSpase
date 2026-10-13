@@ -599,7 +599,7 @@ const getInitialProblemFormTab = () => {
   return formTabs.some((tab) => tab.id === savedTab) ? savedTab : "basics";
 };
 
-const CreateProblemForm = () => {
+const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
     const sampleType = "DP";
     const [activeTab, setActiveTab] = useState(getInitialProblemFormTab);
     const navigation = useNavigate();
@@ -646,7 +646,11 @@ const CreateProblemForm = () => {
     sessionStorage.removeItem(CREATE_PROBLEM_DRAFT_KEY);
     sessionStorage.removeItem(CREATE_PROBLEM_TAB_KEY);
     toast.success(res.data.message || "Problem Created successfully⚡");
-    navigation("/problems");
+    if (onCreated) {
+      onCreated(res.data.problem);
+    } else {
+      navigation("/problems");
+    }
 
    } catch (error) {
     console.log(error);
@@ -710,7 +714,7 @@ const CreateProblemForm = () => {
   };
 
   return (
-    <div className="h-screen w-full overflow-hidden bg-[#080808] text-white">
+    <div className={`${embedded ? "h-[calc(100vh-10rem)] min-h-[680px] rounded-2xl border border-white/10" : "h-screen"} w-full overflow-hidden bg-[#080808] text-white`}>
       <div className="flex h-full w-full flex-col">
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex shrink-0 flex-col items-start justify-between gap-5 border-b border-white/10 bg-[#0d0d0d] px-5 py-6 md:flex-row md:items-center md:px-8 lg:px-10">
@@ -735,10 +739,10 @@ const CreateProblemForm = () => {
             <aside className="overflow-y-auto border-b border-white/10 bg-black/35 p-4 lg:border-b-0 lg:border-r lg:p-5">
               <button
                 type="button"
-                onClick={() => navigation("/problems")}
+                onClick={() => onBack ? onBack() : navigation("/problems")}
                 className="mb-5 inline-flex items-center gap-2 px-2 text-sm text-white/45 transition-colors hover:text-white"
               >
-                <ArrowLeft className="h-4 w-4" /> Back to problems
+                <ArrowLeft className="h-4 w-4" /> {embedded ? "Back to overview" : "Back to problems"}
               </button>
 
               <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-1" aria-label="Problem form sections">

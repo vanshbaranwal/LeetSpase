@@ -1,5 +1,5 @@
-import { ChevronRight, Library, ListMusic, LockKeyhole } from "lucide-react";
-import { FaJava, FaJs, FaPython } from "react-icons/fa";
+import { ChevronRight, FileText, Library, LockKeyhole } from "lucide-react";
+import LanguageBrandIcon from "./LanguageBrandIcon";
 
 const languageTracks = [
   { id: "python", name: "Python" },
@@ -7,26 +7,14 @@ const languageTracks = [
   { id: "javascript", name: "JavaScript" },
 ];
 
-const LanguageMark = ({ language }) => {
-  if (language === "python") {
-    return <FaPython className="h-6 w-6 text-[#3776ab]" aria-hidden="true" />;
-  }
-
-  if (language === "java") {
-    return <FaJava className="h-6 w-6 text-[#e76f00]" aria-hidden="true" />;
-  }
-
-  return <FaJs className="h-6 w-6 text-[#f7df1e]" aria-hidden="true" />;
-};
-
 const selectionKey = (selection) => `${selection?.type}:${selection?.id}`;
 
-const PlaylistButton = ({ active, icon, name, caption, count, onClick }) => (
+const PlaylistButton = ({ active, icon, name, caption, count, onClick, centerText = true }) => (
   <button
     type="button"
     onClick={onClick}
     aria-pressed={active}
-    className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors ${
+    className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 transition-colors ${centerText ? "text-center" : "text-left"} ${
       active
         ? "border-white/20 bg-white/[0.09] text-white"
         : "border-transparent text-white/55 hover:border-white/10 hover:bg-white/[0.045] hover:text-white"
@@ -59,7 +47,7 @@ const PlaylistSidebar = ({
 
   return (
     <aside className="order-first self-start lg:order-last lg:sticky lg:top-28">
-      <div className="max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl border border-white/10 bg-[#101010]/90 p-3 shadow-2xl shadow-black/25">
+      <div className="max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl border border-white/10 bg-[#101010]/90 p-3 text-center shadow-2xl shadow-black/25">
         <div className="px-2 pb-2 pt-1">
           <p className="text-sm font-semibold text-white">Playlists</p>
         </div>
@@ -70,6 +58,7 @@ const PlaylistSidebar = ({
           name="All Problems"
           caption="General problem library"
           count={allProblemCount}
+          centerText={false}
           onClick={() => onSelectCollection({ type: "all", id: "all" })}
         />
 
@@ -98,7 +87,7 @@ const PlaylistSidebar = ({
                 className={`group flex w-full min-w-0 items-center gap-3 rounded-xl border px-3 py-3 text-left transition-all ${active ? "border-white/20 bg-white/[0.09] text-white" : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/15 hover:bg-white/[0.055] hover:text-white"}`}
               >
                 <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl border ${iconStyle} ${active ? "brightness-125" : ""}`}>
-                  <LanguageMark language={track.id} />
+                  <LanguageBrandIcon language={track.id} />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold">{track.name}</span>
@@ -119,7 +108,7 @@ const PlaylistSidebar = ({
           {isLoading ? (
             <p className="px-2 py-3 text-xs text-white/35">Loading playlists...</p>
           ) : !isAuthenticated ? (
-            <div className="flex gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] p-3 text-xs leading-5 text-white/40">
+            <div className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] p-3 text-center text-xs leading-5 text-white/40">
               <LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               Sign in to view your personal playlists.
             </div>
@@ -128,7 +117,7 @@ const PlaylistSidebar = ({
               <PlaylistButton
                 key={playlist.id}
                 active={activeKey === `playlist:${playlist.id}`}
-                icon={<ListMusic className="h-4 w-4" />}
+                icon={<FileText className="h-4 w-4" />}
                 name={playlist.name}
                 caption={playlist.description || "Personal playlist"}
                 count={playlist.problems?.length ?? 0}
@@ -143,7 +132,7 @@ const PlaylistSidebar = ({
         <div className="my-3 border-t border-white/[0.07]" />
 
         <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">Tags</p>
-        <div className="mt-3 flex flex-wrap gap-x-3.5 gap-y-3 px-2">
+        <div className="mt-3 flex flex-wrap justify-center gap-x-3.5 gap-y-3 px-2">
           <button
             type="button"
             onClick={() => onSelectTag("")}

@@ -80,6 +80,38 @@ a.btn:hover {
   color: #000000;
 }
 
+.profile-input {
+  width: 100%;
+  height: 2.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0 1rem;
+  color: #ffffff;
+  font-size: 0.875rem;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.profile-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.profile-input:focus,
+.profile-input:focus-visible {
+  border-color: rgba(255, 255, 255, 0.28);
+  outline: none;
+  box-shadow: none;
+}
+
+.profile-bio-input {
+  height: 10rem;
+  min-height: 10rem;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+  line-height: 1.6;
+  resize: none;
+}
+
 /* Keep the create-problem fields neutral instead of showing DaisyUI's white focus ring. */
 .create-problem-form :where(.input, .textarea, .select):focus,
 .create-problem-form :where(.input, .textarea, .select):focus-visible {

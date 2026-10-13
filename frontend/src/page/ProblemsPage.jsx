@@ -26,6 +26,7 @@ const ProblemsPage = () => {
   const [selectedTag, setSelectedTag] = useState("ALL");
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
+  const playlistParam = searchParams.get("playlist");
 
   const handleProblemSearch = (event) => {
     const nextSearchParams = new URLSearchParams(searchParams);
@@ -53,26 +54,35 @@ const ProblemsPage = () => {
     [problems]
   );
 
+  const linkedPlaylist = useMemo(
+    () => playlistParam ? playlists.find((playlist) => playlist.id === playlistParam) : null,
+    [playlistParam, playlists]
+  );
+
+  const activeCollection = linkedPlaylist
+    ? { type: "playlist", id: linkedPlaylist.id, name: linkedPlaylist.name }
+    : selectedCollection;
+
   const selectedPlaylist = useMemo(() => {
-    if (selectedCollection.type !== "playlist") return null;
-    return playlists.find((playlist) => playlist.id === selectedCollection.id) || null;
-  }, [playlists, selectedCollection]);
+    if (activeCollection.type !== "playlist") return null;
+    return playlists.find((playlist) => playlist.id === activeCollection.id) || null;
+  }, [activeCollection.id, activeCollection.type, playlists]);
 
   const displayedProblems = useMemo(() => {
-    if (selectedCollection.type === "track") {
+    if (activeCollection.type === "track") {
       return problems.filter(
-        (problem) => getProblemTrack(problem) === selectedCollection.id
+        (problem) => getProblemTrack(problem) === activeCollection.id
       );
     }
 
-    if (selectedCollection.type === "playlist") {
+    if (activeCollection.type === "playlist") {
       return (selectedPlaylist?.problems || [])
         .map((playlistProblem) => playlistProblem.problem)
         .filter(Boolean);
     }
 
     return generalProblems;
-  }, [generalProblems, problems, selectedCollection, selectedPlaylist]);
+  }, [activeCollection.id, activeCollection.type, generalProblems, problems, selectedPlaylist]);
 
   const tags = useMemo(() => {
     const counts = new Map();
@@ -100,11 +110,20 @@ const ProblemsPage = () => {
   const handleSelectCollection = (collection) => {
     setSelectedCollection(collection);
     setSelectedTag("ALL");
+    const nextSearchParams = new URLSearchParams(searchParams);
+
+    if (collection.type === "playlist") {
+      nextSearchParams.set("playlist", collection.id);
+    } else {
+      nextSearchParams.delete("playlist");
+    }
+
+    setSearchParams(nextSearchParams, { replace: true });
   };
 
-  const emptyMessage = selectedCollection.type === "track"
-    ? `${selectedCollection.name} questions have not been added yet.`
-    : selectedCollection.type === "playlist"
+  const emptyMessage = activeCollection.type === "track"
+    ? `${activeCollection.name} questions have not been added yet.`
+    : activeCollection.type === "playlist"
       ? "This playlist does not contain any problems yet."
       : "No problems found.";
 
@@ -119,11 +138,11 @@ const ProblemsPage = () => {
           ) : (
             <ProblemTable
               problems={displayedProblems}
-              numberingProblems={selectedCollection.type === "track" ? displayedProblems : generalProblems}
+              numberingProblems={activeCollection.type === "track" ? displayedProblems : generalProblems}
               searchQuery={searchQuery}
               onSearchChange={handleProblemSearch}
               selectedTag={selectedTag}
-              title={selectedCollection.name}
+              title={activeCollection.name}
               emptyMessage={emptyMessage}
             />
           )}
@@ -131,7 +150,7 @@ const ProblemsPage = () => {
 
         <PlaylistSidebar
           playlists={playlists}
-          selectedCollection={selectedCollection}
+          selectedCollection={activeCollection}
           onSelectCollection={handleSelectCollection}
           allProblemCount={generalProblems.length}
           problemCount={displayedProblems.length}

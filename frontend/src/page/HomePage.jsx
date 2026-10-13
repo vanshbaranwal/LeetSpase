@@ -5,6 +5,7 @@ import {
   Layers3, ListChecks, Play, ShieldCheck, Terminal,
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
+import LanguageBrandIcon from "../components/LanguageBrandIcon";
 
 const features = [
   [Terminal, "Run real code", "Write and execute JavaScript, Python, and Java directly in a focused browser editor."],
@@ -56,6 +57,12 @@ const languageExamples = {
   }
 }`,
   },
+};
+
+const languageTabActiveStyles = {
+  PYTHON: "bg-[#3776ab]/15 text-white",
+  JAVA: "bg-[#e76f00]/15 text-white",
+  JAVASCRIPT: "bg-[#f7df1e]/10 text-white",
 };
 
 const syntaxColors = {
@@ -148,36 +155,6 @@ const highlightCodeLine = (line, language) => {
   return highlightedParts.length > 0 ? highlightedParts : " ";
 };
 
-const LanguageLogo = ({ language }) => {
-  if (language === "javascript") {
-    return (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden="true">
-        <rect x="2" y="2" width="20" height="20" rx="2" fill="currentColor" />
-        <text x="12" y="17.25" fill="#080808" fontFamily="Arial, sans-serif" fontSize="9.5" fontWeight="700" textAnchor="middle">JS</text>
-      </svg>
-    );
-  }
-
-  if (language === "python") {
-    return (
-      <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" aria-hidden="true">
-        <path d="M12 2.5H8.2A3.2 3.2 0 0 0 5 5.7v3.1h7v1.7H6.2A4.2 4.2 0 0 0 2 14.7v1.1A4.2 4.2 0 0 0 6.2 20H8v-3.2a3.3 3.3 0 0 1 3.3-3.3h4.5A3.2 3.2 0 0 0 19 10.3V5.7a3.2 3.2 0 0 0-3.2-3.2H12Z" fill="currentColor" />
-        <path d="M12 21.5h3.8a3.2 3.2 0 0 0 3.2-3.2v-3.1h-7v-1.7h5.8a4.2 4.2 0 0 0 4.2-4.2V8.2A4.2 4.2 0 0 0 17.8 4H16v3.2a3.3 3.3 0 0 1-3.3 3.3H8.2A3.2 3.2 0 0 0 5 13.7v4.6a3.2 3.2 0 0 0 3.2 3.2H12Z" fill="currentColor" opacity="0.58" />
-        <circle cx="8.5" cy="5.8" r="1" fill="#080808" />
-        <circle cx="15.5" cy="18.2" r="1" fill="#080808" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M8.4 16.5h7.7a2 2 0 0 0 2-2v-3h-11v3a2 2 0 0 0 1.3 2Z" strokeWidth="1.5" />
-      <path d="M18.1 12h1a1.8 1.8 0 0 1 0 3.6h-1.6M7.6 19c2.8 1 7.2 1 10 0M9 22c2 .6 5.8.6 7.8 0" strokeWidth="1.35" />
-      <path d="M10.2 9c-2.5-2.7 3.8-3.2 1-6M14 9c3-2.4-2.1-3.1 1.2-6.5" strokeWidth="1.45" />
-    </svg>
-  );
-};
-
 const HomePage = () => {
   const { authUser } = useAuthStore();
   const [selectedLanguage, setSelectedLanguage] = useState("PYTHON");
@@ -217,11 +194,9 @@ const HomePage = () => {
                   key={key}
                   type="button"
                   onClick={() => setSelectedLanguage(key)}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-2 py-3 text-xs font-medium transition-colors sm:text-sm ${selectedLanguage === key ? "bg-[#1c1c1c] text-white" : "text-white/40 hover:text-white/75"}`}
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-2 py-3 text-xs font-medium transition-colors sm:text-sm ${selectedLanguage === key ? languageTabActiveStyles[key] : "text-white/40 hover:bg-white/[0.035] hover:text-white/75"}`}
                 >
-                  <span className={selectedLanguage === key ? "text-white" : "text-white/40"}>
-                    <LanguageLogo language={language.logo} />
-                  </span>
+                  <LanguageBrandIcon language={language.logo} />
                   <span className="hidden sm:inline">{language.label}</span>
                 </button>
               ))}

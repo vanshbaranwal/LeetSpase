@@ -39,6 +39,10 @@ export const authMiddleware = async(req, res, next) => {
                 name: true,
                 email: true,
                 role: true,
+                username: true,
+                status: true,
+                isVerified: true,
+                lastActiveAt: true,
             }
         });
 
@@ -47,6 +51,22 @@ export const authMiddleware = async(req, res, next) => {
                 message: "user not found",
             });
         };
+
+        if(user.status === "SUSPENDED"){
+            return res.status(403).json({
+                message: "account suspended",
+            });
+        }
+
+        const oneMinuteAgo = Date.now() - 60_000;
+        if(user.lastActiveAt.getTime() < oneMinuteAgo){
+            db.user.update({
+                where: { id: user.id },
+                data: { lastActiveAt: new Date() },
+            }).catch((error) => {
+                console.error("error updating user activity: ", error);
+            });
+        }
 
         req.user = user;
         next();
@@ -109,11 +129,15 @@ export const optionalAuthMiddleware = async (req, res, next) => {
                 image: true,
                 name: true,
                 email: true,
-                role: true
+                role: true,
+                username: true,
+                status: true,
+                isVerified: true,
+                lastActiveAt: true,
             }
         });
 
-        if (user) {
+        if (user && user.status !== "SUSPENDED") {
             req.user = user;
         }
     } catch {
