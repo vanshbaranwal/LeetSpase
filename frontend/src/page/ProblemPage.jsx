@@ -1,19 +1,20 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import {
-  Play,
-  FileText,
-  MessageSquare,
-  Lightbulb,
+  ArrowLeft,
   Bookmark,
-  Share2,
-  Clock,
-  ChevronRight,
-  Terminal,
+  BookOpenText,
+  Check,
+  ChevronDown,
   Code2,
-  Users,
-  ThumbsUp,
-  Home,
+  Copy,
+  FileText,
+  ListChecks,
+  LoaderCircle,
+  MessageSquare,
+  RotateCcw,
+  Share2,
+  TerminalSquare,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useProblemStore } from "../store/useProblemStore";
@@ -23,360 +24,440 @@ import { useSubmissionStore } from "../store/useSubmissionStore";
 import Submission from "../components/Submission";
 import SubmissionsList from "../components/SubmissionList";
 
+const difficultyStyles = {
+  EASY: "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
+  MEDIUM: "border-orange-400/20 bg-orange-400/10 text-orange-300",
+  HARD: "border-red-400/20 bg-red-400/10 text-red-300",
+};
+
+const tabs = [
+  { id: "description", label: "Description", icon: FileText },
+  { id: "editorial", label: "Editorial", icon: BookOpenText },
+  { id: "submissions", label: "Submissions", icon: ListChecks },
+  { id: "discussion", label: "Discuss", icon: MessageSquare },
+];
+
+const formatLanguage = (language) => {
+  if (language === "JAVASCRIPT") return "JavaScript";
+  return language.charAt(0) + language.slice(1).toLowerCase();
+};
+
 const ProblemPage = () => {
   const { id } = useParams();
   const { getProblemById, problem, isProblemLoading } = useProblemStore();
-
   const {
     submission: submissions,
     isLoading: isSubmissionsLoading,
     getSubmissionForProblem,
-    getSubmissionCountForProblem,
-    submissionCount,
   } = useSubmissionStore();
+  const {
+    runCode,
+    submitCode,
+    result: executionResult,
+    lastAction,
+    isRunning,
+    isSubmitting,
+    clearResult,
+  } = useExecutionStore();
 
   const [code, setCode] = useState("");
   const [activeTab, setActiveTab] = useState("description");
   const [selectedLanguage, setSelectedLanguage] = useState("JAVASCRIPT");
+  const [selectedCase, setSelectedCase] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [testcases, setTestCases] = useState([]);
+  const [copied, setCopied] = useState(false);
 
-  const { executeCode, submission, isExecuting } = useExecutionStore();
+  const testcases = useMemo(
+    () =>
+      Object.values(problem?.examples || {}).map((example) => ({
+        input: example.input,
+        output: example.output,
+      })),
+    [problem]
+  );
 
   useEffect(() => {
     getProblemById(id);
-    getSubmissionCountForProblem(id);
-  }, [id, getProblemById, getSubmissionCountForProblem]);
+    clearResult();
+  }, [id, getProblemById, clearResult]);
 
   useEffect(() => {
     if (problem) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCode(
-        problem.codeSnippet?.[selectedLanguage] || submission?.sourceCode || ""
-      );
-      setTestCases(
-        Object.values(problem.examples || {}).map((example) => ({
-          input: example.input,
-          output: example.output,
-        }))
-      );
+      setCode(problem.codeSnippet?.[selectedLanguage] || "");
     }
-  }, [problem, selectedLanguage, submission?.sourceCode]);
+  }, [problem, selectedLanguage]);
 
   useEffect(() => {
-    if (activeTab === "submissions" && id) {
-      getSubmissionForProblem(id);
-    }
+    if (activeTab === "submissions" && id) getSubmissionForProblem(id);
   }, [activeTab, id, getSubmissionForProblem]);
 
-  console.log("submission", submissions);
-
-  const handleLanguageChange = (e) => {
-    const lang = e.target.value;
-    setSelectedLanguage(lang);
-    setCode(problem.codeSnippet?.[lang] || "");
+  const handleLanguageChange = (language) => {
+    setSelectedLanguage(language);
+    setCode(problem.codeSnippet?.[language] || "");
+    clearResult();
   };
 
-  const handleRunCode = (e) => {
-    e.preventDefault();
+  const handleRunCode = async () => {
+    const languageId = getLanguageId(selectedLanguage);
+    await runCode(code, languageId, id);
+  };
+
+  const handleSubmitCode = async () => {
+    const languageId = getLanguageId(selectedLanguage);
+    const submitted = await submitCode(code, languageId, id);
+    if (submitted && activeTab === "submissions") {
+      await getSubmissionForProblem(id);
+    }
+  };
+
+  const handleResetCode = () => {
+    setCode(problem.codeSnippet?.[selectedLanguage] || "");
+    clearResult();
+  };
+
+  const handleShare = async () => {
     try {
-      const language_id = getLanguageId(selectedLanguage);
-      executeCode(code, language_id, id);
-    } catch (error) {
-      console.log("Error executing code", error);
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
     }
   };
 
   if (isProblemLoading || !problem) {
     return (
-      <div className="flex items-center justify-center h-screen bg-base-200">
-        <div className="card bg-base-100 p-8 shadow-xl">
-          <span className="loading loading-spinner loading-lg text-primary"></span>
-          <p className="mt-4 text-base-content/70">Loading problem...</p>
+      <div className="grid min-h-screen w-full place-items-center bg-[#080808] text-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-[#111111]">
+            <LoaderCircle className="h-5 w-5 animate-spin text-white/70" />
+          </div>
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-white/35">Loading workspace</p>
         </div>
       </div>
     );
   }
 
   const renderTabContent = () => {
-    switch (activeTab) {
-      case "description":
-        return (
-          <div className="prose max-w-none">
-            <p className="text-lg mb-6">{problem.description}</p>
-
-            {problem.examples && (
-              <>
-                <h3 className="text-xl font-bold mb-4">Examples:</h3>
-                {Object.entries(problem.examples).map(
-                  ([lang, example]) => (
-                    <div
-                      key={lang}
-                      className="bg-base-200 p-6 rounded-xl mb-6 font-mono"
-                    >
-                      <div className="mb-4">
-                        <div className="text-indigo-300 mb-2 text-base font-semibold">
-                          Input:
-                        </div>
-                        <span className="bg-black/90 px-4 py-1 rounded-lg font-semibold text-white">
-                          {example.input}
-                        </span>
-                      </div>
-                      <div className="mb-4">
-                        <div className="text-indigo-300 mb-2 text-base font-semibold">
-                          Output:
-                        </div>
-                        <span className="bg-black/90 px-4 py-1 rounded-lg font-semibold text-white">
-                          {example.output}
-                        </span>
-                      </div>
-                      {example.explanation && (
-                        <div>
-                          <div className="text-emerald-300 mb-2 text-base font-semibold">
-                            Explanation:
-                          </div>
-                          <p className="text-base-content/70 text-lg font-sem">
-                            {example.explanation}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )
-                )}
-              </>
-            )}
-
-            {problem.constraints && (
-              <>
-                <h3 className="text-xl font-bold mb-4">Constraints:</h3>
-                <div className="bg-base-200 p-6 rounded-xl mb-6">
-                  <span className="bg-black/90 px-4 py-1 rounded-lg font-semibold text-white text-lg">
-                    {problem.constraints}
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
-        );
-      case "submissions":
-        return (
-          <SubmissionsList
-            submissions={submissions}
-            isLoading={isSubmissionsLoading}
-          />
-        );
-      case "discussion":
-        return (
-          <div className="p-4 text-center text-base-content/70">
-            No discussions yet
-          </div>
-        );
-      case "hints":
-        return (
-          <div className="p-4">
-            {problem?.hints ? (
-              <div className="bg-base-200 p-6 rounded-xl">
-                <span className="bg-black/90 px-4 py-1 rounded-lg font-semibold text-white text-lg">
-                  {problem.hints}
-                </span>
-              </div>
-            ) : (
-              <div className="text-center text-base-content/70">
-                No hints available
-              </div>
-            )}
-          </div>
-        );
-      default:
-        return null;
+    if (activeTab === "submissions") {
+      return <SubmissionsList submissions={submissions} isLoading={isSubmissionsLoading} />;
     }
+
+    if (activeTab === "editorial") {
+      return problem.editorial ? (
+        <div>
+          <SectionLabel>Solution approach</SectionLabel>
+          <div className="mt-4 whitespace-pre-wrap rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-5 text-sm leading-7 text-white/62">
+            {problem.editorial}
+          </div>
+        </div>
+      ) : (
+        <EmptyPanel icon={BookOpenText} title="Editorial not available" description="A detailed solution approach has not been published for this problem yet." />
+      );
+    }
+
+    if (activeTab === "discussion") {
+      return <EmptyPanel icon={MessageSquare} title="Discussion is coming soon" description="A focused place to compare approaches will be available here." />;
+    }
+
+    return (
+      <div className="space-y-8 pb-8">
+        <section>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${difficultyStyles[problem.difficulty] || "border-white/10 bg-white/5 text-white/55"}`}>
+              {problem.difficulty}
+            </span>
+            {(problem.tags || []).map((tag) => (
+              <span key={tag} className="rounded-full border border-white/[0.08] bg-white/[0.035] px-2.5 py-1 text-[11px] text-white/45">
+                {tag}
+              </span>
+            ))}
+          </div>
+          <h1 className="mt-5 text-2xl font-semibold tracking-[-0.035em] text-white sm:text-3xl">{problem.title}</h1>
+          <p className="mt-5 whitespace-pre-wrap text-[15px] leading-7 text-white/62">{problem.description}</p>
+        </section>
+
+        {!!Object.keys(problem.examples || {}).length && (
+          <section className="space-y-6">
+            {Object.entries(problem.examples).map(([name, example], index) => (
+              <div key={name}>
+                <h3 className="text-sm font-semibold text-white/88">Example {index + 1}:</h3>
+                <div className="mt-3 space-y-1 border-l-2 border-white/15 pl-4 font-mono text-[13px] leading-5 text-white/58">
+                  <ExampleLine label="Input" value={example.input} />
+                  <ExampleLine label="Output" value={example.output} />
+                  {example.explanation && (
+                    <ExampleLine label="Explanation" value={example.explanation} />
+                  )}
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {problem.constraints && (
+          <section>
+            <SectionLabel>Constraints</SectionLabel>
+            <pre className="mt-4 whitespace-pre-wrap rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-4 font-mono text-[13px] leading-7 text-white/58">{problem.constraints}</pre>
+          </section>
+        )}
+
+        <section>
+          <SectionLabel>Hints</SectionLabel>
+          <div className={`mt-4 whitespace-pre-wrap rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-4 text-sm leading-6 ${problem.hints ? "text-white/58" : "text-white/32"}`}>
+            {problem.hints || "No hints are available for this problem."}
+          </div>
+        </section>
+      </div>
+    );
   };
 
   return (
-    <div className="min-h-screen bg-base-100 max-w-7xl w-full">
-      <nav className="navbar bg-base-100 shadow-lg px-4">
-        <div className="flex-1 gap-2">
-          <Link to={"/"} className="flex items-center gap-2 text-primary">
-            <Home className="w-6 h-6" />
-            <ChevronRight className="w-4 h-4" />
+    <div className="flex h-dvh w-full flex-col overflow-hidden bg-[#080808] text-white">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.08] bg-[#070707] px-3 sm:px-4">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <Link to="/problems" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-white/55 transition-colors hover:bg-white/[0.06] hover:text-white" aria-label="Back to problems">
+            <ArrowLeft className="h-4 w-4" />
           </Link>
-          <div className="mt-2">
-            <h1 className="text-xl font-bold">{problem.title}</h1>
-            <div className="flex items-center gap-2 text-sm text-base-content/70 mt-5">
-              <Clock className="w-4 h-4" />
-              <span>
-                Updated{" "}
-                {new Date(problem.createdAt).toLocaleString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </span>
-              <span className="text-base-content/30">•</span>
-              <Users className="w-4 h-4" />
-              <span>{submissionCount} Submissions</span>
-              <span className="text-base-content/30">•</span>
-              <ThumbsUp className="w-4 h-4" />
-              <span>95% Success Rate</span>
-            </div>
-          </div>
+          <Link to="/problems" className="hidden items-center gap-2 border-r border-white/10 pr-4 sm:flex">
+            <Code2 className="h-5 w-5" />
+            <span className="font-semibold tracking-[-0.03em]">LeetSpase</span>
+          </Link>
         </div>
-        <div className="flex-none gap-4">
-          <button
-            className={`btn btn-ghost btn-circle ${
-              isBookmarked ? "text-primary" : ""
-            }`}
-            onClick={() => setIsBookmarked(!isBookmarked)}
-          >
-            <Bookmark className="w-5 h-5" />
+
+        <div className="flex shrink-0 items-center gap-1.5">
+          <button type="button" onClick={() => setIsBookmarked((value) => !value)} className={`grid h-9 w-9 place-items-center rounded-xl transition-colors hover:bg-white/[0.06] ${isBookmarked ? "text-white" : "text-white/40"}`} aria-label={isBookmarked ? "Remove bookmark" : "Bookmark problem"}>
+            <Bookmark className="h-4 w-4" fill={isBookmarked ? "currentColor" : "none"} />
           </button>
-          <button className="btn btn-ghost btn-circle">
-            <Share2 className="w-5 h-5" />
+          <button type="button" onClick={handleShare} className="grid h-9 w-9 place-items-center rounded-xl text-white/40 transition-colors hover:bg-white/[0.06] hover:text-white" aria-label="Copy problem link">
+            {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Share2 className="h-4 w-4" />}
           </button>
-          <select
-            className="select select-bordered select-primary w-40"
+          <LanguageSelector
+            languages={Object.keys(problem.codeSnippet || {})}
             value={selectedLanguage}
             onChange={handleLanguageChange}
-          >
-            {Object.keys(problem.codeSnippet || {}).map((lang) => (
-              <option key={lang} value={lang}>
-                {lang.charAt(0).toUpperCase() + lang.slice(1)}
-              </option>
+            className="ml-1 hidden sm:block"
+          />
+          <button type="button" onClick={handleRunCode} disabled={isRunning || isSubmitting} className="ml-1 inline-flex h-9 items-center gap-2 rounded-xl bg-white px-3.5 text-xs font-semibold text-black transition-colors hover:bg-[#e6e6e6] disabled:cursor-wait disabled:opacity-55">
+            {isRunning && <LoaderCircle className="h-3.5 w-3.5 animate-spin" />}
+            <span>Run</span>
+          </button>
+          <button type="button" onClick={handleSubmitCode} disabled={isRunning || isSubmitting} className="inline-flex h-9 items-center gap-2 rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-3.5 text-xs font-semibold text-emerald-200 transition-colors hover:bg-emerald-300/15 disabled:cursor-wait disabled:opacity-50">
+            {isSubmitting && <LoaderCircle className="h-3.5 w-3.5 animate-spin" />}
+            <span>Submit</span>
+          </button>
+        </div>
+      </header>
+
+      <main className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:grid-cols-[minmax(360px,41%)_minmax(0,59%)] lg:overflow-hidden">
+        <section className="flex min-h-[620px] flex-col border-b border-white/[0.08] bg-[#0b0b0b] lg:min-h-0 lg:border-b-0 lg:border-r">
+          <div className="flex h-12 shrink-0 items-center gap-1 overflow-x-auto border-b border-white/[0.08] px-2">
+            {tabs.map(({ id: tabId, label, icon: Icon }) => (
+              <button key={tabId} type="button" onClick={() => setActiveTab(tabId)} className={`relative flex h-full shrink-0 items-center gap-2 px-3 text-xs font-medium transition-colors ${activeTab === tabId ? "text-white" : "text-white/38 hover:text-white/70"}`}>
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+                {activeTab === tabId && <span className="absolute inset-x-3 bottom-0 h-px bg-white" />}
+              </button>
             ))}
-          </select>
-        </div>
-      </nav>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-7">{renderTabContent()}</div>
+        </section>
 
-      <div className="container mx-auto p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="card bg-base-100 shadow-xl">
-            <div className="card-body p-0">
-              <div className="tabs tabs-bordered">
-                <button
-                  className={`tab gap-2 ${
-                    activeTab === "description" ? "tab-active" : ""
-                  }`}
-                  onClick={() => setActiveTab("description")}
-                >
-                  <FileText className="w-4 h-4" />
-                  Description
-                </button>
-                <button
-                  className={`tab gap-2 ${
-                    activeTab === "submissions" ? "tab-active" : ""
-                  }`}
-                  onClick={() => setActiveTab("submissions")}
-                >
-                  <Code2 className="w-4 h-4" />
-                  Submissions
-                </button>
-                <button
-                  className={`tab gap-2 ${
-                    activeTab === "discussion" ? "tab-active" : ""
-                  }`}
-                  onClick={() => setActiveTab("discussion")}
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  Discussion
-                </button>
-                <button
-                  className={`tab gap-2 ${
-                    activeTab === "hints" ? "tab-active" : ""
-                  }`}
-                  onClick={() => setActiveTab("hints")}
-                >
-                  <Lightbulb className="w-4 h-4" />
-                  Hints
-                </button>
-              </div>
-
-              <div className="p-6">{renderTabContent()}</div>
+        <section className="flex min-h-[760px] flex-col bg-[#080808] lg:min-h-0">
+          <div className="flex h-11 shrink-0 items-center justify-between border-b border-white/[0.08] px-4">
+            <div className="flex items-center gap-2 text-xs font-medium text-white/55">
+              <TerminalSquare className="h-3.5 w-3.5" />
+              Code
+              <span className="h-1 w-1 rounded-full bg-white/20" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-white/25">{formatLanguage(selectedLanguage)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <LanguageSelector
+                languages={Object.keys(problem.codeSnippet || {})}
+                value={selectedLanguage}
+                onChange={handleLanguageChange}
+                compact
+                className="sm:hidden"
+              />
+              <button type="button" onClick={handleResetCode} className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-white/32 transition-colors hover:bg-white/[0.05] hover:text-white/65">
+                <RotateCcw className="h-3 w-3" /> Reset code
+              </button>
             </div>
           </div>
 
-          <div className="card bg-base-100 shadow-xl">
-            <div className="card-body p-0">
-              <div className="tabs tabs-bordered">
-                <button className="tab tab-active gap-2">
-                  <Terminal className="w-4 h-4" />
-                  Code Editor
-                </button>
-              </div>
+          <div className="min-h-[380px] flex-1 overflow-hidden bg-[#0d0d0d]">
+            <Editor
+              height="100%"
+              language={selectedLanguage.toLowerCase()}
+              theme="vs-dark"
+              value={code}
+              onChange={(value) => setCode(value || "")}
+              beforeMount={(monaco) => {
+                monaco.editor.defineTheme("leetspase-dark", {
+                  base: "vs-dark",
+                  inherit: true,
+                  rules: [],
+                  colors: {
+                    "editor.background": "#0d0d0d",
+                    "editorGutter.background": "#0d0d0d",
+                    "editorLineNumber.foreground": "#3f3f46",
+                    "editorLineNumber.activeForeground": "#a1a1aa",
+                    "editor.lineHighlightBackground": "#141414",
+                    "editor.selectionBackground": "#333333",
+                  },
+                });
+              }}
+              onMount={(_, monaco) => monaco.editor.setTheme("leetspase-dark")}
+              options={{
+                minimap: { enabled: false },
+                fontSize: 14,
+                fontFamily: "JetBrains Mono, Fira Code, Consolas, monospace",
+                fontLigatures: true,
+                lineHeight: 23,
+                lineNumbers: "on",
+                tabSize: 4,
+                insertSpaces: true,
+                detectIndentation: false,
+                padding: { top: 18, bottom: 18 },
+                roundedSelection: false,
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                renderLineHighlight: "line",
+                overviewRulerBorder: false,
+                hideCursorInOverviewRuler: true,
+              }}
+            />
+          </div>
 
-              <div className="h-150 w-full">
-                <Editor
-                  height="100%"
-                  language={selectedLanguage.toLowerCase()}
-                  theme="vs-dark"
-                  value={code}
-                  onChange={(value) => setCode(value || "")}
-                  options={{
-                    minimap: { enabled: false },
-                    fontSize: 20,
-                    lineNumbers: "on",
-                    roundedSelection: false,
-                    scrollBeyondLastLine: false,
-                    readOnly: false,
-                    automaticLayout: true,
-                  }}
-                />
+          <div className="flex h-[34%] min-h-[235px] shrink-0 flex-col border-t border-white/[0.08] bg-[#0b0b0b]">
+            <div className="flex h-11 shrink-0 items-center justify-between border-b border-white/[0.07] px-4">
+              <div className="flex items-center gap-2 text-xs font-medium text-white/55">
+                <ListChecks className="h-3.5 w-3.5" />
+                {executionResult ? `${lastAction === "submit" ? "Submission" : "Run"} result` : "Test cases"}
               </div>
-
-              <div className="p-4 border-t border-base-300 bg-base-200">
-                <div className="flex justify-between items-center">
-                  <button
-                    className={`btn btn-primary gap-2 ${
-                      isExecuting ? "loading" : ""
-                    }`}
-                    onClick={handleRunCode}
-                    disabled={isExecuting}
-                  >
-                    {!isExecuting && <Play className="w-4 h-4" />}
-                    Run Code
-                  </button>
-                  <button className="btn btn-success gap-2">
-                    Submit Solution
-                  </button>
+              {!executionResult && <span className="text-[10px] uppercase tracking-[0.12em] text-white/25">Sample cases</span>}
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto p-4">
+              {executionResult ? (
+                <Submission submission={executionResult} />
+              ) : testcases.length ? (
+                <div>
+                  <div className="flex items-center gap-2 overflow-x-auto">
+                    {testcases.map((_, index) => (
+                      <button key={index} type="button" onClick={() => setSelectedCase(index)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${selectedCase === index ? "bg-white text-black" : "bg-white/[0.045] text-white/40 hover:text-white/70"}`}>
+                        Case {index + 1}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <ConsoleValue label="Input" value={testcases[selectedCase]?.input} onCopy={() => navigator.clipboard.writeText(String(testcases[selectedCase]?.input || ""))} />
+                    <ConsoleValue label="Expected output" value={testcases[selectedCase]?.output} onCopy={() => navigator.clipboard.writeText(String(testcases[selectedCase]?.output || ""))} />
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <p className="text-sm text-white/35">No sample test cases are available.</p>
+              )}
             </div>
           </div>
-        </div>
-
-        <div className="card bg-base-100 shadow-xl mt-6">
-          <div className="card-body">
-            {submission ? (
-              <Submission submission={submission} />
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold">Sample Test Cases</h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="table table-zebra w-full">
-                    <thead>
-                      <tr>
-                        <th>Input</th>
-                        <th>Expected Output</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {testcases.map((testCase, index) => (
-                        <tr key={index}>
-                          <td className="font-mono">{testCase.input}</td>
-                          <td className="font-mono">{testCase.output}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 };
+
+const SectionLabel = ({ children }) => (
+  <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-white/35">{children}</h2>
+);
+
+const LanguageSelector = ({ languages, value, onChange, compact = false, className = "" }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (!menuRef.current?.contains(event.target)) setIsOpen(false);
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  const selectLanguage = (language) => {
+    onChange(language);
+    setIsOpen(false);
+  };
+
+  return (
+    <div ref={menuRef} className={`relative ${className}`}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((open) => !open)}
+        className={`flex items-center justify-between gap-3 bg-[#141414] font-medium text-white/72 transition-colors hover:bg-[#191919] hover:text-white ${compact ? "h-8 min-w-28 rounded-lg px-2.5 text-[11px]" : "h-9 min-w-36 rounded-xl px-3 text-xs"}`}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <span>{formatLanguage(value)}</span>
+        <ChevronDown className={`h-3.5 w-3.5 text-white/28 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-[calc(100%+8px)] z-[80] min-w-40 overflow-hidden rounded-xl border border-white/[0.09] bg-[#111111] p-1.5 shadow-2xl shadow-black/70" role="listbox" aria-label="Programming language">
+          {languages.map((language) => {
+            const isSelected = language === value;
+            return (
+              <button
+                key={language}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => selectLanguage(language)}
+                className={`flex h-10 w-full items-center justify-between rounded-lg px-3 text-left text-xs font-medium transition-colors ${isSelected ? "bg-white text-black" : "text-white/58 hover:bg-white/[0.06] hover:text-white"}`}
+              >
+                <span>{formatLanguage(language)}</span>
+                {isSelected && <Check className="h-3.5 w-3.5" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ExampleLine = ({ label, value }) => (
+  <p className="whitespace-pre-wrap break-words">
+    <span className="font-semibold text-white/88">{label}:</span>{" "}
+    <span>{value}</span>
+  </p>
+);
+
+const ConsoleValue = ({ label, value, onCopy }) => (
+  <div>
+    <div className="mb-2 flex items-center justify-between">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/28">{label}</p>
+      <button type="button" onClick={onCopy} className="text-white/25 transition-colors hover:text-white/65" aria-label={`Copy ${label.toLowerCase()}`}><Copy className="h-3.5 w-3.5" /></button>
+    </div>
+    <pre className="min-h-11 whitespace-pre-wrap rounded-xl border border-white/[0.07] bg-black/50 px-3 py-2.5 font-mono text-xs leading-5 text-white/65">{value}</pre>
+  </div>
+);
+
+const EmptyPanel = ({ icon: Icon, title, description }) => (
+  <div className="grid min-h-64 place-items-center rounded-2xl border border-dashed border-white/10 bg-white/[0.018] p-8 text-center">
+    <div>
+      <div className="mx-auto grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.035] text-white/40"><Icon className="h-4 w-4" /></div>
+      <p className="mt-4 text-sm font-medium text-white/72">{title}</p>
+      <p className="mx-auto mt-2 max-w-xs text-xs leading-5 text-white/35">{description}</p>
+    </div>
+  </div>
+);
 
 export default ProblemPage;

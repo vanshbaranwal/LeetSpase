@@ -1,109 +1,64 @@
-import {
-  CheckCircle2,
-  XCircle,
-  Clock,
-  MemoryStick as Memory,
-  Calendar,
-} from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock3, MemoryStick, XCircle } from "lucide-react";
+
+const parseMetric = (value) => {
+  if (Array.isArray(value)) return value;
+  try {
+    const parsed = JSON.parse(value || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const average = (value) => {
+  const numbers = parseMetric(value).map((item) => Number.parseFloat(item)).filter(Number.isFinite);
+  return numbers.length ? numbers.reduce((sum, item) => sum + item, 0) / numbers.length : 0;
+};
 
 const SubmissionsList = ({ submissions, isLoading }) => {
-  // Helper function to safely parse JSON strings
-  const safeParse = (data) => {
-    try {
-      return JSON.parse(data);
-    } catch (error) {
-      console.error("Error parsing data:", error);
-      return [];
-    }
-  };
-
-  // Helper function to calculate average memory usage
-  const calculateAverageMemory = (memoryData) => {
-    const memoryArray = safeParse(memoryData).map((m) =>
-      parseFloat(m.split(" ")[0])
-    );
-    if (memoryArray.length === 0) return 0;
-    return (
-      memoryArray.reduce((acc, curr) => acc + curr, 0) / memoryArray.length
-    );
-  };
-
-  // Helper function to calculate average runtime
-  const calculateAverageTime = (timeData) => {
-    const timeArray = safeParse(timeData).map((t) =>
-      parseFloat(t.split(" ")[0])
-    );
-    if (timeArray.length === 0) return 0;
-    return timeArray.reduce((acc, curr) => acc + curr, 0) / timeArray.length;
-  };
-
-  // Loading state
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center p-8">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
+      <div className="grid min-h-56 place-items-center">
+        <span className="loading loading-spinner loading-sm text-white/55" />
       </div>
     );
   }
 
-  // No submissions state
   if (!submissions?.length) {
     return (
-      <div className="text-center p-8">
-        <div className="text-base-content/70">No submissions yet</div>
+      <div className="grid min-h-64 place-items-center rounded-2xl border border-dashed border-white/10 bg-white/[0.018] p-8 text-center">
+        <div>
+          <div className="mx-auto grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.035] text-white/40"><Clock3 className="h-4 w-4" /></div>
+          <p className="mt-4 text-sm font-medium text-white/70">No submissions yet</p>
+          <p className="mt-2 text-xs text-white/35">Run your first solution to start building history.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2.5">
       {submissions.map((submission) => {
-        const avgMemory = calculateAverageMemory(submission.memory);
-        const avgTime = calculateAverageTime(submission.time);
-
+        const isAccepted = submission.status === "Accepted";
         return (
-          <div
-            key={submission.id}
-            className="card bg-base-200 shadow-lg hover:shadow-xl transition-shadow rounded-lg"
-          >
-            <div className="card-body p-4">
-              <div className="flex items-center justify-between">
-                {/* Left Section: Status and Language */}
-                <div className="flex items-center gap-4">
-                  {submission.status === "Accepted" ? (
-                    <div className="flex items-center gap-2 text-success">
-                      <CheckCircle2 className="w-6 h-6" />
-                      <span className="font-semibold">Accepted</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-error">
-                      <XCircle className="w-6 h-6" />
-                      <span className="font-semibold">{submission.status}</span>
-                    </div>
-                  )}
-                  <div className="badge badge-neutral">{submission.language}</div>
-                </div>
-
-                {/* Right Section: Runtime, Memory, and Date */}
-                <div className="flex items-center gap-4 text-base-content/70">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{avgTime.toFixed(3)} s</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Memory className="w-4 h-4" />
-                    <span>{avgMemory.toFixed(0)} KB</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    <span>
-                      {new Date(submission.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
+          <article key={submission.id} className="rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-4 transition-colors hover:border-white/[0.14]">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className={`grid h-8 w-8 place-items-center rounded-lg ${isAccepted ? "bg-emerald-400/10 text-emerald-300" : "bg-red-400/10 text-red-300"}`}>
+                  {isAccepted ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                </span>
+                <div>
+                  <p className={`text-sm font-semibold ${isAccepted ? "text-emerald-300" : "text-red-300"}`}>{submission.status}</p>
+                  <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-white/28">{submission.language}</p>
                 </div>
               </div>
+              <div className="flex flex-wrap items-center gap-3 text-[11px] text-white/38">
+                <span className="flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5" />{average(submission.time).toFixed(3)} s</span>
+                <span className="flex items-center gap-1.5"><MemoryStick className="h-3.5 w-3.5" />{average(submission.memory).toFixed(0)} KB</span>
+                <span className="flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" />{new Date(submission.createdAt).toLocaleDateString()}</span>
+              </div>
             </div>
-          </div>
+          </article>
         );
       })}
     </div>

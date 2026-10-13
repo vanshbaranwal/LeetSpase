@@ -12,6 +12,7 @@ export const publicProblemSelect = {
     examples: true,
     constraints: true,
     hints: true,
+    editorial: true,
     codeSnippet: true,
     createdAt: true,
     updatedAt: true,

@@ -257,10 +257,10 @@ const ProblemsTable = ({
                     </td>
                     <td className="text-center">
                       {authUser ? (
-                        <Link to={`/problem/${problem.id}`} className="inline-flex items-center justify-center gap-2 font-semibold hover:underline">
-                          <span>{problem.title}</span>
+                        <Link to={`/problem/${problem.id}`} className="group inline-flex items-center justify-center gap-2.5 font-semibold no-underline transition-colors hover:text-white/65 hover:no-underline">
+                          <span className="no-underline">{problem.title}</span>
                           {problem.isDemo && (
-                            <span className="rounded-full border border-sky-400/25 bg-sky-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-300">
+                            <span className="inline-flex h-5 items-center rounded-full border border-sky-400/20 bg-sky-400/[0.08] px-2 text-[9px] font-semibold uppercase leading-none tracking-[0.12em] text-sky-300 no-underline transition-colors group-hover:border-sky-400/30 group-hover:bg-sky-400/10">
                               Demo
                             </span>
                           )}
@@ -269,12 +269,12 @@ const ProblemsTable = ({
                         <button
                           type="button"
                           onClick={() => setIsAuthPromptOpen(true)}
-                          className="inline-flex items-center justify-center gap-2 font-semibold text-white transition-colors hover:text-white/70 hover:underline"
+                          className="group inline-flex items-center justify-center gap-2.5 font-semibold text-white no-underline transition-colors hover:text-white/65 hover:no-underline"
                         >
                           <LockKeyhole className="h-4 w-4 text-white/40" aria-hidden="true" />
                           <span>{problem.title}</span>
                           {problem.isDemo && (
-                            <span className="rounded-full border border-sky-400/25 bg-sky-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-300">
+                            <span className="inline-flex h-5 items-center rounded-full border border-sky-400/20 bg-sky-400/[0.08] px-2 text-[9px] font-semibold uppercase leading-none tracking-[0.12em] text-sky-300 no-underline transition-colors group-hover:border-sky-400/30 group-hover:bg-sky-400/10">
                               Demo
                             </span>
                           )}

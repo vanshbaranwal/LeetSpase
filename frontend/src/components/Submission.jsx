@@ -1,121 +1,62 @@
-import { CheckCircle2, XCircle, Clock, MemoryStick as Memory } from 'lucide-react';
+import { CheckCircle2, Clock3, MemoryStick, XCircle } from "lucide-react";
+
+const parseMetric = (value) => {
+  if (Array.isArray(value)) return value;
+  try {
+    const parsed = JSON.parse(value || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const average = (values) => {
+  const numbers = values.map((value) => Number.parseFloat(value)).filter(Number.isFinite);
+  return numbers.length ? numbers.reduce((sum, value) => sum + value, 0) / numbers.length : 0;
+};
 
 const SubmissionResults = ({ submission }) => {
-  // Parse stringified arrays
-  const memoryArr = JSON.parse(submission.memory || '[]');
-  const timeArr = JSON.parse(submission.time || '[]');
-
-  // Calculate averages
-  const avgMemory = memoryArr.length
-    ? memoryArr
-        .map(m => parseFloat(m)) // remove ' KB' using parseFloat
-        .reduce((a, b) => a + b, 0) / memoryArr.length
-    : 0;
-
-  const avgTime = timeArr.length
-    ? timeArr
-        .map(t => parseFloat(t)) // remove ' s' using parseFloat
-        .reduce((a, b) => a + b, 0) / timeArr.length
-    : 0;
-
-  const passedTests = submission.testCases.filter(tc => tc.passed).length;
-  const totalTests = submission.testCases.length;
-  const successRate = totalTests ? (passedTests / totalTests) * 100 : 0;
-  const isAccepted = submission.status?.toLowerCase() === 'accepted';
+  const testCases = Array.isArray(submission?.testCases) ? submission.testCases : [];
+  const avgMemory = average(parseMetric(submission?.memory));
+  const avgTime = average(parseMetric(submission?.time));
+  const passedTests = testCases.filter((testCase) => testCase.passed).length;
+  const isAccepted = submission?.status?.toLowerCase() === "accepted";
 
   return (
-    <div className="space-y-6">
-      {/* Overall Status */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="card bg-base-200 shadow-lg">
-          <div className="card-body p-4">
-            <h3 className="card-title text-sm">Status</h3>
-            <div className={`text-lg font-bold ${
-              isAccepted ? 'text-success' : 'text-error'
-            }`}>
-              {submission.status}
-            </div>
-          </div>
+    <div>
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+        <div className={`flex items-center gap-2 text-sm font-semibold ${isAccepted ? "text-emerald-300" : "text-red-300"}`}>
+          {isAccepted ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+          {submission?.status || "Finished"}
         </div>
-
-        <div className="card bg-base-200 shadow-lg">
-          <div className="card-body p-4">
-            <h3 className="card-title text-sm">Success Rate</h3>
-            <div className="text-lg font-bold">
-              {successRate.toFixed(1)}%
-            </div>
-          </div>
-        </div>
-
-        <div className="card bg-base-200 shadow-lg">
-          <div className="card-body p-4">
-            <h3 className="card-title text-sm flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              Avg. Runtime
-            </h3>
-            <div className="text-lg font-bold">
-              {avgTime.toFixed(3)} s
-            </div>
-          </div>
-        </div>
-
-        <div className="card bg-base-200 shadow-lg">
-          <div className="card-body p-4">
-            <h3 className="card-title text-sm flex items-center gap-2">
-              <Memory className="w-4 h-4" />
-              Avg. Memory
-            </h3>
-            <div className="text-lg font-bold">
-              {avgMemory.toFixed(0)} KB
-            </div>
-          </div>
-        </div>
+        <Metric icon={CheckCircle2} value={`${passedTests}/${testCases.length}`} label="passed" />
+        <Metric icon={Clock3} value={`${avgTime.toFixed(3)} s`} label="runtime" />
+        <Metric icon={MemoryStick} value={`${avgMemory.toFixed(0)} KB`} label="memory" />
       </div>
 
-      {/* Test Cases Results */}
-      <div className="card bg-base-100 shadow-xl">
-        <div className="card-body">
-          <h2 className="card-title mb-4">Test Cases Results</h2>
-          <div className="overflow-x-auto">
-            <table className="table table-zebra w-full">
-              <thead>
-                <tr>
-                  <th>Status</th>
-                  <th>Test Case</th>
-                  <th>Your Output</th>
-                  <th>Memory</th>
-                  <th>Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {submission.testCases.map((testCase) => (
-                  <tr key={testCase.id || testCase.testCase}>
-                    <td>
-                      {testCase.passed ? (
-                        <div className="flex items-center gap-2 text-success">
-                          <CheckCircle2 className="w-5 h-5" />
-                          Passed
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 text-error">
-                          <XCircle className="w-5 h-5" />
-                          Failed
-                        </div>
-                      )}
-                    </td>
-                    <td className="font-mono">#{testCase.testCase}</td>
-                    <td className="font-mono">{testCase.stdout || 'null'}</td>
-                    <td>{testCase.memory}</td>
-                    <td>{testCase.time}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {!!testCases.length && (
+        <div className="mt-4 space-y-2">
+          {testCases.map((testCase, index) => (
+            <div key={testCase.id || testCase.testCase || index} className="grid grid-cols-[auto_1fr] gap-3 rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-3 sm:grid-cols-[auto_80px_1fr_auto_auto] sm:items-center">
+              {testCase.passed ? <CheckCircle2 className="h-4 w-4 text-emerald-300" /> : <XCircle className="h-4 w-4 text-red-300" />}
+              <span className="text-xs font-medium text-white/55">Case {testCase.testCase || index + 1}</span>
+              <code className="col-span-2 truncate text-xs text-white/45 sm:col-span-1">{testCase.stdout || "No output"}</code>
+              <span className="text-[11px] text-white/28">{testCase.time || "—"}</span>
+              <span className="text-[11px] text-white/28">{testCase.memory || "—"}</span>
+            </div>
+          ))}
         </div>
-      </div>
+      )}
     </div>
   );
 };
+
+const Metric = ({ icon: Icon, value, label }) => (
+  <div className="flex items-center gap-2 text-xs">
+    <Icon className="h-3.5 w-3.5 text-white/25" />
+    <span className="font-medium text-white/62">{value}</span>
+    <span className="text-white/25">{label}</span>
+  </div>
+);
 
 export default SubmissionResults;
