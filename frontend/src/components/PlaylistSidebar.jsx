@@ -113,17 +113,31 @@ const PlaylistSidebar = ({
               Sign in to view your personal playlists.
             </div>
           ) : playlists.length > 0 ? (
-            playlists.map((playlist) => (
-              <PlaylistButton
-                key={playlist.id}
-                active={activeKey === `playlist:${playlist.id}`}
-                icon={<FileText className="h-4 w-4" />}
-                name={playlist.name}
-                caption={playlist.description || "Personal playlist"}
-                count={playlist.problems?.length ?? 0}
-                onClick={() => onSelectCollection({ type: "playlist", id: playlist.id })}
-              />
-            ))
+            playlists.map((playlist) => {
+              const active = activeKey === `playlist:${playlist.id}`;
+              const count = playlist.problems?.length ?? 0;
+
+              return (
+                <button
+                  key={playlist.id}
+                  type="button"
+                  onClick={() => onSelectCollection({ type: "playlist", id: playlist.id })}
+                  aria-pressed={active}
+                  className={`group flex w-full min-w-0 items-center gap-3 rounded-xl border px-3 py-3 text-left transition-all ${active ? "border-white/20 bg-white/[0.09] text-white" : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/15 hover:bg-white/[0.055] hover:text-white"}`}
+                >
+                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl border ${active ? "border-white/20 bg-white/[0.09] text-white" : "border-white/10 bg-white/[0.035] text-white/45"}`}>
+                    <FileText className="h-5 w-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold">{playlist.name}</span>
+                    <span className="mt-1 block truncate text-[10px] text-white/40">{count} {count === 1 ? "problem" : "problems"} · Personal playlist</span>
+                  </span>
+                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/10 text-white/35 transition-colors group-hover:text-white/70">
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </span>
+                </button>
+              );
+            })
           ) : (
             <p className="px-2 py-3 text-xs leading-5 text-white/35">Your created playlists will appear here.</p>
           )}
