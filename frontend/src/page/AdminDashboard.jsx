@@ -3,17 +3,12 @@ import { Link } from "react-router-dom";
 import {
   Activity,
   ArrowLeft,
-  Database,
   Code2,
   FileCode2,
-  Gauge,
   LayoutDashboard,
   LoaderCircle,
   Plus,
   RefreshCw,
-  Server,
-  TerminalSquare,
-  UserCheck,
   Users,
   X,
 } from "lucide-react";
@@ -98,6 +93,21 @@ const formatSubmissionStatus = (status) => {
     .replace(/\b\w/g, (character) => character.toUpperCase());
 };
 
+const formatServiceStatus = (status) => {
+  if (status === "operational") return "Operational";
+  if (!status) return "Unavailable";
+
+  return String(status)
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+};
+
+const getServiceStatusClass = (status) => {
+  if (status === "operational") return "text-emerald-400";
+  if (status === "degraded") return "text-amber-300";
+  return "text-red-400";
+};
+
 const getUserPresence = (user) => {
   if (user.status !== "ACTIVE") {
     return { label: "Inactive", className: "text-red-400" };
@@ -157,10 +167,33 @@ const AdminDashboard = () => {
   }, [submissionQuery, submissions]);
 
   const overviewCards = [
-    { label: "Registered users", value: overview?.users ?? 0, icon: Users },
-    { label: "Active users", value: overview?.activeUsers ?? 0, icon: UserCheck },
-    { label: "Problems", value: overview?.problems ?? 0, icon: Code2 },
-    { label: "Submissions", value: overview?.submissions ?? 0, icon: TerminalSquare },
+    { label: "Registered users", value: overview?.users ?? 0 },
+    { label: "Active users", value: overview?.activeUsers ?? 0 },
+    { label: "Problems", value: overview?.problems ?? 0 },
+    { label: "Submissions", value: overview?.submissions ?? 0 },
+  ];
+  const acceptanceRate = overview?.submissions
+    ? Math.round((overview.acceptedSubmissions / overview.submissions) * 100)
+    : 0;
+  const systemServices = [
+    {
+      label: "Server",
+      status: system?.server?.status,
+      response: system?.server?.responseTime,
+      detail: `${formatUptime(system?.server?.uptime)} uptime`,
+    },
+    {
+      label: "Database",
+      status: system?.database?.status,
+      response: system?.database?.responseTime,
+      detail: system?.database?.status === "operational" ? "Primary store connected" : "Connection unavailable",
+    },
+    {
+      label: "CodeBox",
+      status: system?.codebox?.status,
+      response: system?.codebox?.responseTime,
+      detail: system?.codebox?.status === "operational" ? "Execution engine ready" : "Execution service unavailable",
+    },
   ];
 
   const confirmRoleChange = async () => {
@@ -202,65 +235,58 @@ const AdminDashboard = () => {
               <div className="mb-8">
                 <p className="font-mono text-xs uppercase tracking-[0.22em] text-white/35">Control center</p>
                 <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Admin overview</h1>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-white/45">A live view of LeetSpase users, problems, submissions, and core services.</p>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                {overviewCards.map(({ label, value, icon: Icon }) => (
-                  <article key={label} className="rounded-2xl border border-white/10 bg-[#111111] p-5">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm text-white/40">{label}</p>
-                        <p className="mt-4 text-3xl font-semibold tracking-[-0.04em]">{value}</p>
+              <div className="border-y border-white/10">
+                <div className="grid grid-cols-2 xl:grid-cols-4">
+                  {overviewCards.map(({ label, value }, index) => (
+                    <div
+                      key={label}
+                      className={`px-4 py-7 text-center sm:px-6 xl:py-8 ${index < 2 ? "border-b border-white/10 xl:border-b-0" : ""} ${index % 2 === 1 ? "border-l border-white/10" : "xl:border-l xl:border-white/10"}`}
+                    >
+                      <p className="text-xs uppercase tracking-[0.16em] text-white/35">{label}</p>
+                      <p className="mt-3 text-3xl font-semibold tabular-nums tracking-[-0.04em] sm:text-4xl">{value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-10 border-y border-white/10 xl:grid xl:grid-cols-[1.15fr_0.85fr] xl:divide-x xl:divide-white/10">
+                <section className="py-8 xl:pr-10">
+                  <p className="text-sm font-semibold">Platform activity</p>
+                  <p className="mt-1 text-xs text-white/35">Acceptance and participation at a glance</p>
+
+                  <dl className="mt-8 divide-y divide-white/[0.08]">
+                    <div className="flex items-center justify-between py-4 first:pt-0">
+                      <dt className="text-sm text-white/45">Accepted submissions</dt>
+                      <dd className="text-lg font-semibold tabular-nums">{overview?.acceptedSubmissions ?? 0}</dd>
+                    </div>
+                    <div className="py-4 last:pb-0">
+                      <div className="flex items-center justify-between">
+                        <dt className="text-sm text-white/45">Acceptance rate</dt>
+                        <dd className="text-lg font-semibold tabular-nums">{acceptanceRate}%</dd>
                       </div>
-                      <span className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04]">
-                        <Icon className="h-4 w-4 text-white/70" />
-                      </span>
+                      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[0.08]" aria-label={`${acceptanceRate}% acceptance rate`}>
+                        <div className="h-full rounded-full bg-emerald-400 transition-[width]" style={{ width: `${acceptanceRate}%` }} />
+                      </div>
                     </div>
-                  </article>
-                ))}
-              </div>
+                  </dl>
+                </section>
 
-              <div className="mt-6 grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-                <article className="rounded-2xl border border-white/10 bg-[#111111] p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-semibold">Platform activity</p>
-                      <p className="mt-1 text-xs text-white/35">Acceptance and participation at a glance</p>
-                    </div>
-                    <Gauge className="h-5 w-5 text-white/35" />
-                  </div>
-                  <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-xl border border-white/10 bg-black/25 p-5">
-                      <p className="text-xs uppercase tracking-[0.18em] text-white/35">Accepted submissions</p>
-                      <p className="mt-3 text-2xl font-semibold">{overview?.acceptedSubmissions ?? 0}</p>
-                    </div>
-                    <div className="rounded-xl border border-white/10 bg-black/25 p-5">
-                      <p className="text-xs uppercase tracking-[0.18em] text-white/35">Acceptance rate</p>
-                      <p className="mt-3 text-2xl font-semibold">
-                        {overview?.submissions ? `${Math.round((overview.acceptedSubmissions / overview.submissions) * 100)}%` : "0%"}
-                      </p>
-                    </div>
-                  </div>
-                </article>
-
-                <article className="rounded-2xl border border-white/10 bg-[#111111] p-6">
+                <section className="border-t border-white/10 py-8 xl:border-t-0 xl:pl-10">
                   <p className="text-sm font-semibold">Service health</p>
-                  <div className="mt-6 space-y-4">
-                    {[
-                      ["Server", system?.server?.status],
-                      ["Database", system?.database?.status],
-                      ["CodeBox", system?.codebox?.status],
-                    ].map(([label, status]) => (
-                      <div key={label} className="flex items-center justify-between rounded-xl border border-white/10 bg-black/25 px-4 py-3">
-                        <span className="text-sm text-white/60">{label}</span>
-                        <span className={`text-xs font-medium capitalize ${status === "operational" ? "text-emerald-400" : "text-red-400"}`}>
-                          {status === "operational" ? "Operational" : status || "Unavailable"}
+                  <p className="mt-1 text-xs text-white/35">Current state of the platform dependencies</p>
+                  <div className="mt-8 divide-y divide-white/[0.08]">
+                    {systemServices.map(({ label, status }) => (
+                      <div key={label} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                        <span className="text-sm text-white/55">{label}</span>
+                        <span className={`text-xs font-semibold ${getServiceStatusClass(status)}`}>
+                          {formatServiceStatus(status)}
                         </span>
                       </div>
                     ))}
                   </div>
-                </article>
+                </section>
               </div>
             </section>
           )}
@@ -453,36 +479,42 @@ const AdminDashboard = () => {
                 </button>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {[
-                  { label: "Server status", value: system?.server?.status, detail: `${formatUptime(system?.server?.uptime)} uptime`, icon: Server },
-                  { label: "Database", value: system?.database?.status, detail: `${system?.database?.responseTime ?? "—"} ms response`, icon: Database },
-                  { label: "CodeBox system", value: system?.codebox?.status, detail: `${system?.codebox?.responseTime ?? "—"} ms response`, icon: TerminalSquare },
-                  { label: "API response time", value: `${system?.server?.responseTime ?? "—"} ms`, detail: "Latest dashboard health check", icon: Gauge },
-                  { label: "Active users", value: system?.activeUsers ?? 0, detail: `Active in the last ${system?.activeWindowMinutes ?? 15} minutes`, icon: Users },
-                  { label: "Server memory", value: `${system?.server?.memoryUsedMb ?? "—"} MB`, detail: `${system?.server?.memoryTotalMb ?? "—"} MB allocated heap`, icon: Activity },
-                ].map(({ label, value, detail, icon: Icon }, index) => (
-                  <article key={label} className="rounded-2xl border border-white/10 bg-[#111111] p-6">
-                    <div className="flex items-start justify-between gap-5">
-                      <div>
-                        <p className="text-sm text-white/40">{label}</p>
-                        <div className="mt-4 flex items-center gap-2">
-                          <p className={`text-xl font-semibold capitalize ${index < 3 ? (value === "operational" ? "text-emerald-400" : "text-red-400") : "text-white"}`}>
-                            {index < 3 ? (value === "operational" ? "Operational" : value || "Unavailable") : value || "unknown"}
-                          </p>
-                        </div>
-                        <p className="mt-2 text-xs text-white/30">{detail}</p>
-                      </div>
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.04]">
-                        <Icon className="h-4 w-4 text-white/60" />
-                      </span>
+              <div className="border-y border-white/10">
+                <div className="hidden grid-cols-[1.1fr_0.85fr_0.75fr_1.4fr] border-b border-white/10 px-4 py-3 text-xs uppercase tracking-[0.14em] text-white/30 md:grid">
+                  <span>Service</span>
+                  <span>Status</span>
+                  <span>Response</span>
+                  <span>Details</span>
+                </div>
+
+                <div className="divide-y divide-white/[0.08]">
+                  {systemServices.map(({ label, status, response, detail }) => (
+                    <div key={label} className="grid gap-3 px-4 py-5 md:grid-cols-[1.1fr_0.85fr_0.75fr_1.4fr] md:items-center md:gap-0">
+                      <p className="text-sm font-semibold text-white/80">{label}</p>
+                      <p className={`text-xs font-semibold ${getServiceStatusClass(status)}`}>{formatServiceStatus(status)}</p>
+                      <p className="text-sm tabular-nums text-white/55">{response === null || response === undefined ? "—" : `${response} ms`}</p>
+                      <p className="text-xs text-white/35">{detail}</p>
                     </div>
-                  </article>
-                ))}
+                  ))}
+                </div>
               </div>
 
-              <div className="mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 text-xs text-white/35">
-                Last checked {system?.checkedAt ? formatDate(system.checkedAt) : "—"} · Node {system?.server?.nodeVersion || "—"}
+              <div className="grid border-b border-white/10 sm:grid-cols-2 xl:grid-cols-4">
+                {[
+                  ["Active users", system?.activeUsers ?? 0, `Last ${system?.activeWindowMinutes ?? 15} minutes`],
+                  ["Server memory", `${system?.server?.memoryUsedMb ?? "—"} MB`, `${system?.server?.memoryTotalMb ?? "—"} MB heap`],
+                  ["Node runtime", system?.server?.nodeVersion || "—", "Backend environment"],
+                  ["Last checked", system?.checkedAt ? formatDate(system.checkedAt) : "—", "Latest health request"],
+                ].map(([label, value, detail], index) => (
+                  <div
+                    key={label}
+                    className={`px-4 py-6 ${index < 2 ? "border-b border-white/10 xl:border-b-0" : ""} ${index % 2 === 1 ? "border-l border-white/10" : "xl:border-l xl:border-white/10"}`}
+                  >
+                    <p className="text-xs uppercase tracking-[0.14em] text-white/30">{label}</p>
+                    <p className="mt-3 text-lg font-semibold tabular-nums text-white/85">{value}</p>
+                    <p className="mt-1 text-xs text-white/30">{detail}</p>
+                  </div>
+                ))}
               </div>
             </section>
           )}
