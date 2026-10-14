@@ -20,11 +20,46 @@ const getDailyChallengeDate = () => {
     return new Date(`${date.year}-${date.month}-${date.day}T00:00:00.000Z`);
 };
 
+const isYoutubeVideoUrl = (value) => {
+    try {
+        const url = new URL(value);
+        if(!["http:", "https:"].includes(url.protocol)) return false;
+
+        const hostname = url.hostname.toLowerCase().replace(/^www\./, "");
+        if(hostname === "youtu.be") return Boolean(url.pathname.slice(1).split("/")[0]);
+        if(hostname !== "youtube.com" && !hostname.endsWith(".youtube.com")) return false;
+
+        return (
+            (url.pathname === "/watch" && Boolean(url.searchParams.get("v"))) ||
+            /^\/(shorts|embed|live)\/[^/]+/.test(url.pathname)
+        );
+    } catch {
+        return false;
+    }
+};
+
 
 
 export const createProblem = async(req, res) => {
     
-    const { title, description, difficulty, tags, examples, constraints, testcases, codeSnippet, referenceSolutions } = req.body;
+    const {
+        title,
+        description,
+        difficulty,
+        tags,
+        examples,
+        constraints,
+        hints,
+        intuition,
+        editorial,
+        walkthrough,
+        timeComplexity,
+        spaceComplexity,
+        youtubeUrl,
+        testcases,
+        codeSnippet,
+        referenceSolutions
+    } = req.body;
 
     if(typeof title !== "string" || !title.trim()){
         return res.status(400).json({
@@ -34,6 +69,13 @@ export const createProblem = async(req, res) => {
 
     const cleanedTitle = cleanProblemTitle(title);
     const titleKey = createProblemTitleKey(title);
+    const normalizedYoutubeUrl = typeof youtubeUrl === "string" ? youtubeUrl.trim() : "";
+
+    if(normalizedYoutubeUrl && !isYoutubeVideoUrl(normalizedYoutubeUrl)){
+        return res.status(400).json({
+            error: "a valid YouTube video URL is required"
+        });
+    }
     
     // using middleware checkadmin in routes
     // if(req.user.role !== "ADMIN"){
@@ -98,6 +140,13 @@ export const createProblem = async(req, res) => {
                 tags,
                 examples,
                 constraints,
+                hints,
+                intuition,
+                editorial,
+                walkthrough,
+                timeComplexity,
+                spaceComplexity,
+                youtubeUrl: normalizedYoutubeUrl || null,
                 testcases,
                 codeSnippet,
                 referenceSolutions,
@@ -236,7 +285,11 @@ export const getProblemById = async(req, res) => {
     try {
         const problem = await db.problem.findUnique({
             where: { id },
-            select: publicProblemSelect,
+            select: {
+                ...publicProblemSelect,
+                testcases: true,
+                referenceSolutions: true
+            },
         });
 
         if(!problem){
@@ -245,10 +298,25 @@ export const getProblemById = async(req, res) => {
             });
         }
 
+        const { testcases, ...publicProblem } = problem;
+        const sampleTestCases = Array.isArray(testcases)
+            ? testcases
+                .filter((testCase) =>
+                    testCase &&
+                    typeof testCase.input === "string" &&
+                    typeof testCase.output === "string"
+                )
+                .slice(0, 3)
+                .map(({ input, output }) => ({ input, output }))
+            : [];
+
         return res.status(200).json({
             success: true,
             message: "problem fetched successfully",
-            problem
+            problem: {
+                ...publicProblem,
+                sampleTestCases
+            }
         });
 
 
@@ -266,7 +334,24 @@ export const updateProblem = async(req, res) => {
     // rest same as create
     const { id } = req.params;
 
-    const { title, description, difficulty, tags, examples, constraints, testcases, codeSnippet, referenceSolutions } = req.body;
+    const {
+        title,
+        description,
+        difficulty,
+        tags,
+        examples,
+        constraints,
+        hints,
+        intuition,
+        editorial,
+        walkthrough,
+        timeComplexity,
+        spaceComplexity,
+        youtubeUrl,
+        testcases,
+        codeSnippet,
+        referenceSolutions
+    } = req.body;
 
     if(typeof title !== "string" || !title.trim()){
         return res.status(400).json({
@@ -276,6 +361,13 @@ export const updateProblem = async(req, res) => {
 
     const cleanedTitle = cleanProblemTitle(title);
     const titleKey = createProblemTitleKey(title);
+    const normalizedYoutubeUrl = typeof youtubeUrl === "string" ? youtubeUrl.trim() : "";
+
+    if(normalizedYoutubeUrl && !isYoutubeVideoUrl(normalizedYoutubeUrl)){
+        return res.status(400).json({
+            error: "a valid YouTube video URL is required"
+        });
+    }
 
     try {
         const existingProblem = await db.problem.findUnique({ where: { id } });
@@ -353,6 +445,13 @@ export const updateProblem = async(req, res) => {
                 tags,
                 examples,
                 constraints,
+                hints,
+                intuition,
+                editorial,
+                walkthrough,
+                timeComplexity,
+                spaceComplexity,
+                youtubeUrl: normalizedYoutubeUrl || null,
                 testcases,
                 codeSnippet,
                 referenceSolutions

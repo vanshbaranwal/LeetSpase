@@ -54,18 +54,23 @@ model User {
 }
 
 model Problem {
-  id          String     @id @default(uuid())
-  title       String
-  titleKey    String     @unique
-  description String
-  difficulty  Difficulty
-  isDemo      Boolean    @default(false)
-  tags        String[] // e.g.["tag1", "tag2", "tag3"]
-  userId      String
-  examples    Json
-  constraints String
-  hints       String?
-  editorial   String?
+  id              String     @id @default(uuid())
+  title           String
+  titleKey        String     @unique
+  description     String
+  difficulty      Difficulty
+  isDemo          Boolean    @default(false)
+  tags            String[] // e.g.["tag1", "tag2", "tag3"]
+  userId          String
+  examples        Json
+  constraints     String
+  hints           String?
+  intuition       String?
+  editorial       String?
+  walkthrough     String?
+  timeComplexity  String?
+  spaceComplexity String?
+  youtubeUrl      String?
 
   testcases          Json
   codeSnippet        Json

@@ -22,6 +22,24 @@ import {axiosInstance} from "../lib/axios"
 import toast from "react-hot-toast";
 import {useNavigate} from "react-router-dom";
 
+const isYoutubeVideoUrl = (value) => {
+  try {
+    const url = new URL(value);
+    if (!["http:", "https:"].includes(url.protocol)) return false;
+
+    const hostname = url.hostname.toLowerCase().replace(/^www\./, "");
+    if (hostname === "youtu.be") return Boolean(url.pathname.slice(1).split("/")[0]);
+    if (hostname !== "youtube.com" && !hostname.endsWith(".youtube.com")) return false;
+
+    return (
+      (url.pathname === "/watch" && Boolean(url.searchParams.get("v"))) ||
+      /^\/(shorts|embed|live)\/[^/]+/.test(url.pathname)
+    );
+  } catch {
+    return false;
+  }
+};
+
 const problemSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
@@ -31,7 +49,15 @@ const problemSchema = z.object({
     .min(1, "At least one tag is required"),
   constraints: z.string().min(1, "Constraints are required"),
   hints: z.string().optional(),
+  intuition: z.string().optional(),
   editorial: z.string().optional(),
+  walkthrough: z.string().optional(),
+  timeComplexity: z.string().optional(),
+  spaceComplexity: z.string().optional(),
+  youtubeUrl: z.string().trim().refine(
+    (value) => !value || isYoutubeVideoUrl(value),
+    "Enter a valid YouTube video URL"
+  ).optional(),
   testcases: z
     .array(
       z.object({
@@ -80,8 +106,14 @@ const sampledpData = {
   constraints: "1 <= n <= 45",
   hints:
     "To reach the nth step, you can either come from the (n-1)th step or the (n-2)th step.",
+  intuition:
+    "Every way to reach step n must come from either step n - 1 or step n - 2. That means the answer can be built from the answers to those two smaller states.",
   editorial:
     "This is a classic dynamic programming problem. The number of ways to reach the nth step is the sum of the number of ways to reach the (n-1)th step and the (n-2)th step, forming a Fibonacci-like sequence.",
+  walkthrough:
+    "For n = 4, start with one way to stand at step 0 and one way to reach step 1. The next totals become 2, 3, and finally 5 ways to reach step 4.",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
   testcases: [
     {
       input: "2",
@@ -327,8 +359,14 @@ const sampleStringProblem = {
     "1 <= s.length <= 2 * 10^5\ns consists only of printable ASCII characters.",
   hints:
     "Consider using two pointers, one from the start and one from the end, moving towards the center.",
+  intuition:
+    "A palindrome mirrors around its center, so compare matching alphanumeric characters from both ends while ignoring casing and punctuation.",
   editorial:
     "We can use two pointers approach to check if the string is a palindrome. One pointer starts from the beginning and the other from the end, moving towards each other.",
+  walkthrough:
+    "For 'A man, a plan, a canal: Panama', the pointers compare a with a, m with m, and continue inward while skipping spaces and punctuation. No mismatch is found.",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
   testcases: [
     {
       input: "A man, a plan, a canal: Panama",
@@ -558,6 +596,12 @@ const CREATE_PROBLEM_DRAFT_KEY = "leetspase:create-problem-draft:v1";
 const CREATE_PROBLEM_TAB_KEY = "leetspase:create-problem-tab:v1";
 
 const createEmptyProblemFormValues = () => ({
+  intuition: "",
+  editorial: "",
+  walkthrough: "",
+  timeComplexity: "",
+  spaceComplexity: "",
+  youtubeUrl: "",
   testcases: [{ input: "", output: "" }],
   tags: ["", "", ""],
   examples: {
@@ -678,7 +722,16 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
     if (tabId === "basics") return Boolean(errors.title || errors.description);
     if (tabId === "classification") return Boolean(errors.difficulty || errors.tags);
     if (tabId === "testcases") return Boolean(errors.testcases);
-    if (tabId === "additional") return Boolean(errors.constraints || errors.hints || errors.editorial);
+    if (tabId === "additional") return Boolean(
+      errors.constraints ||
+      errors.hints ||
+      errors.intuition ||
+      errors.editorial ||
+      errors.walkthrough ||
+      errors.timeComplexity ||
+      errors.spaceComplexity ||
+      errors.youtubeUrl
+    );
 
     const language = languageByTab[tabId];
     return Boolean(
@@ -1240,14 +1293,87 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
                 <div className="form-control">
                   <label className="label">
                     <span className="label-text font-medium">
-                      Editorial (Optional)
+                      Intuition (Optional)
                     </span>
                   </label>
                   <textarea
-                    className="additional-info-textarea editorial-textarea textarea textarea-bordered w-full p-4 text-base leading-7"
-                    {...register("editorial")}
-                    placeholder="Enter problem editorial/solution explanation"
+                    className="additional-info-textarea editorial-section-textarea textarea textarea-bordered w-full p-4 text-base leading-7"
+                    {...register("intuition")}
+                    placeholder="Explain the key observation that helps unlock the problem"
                   />
+                </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">
+                      Approach (Optional)
+                    </span>
+                  </label>
+                  <textarea
+                    className="additional-info-textarea editorial-section-textarea textarea textarea-bordered w-full p-4 text-base leading-7"
+                    {...register("editorial")}
+                    placeholder="Describe the algorithm step by step"
+                  />
+                </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">
+                      Example Walkthrough (Optional)
+                    </span>
+                  </label>
+                  <textarea
+                    className="additional-info-textarea editorial-section-textarea textarea textarea-bordered w-full p-4 text-base leading-7"
+                    {...register("walkthrough")}
+                    placeholder="Walk through the algorithm using one representative example"
+                  />
+                </div>
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Time Complexity (Optional)
+                      </span>
+                    </label>
+                    <textarea
+                      className="additional-info-textarea complexity-textarea textarea textarea-bordered w-full p-4 font-mono text-base leading-7"
+                      {...register("timeComplexity")}
+                      placeholder="Example: O(n) — each element is visited once"
+                    />
+                  </div>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Space Complexity (Optional)
+                      </span>
+                    </label>
+                    <textarea
+                      className="additional-info-textarea complexity-textarea textarea textarea-bordered w-full p-4 font-mono text-base leading-7"
+                      {...register("spaceComplexity")}
+                      placeholder="Example: O(1) — only constant extra space is used"
+                    />
+                  </div>
+                </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">
+                      YouTube Video URL (Optional)
+                    </span>
+                  </label>
+                  <input
+                    type="url"
+                    className="input input-bordered h-12 w-full bg-[#181818] px-4 text-base"
+                    {...register("youtubeUrl")}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                  />
+                  <p className="mt-2 text-xs leading-5 text-white/35">
+                    Add a YouTube walkthrough or explanation. It will open on YouTube in a new tab.
+                  </p>
+                  {errors.youtubeUrl && (
+                    <label className="label">
+                      <span className="label-text-alt text-error">
+                        {errors.youtubeUrl.message}
+                      </span>
+                    </label>
+                  )}
                 </div>
               </div>
             </div>

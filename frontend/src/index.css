@@ -144,8 +144,12 @@ a.btn:hover {
   min-height: 14rem;
 }
 
-.create-problem-form .editorial-textarea {
-  min-height: 24rem;
+.create-problem-form .editorial-section-textarea {
+  min-height: 16rem;
+}
+
+.create-problem-form .complexity-textarea {
+  min-height: 9rem;
 }
 
 .create-problem-form .tag-remove-button {

@@ -42,6 +42,17 @@ const validateTestCases = (testCases) => {
     }
 };
 
+const getSampleTestCases = (testCases) => Array.isArray(testCases)
+    ? testCases
+        .filter((testCase) =>
+            testCase &&
+            typeof testCase.input === "string" &&
+            typeof testCase.output === "string"
+        )
+        .slice(0, 3)
+        .map(({ input, output }) => ({ input, output }))
+    : [];
+
 const executeTestCases = async(sourceCode, languageId, testCases) => {
     validateTestCases(testCases);
 
@@ -127,16 +138,12 @@ export const runCode = async(req, res) => {
         const { source_code, language_id, problemId, language } = getExecutionRequest(req);
         const problem = await db.problem.findUnique({
             where: { id: problemId },
-            select: { examples: true }
+            select: { testcases: true }
         });
 
         if(!problem) throw requestError("problem not found", 404);
 
-        const languageKey = language.toUpperCase();
-        const selectedExample = problem.examples?.[languageKey] || Object.values(problem.examples || {})[0];
-        const sampleCases = selectedExample
-            ? [{ input: selectedExample.input, output: selectedExample.output }]
-            : [];
+        const sampleCases = getSampleTestCases(problem.testcases);
 
         const { allPassed, detailedResults } = await executeTestCases(source_code, language_id, sampleCases);
 
