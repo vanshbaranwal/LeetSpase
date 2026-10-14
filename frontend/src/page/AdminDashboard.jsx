@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
   Activity,
   ArrowLeft,
-  CheckCircle2,
   Database,
   Code2,
   FileCode2,
@@ -48,12 +47,67 @@ const formatUptime = (seconds = 0) => {
   return `${minutes}m`;
 };
 
-const StatusDot = ({ status }) => {
-  const isHealthy = status === "operational" || status === "ACTIVE";
+const parseMetricValues = (value) => {
+  if (value === null || value === undefined || value === "") return [];
 
-  return (
-    <span className={`inline-block h-2 w-2 rounded-full ${isHealthy ? "bg-emerald-400" : "bg-red-400"}`} />
-  );
+  if (Array.isArray(value)) return value;
+
+  if (typeof value === "string") {
+    try {
+      const parsedValue = JSON.parse(value);
+      return Array.isArray(parsedValue) ? parsedValue : [parsedValue];
+    } catch {
+      return [value];
+    }
+  }
+
+  return [value];
+};
+
+const getMetricSummary = (value) => {
+  const values = parseMetricValues(value)
+    .map((item) => Number.parseFloat(String(item)))
+    .filter(Number.isFinite);
+
+  if (!values.length) return { average: null, count: 0 };
+
+  return {
+    average: values.reduce((total, item) => total + item, 0) / values.length,
+    count: values.length,
+  };
+};
+
+const formatRuntime = (value) => {
+  const { average } = getMetricSummary(value);
+  return average === null ? "—" : `${average.toFixed(3)} s`;
+};
+
+const formatMemory = (value) => {
+  const { average } = getMetricSummary(value);
+  return average === null ? "—" : `${Math.round(average)} KB`;
+};
+
+const normalizeSubmissionStatus = (status) => String(status || "").trim().toLowerCase();
+
+const formatSubmissionStatus = (status) => {
+  const normalizedStatus = normalizeSubmissionStatus(status);
+  if (!normalizedStatus) return "Unknown";
+
+  return normalizedStatus
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+};
+
+const getUserPresence = (user) => {
+  if (user.status !== "ACTIVE") {
+    return { label: "Inactive", className: "text-red-400" };
+  }
+
+  if (user.isOnline) {
+    return { label: "Online", className: "text-emerald-400" };
+  }
+
+  return { label: "Active", className: "text-amber-300" };
 };
 
 const AdminDashboard = () => {
@@ -65,6 +119,7 @@ const AdminDashboard = () => {
     system,
     isLoading,
     isUpdatingUser,
+    updatingUserId,
     fetchDashboard,
     refreshSystemStatus,
     updateUserRole,
@@ -72,6 +127,7 @@ const AdminDashboard = () => {
   } = useAdminStore();
   const [activeSection, setActiveSection] = useState("overview");
   const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [pendingRoleChange, setPendingRoleChange] = useState(null);
   const [userQuery, setUserQuery] = useState("");
   const [submissionQuery, setSubmissionQuery] = useState("");
 
@@ -106,6 +162,13 @@ const AdminDashboard = () => {
     { label: "Problems", value: overview?.problems ?? 0, icon: Code2 },
     { label: "Submissions", value: overview?.submissions ?? 0, icon: TerminalSquare },
   ];
+
+  const confirmRoleChange = async () => {
+    if (!pendingRoleChange) return;
+
+    const wasUpdated = await updateUserRole(pendingRoleChange.user.id, pendingRoleChange.nextRole);
+    if (wasUpdated) setPendingRoleChange(null);
+  };
 
   if (isLoading && !overview) {
     return (
@@ -218,72 +281,90 @@ const AdminDashboard = () => {
               </div>
 
               <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[1180px] text-left text-sm">
+                <div className="w-full overflow-hidden">
+                  <table className="w-full table-fixed text-left text-sm">
+                    <colgroup>
+                      <col className="w-[20%]" />
+                      <col className="w-[14%]" />
+                      <col className="w-[7%]" />
+                      <col className="w-[6%]" />
+                      <col className="w-[9%]" />
+                      <col className="w-[8%]" />
+                      <col className="w-[12%]" />
+                      <col className="w-[24%]" />
+                    </colgroup>
                     <thead className="border-b border-white/10 bg-black/20 text-xs uppercase tracking-[0.12em] text-white/35">
                       <tr>
-                        <th className="px-5 py-4">Name</th>
-                        <th className="px-5 py-4">Username</th>
-                        <th className="px-5 py-4">Role</th>
-                        <th className="px-5 py-4">Solved</th>
-                        <th className="px-5 py-4">Verified</th>
-                        <th className="px-5 py-4">Status</th>
-                        <th className="px-5 py-4">Joined</th>
-                        <th className="px-5 py-4 text-right">Actions</th>
+                        <th className="px-3 py-4 text-center">Name</th>
+                        <th className="px-3 py-4 text-center">Username</th>
+                        <th className="px-2 py-4 text-center">Role</th>
+                        <th className="px-2 py-4 text-center">Solved</th>
+                        <th className="px-2 py-4 text-center">Verified</th>
+                        <th className="px-2 py-4 text-center">Status</th>
+                        <th className="px-3 py-4 text-center">Joined</th>
+                        <th className="px-3 py-4 text-center">Admin controls</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/[0.07]">
-                      {filteredUsers.map((user) => (
+                      {filteredUsers.map((user) => {
+                        const presence = getUserPresence(user);
+
+                        return (
                         <tr key={user.id} className="transition-colors hover:bg-white/[0.025]">
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-3">
+                          <td className="min-w-0 px-3 py-4">
+                            <div className="flex min-w-0 items-center justify-center gap-2.5">
                               <div className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-sm font-semibold text-black">
                                 {user.image ? <img src={user.image} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" /> : (user.name?.[0] || "U").toUpperCase()}
                               </div>
-                              <div>
-                                <p className="font-medium">{user.name || "Unnamed user"}</p>
-                                <p className="mt-0.5 text-xs text-white/35">{user.email}</p>
+                              <div className="min-w-0 text-left">
+                                <p className="truncate font-medium" title={user.name || "Unnamed user"}>{user.name || "Unnamed user"}</p>
+                                <p className="mt-0.5 truncate text-xs text-white/35" title={user.email}>{user.email}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="px-5 py-4 font-mono text-xs text-white/60">@{user.username}</td>
-                          <td className="px-5 py-4">
-                            <span className={`rounded-full px-3 py-1 text-xs font-medium ${user.role === "ADMIN" ? "bg-violet-400/10 text-violet-300" : "bg-white/[0.06] text-white/55"}`}>{user.role}</span>
+                          <td className="truncate px-3 py-4 text-center font-mono text-xs text-white/60" title={`@${user.username}`}>@{user.username}</td>
+                          <td className="px-2 py-4 text-center">
+                            <span className={`text-xs font-semibold ${user.role === "ADMIN" ? "text-violet-300" : "text-white/55"}`}>{user.role}</span>
                           </td>
-                          <td className="px-5 py-4 text-white/65">{user.solvedProblems}</td>
-                          <td className="px-5 py-4">
-                            <span className={`inline-flex items-center gap-2 text-xs ${user.isVerified ? "text-emerald-300" : "text-white/35"}`}>
-                              <CheckCircle2 className="h-3.5 w-3.5" /> {user.isVerified ? "Verified" : "Not verified"}
+                          <td className="px-2 py-4 text-center text-white/65">{user.solvedProblems}</td>
+                          <td className="px-2 py-4 text-center">
+                            <span className={`text-xs font-medium ${user.isVerified ? "text-emerald-400" : "text-red-400"}`}>
+                              {user.isVerified ? "Verified" : "Not verified"}
                             </span>
                           </td>
-                          <td className="px-5 py-4">
-                            <span className="inline-flex items-center gap-2 text-xs text-white/60">
-                              <StatusDot status={user.status} /> {user.status === "ACTIVE" ? (user.isOnline ? "Online" : "Active") : "Suspended"}
+                          <td className="px-2 py-4 text-center">
+                            <span className={`text-xs font-semibold ${presence.className}`}>
+                              {presence.label}
                             </span>
                           </td>
-                          <td className="px-5 py-4 text-xs text-white/45">{formatDate(user.createdAt)}</td>
-                          <td className="px-5 py-4">
-                            <div className="flex justify-end gap-2">
+                          <td className="px-3 py-4 text-center text-xs leading-5 text-white/45">{formatDate(user.createdAt)}</td>
+                          <td className="px-3 py-4">
+                            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
                               <button
                                 type="button"
                                 disabled={isUpdatingUser || user.id === authUser.id}
-                                onClick={() => updateUserRole(user.id, user.role === "ADMIN" ? "USER" : "ADMIN")}
-                                className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/55 transition-colors hover:border-white/25 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                                onClick={() => setPendingRoleChange({
+                                  user,
+                                  nextRole: user.role === "ADMIN" ? "USER" : "ADMIN",
+                                })}
+                                title={user.id === authUser.id ? "You cannot remove your own admin access" : undefined}
+                                className={`whitespace-nowrap px-1 py-1.5 text-xs font-semibold transition-colors hover:underline hover:underline-offset-4 disabled:cursor-not-allowed disabled:no-underline disabled:opacity-35 ${user.id === authUser.id || user.role === "ADMIN" ? "text-amber-300" : "text-violet-300"}`}
                               >
-                                {user.role === "ADMIN" ? "Make user" : "Make admin"}
+                                {user.id === authUser.id ? "Current admin" : user.role === "ADMIN" ? "Remove admin" : "Make admin"}
                               </button>
                               <button
                                 type="button"
                                 disabled={isUpdatingUser || user.id === authUser.id}
                                 onClick={() => updateUserStatus(user.id, user.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE")}
-                                className={`rounded-full border px-3 py-1.5 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-30 ${user.status === "ACTIVE" ? "border-red-400/20 text-red-300 hover:bg-red-400/10" : "border-emerald-400/20 text-emerald-300 hover:bg-emerald-400/10"}`}
+                                className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-30 ${user.status === "ACTIVE" ? "border-red-400/20 text-red-300 hover:bg-red-400/10" : "border-emerald-400/20 text-emerald-300 hover:bg-emerald-400/10"}`}
                               >
                                 {user.status === "ACTIVE" ? "Suspend" : "Activate"}
                               </button>
                             </div>
                           </td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -312,35 +393,41 @@ const AdminDashboard = () => {
                   <table className="w-full min-w-[1050px] text-left text-sm">
                     <thead className="border-b border-white/10 bg-black/20 text-xs uppercase tracking-[0.12em] text-white/35">
                       <tr>
-                        <th className="px-5 py-4">User</th>
-                        <th className="px-5 py-4">Problem</th>
-                        <th className="px-5 py-4">Language</th>
-                        <th className="px-5 py-4">Status</th>
-                        <th className="px-5 py-4">Runtime</th>
-                        <th className="px-5 py-4">Memory</th>
-                        <th className="px-5 py-4">Timestamp</th>
-                        <th className="px-5 py-4 text-right">Actions</th>
+                        <th className="px-5 py-4 text-center">User</th>
+                        <th className="px-5 py-4 text-center">Problem</th>
+                        <th className="px-5 py-4 text-center">Language</th>
+                        <th className="px-5 py-4 text-center">Status</th>
+                        <th className="px-5 py-4 text-center">Avg runtime</th>
+                        <th className="px-5 py-4 text-center">Avg memory</th>
+                        <th className="px-5 py-4 text-center">Timestamp</th>
+                        <th className="px-5 py-4 text-center">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/[0.07]">
                       {filteredSubmissions.map((submission) => {
-                        const accepted = submission.status?.toLowerCase() === "accepted";
+                        const accepted = normalizeSubmissionStatus(submission.status) === "accepted";
+                        const runtimeSummary = getMetricSummary(submission.time);
 
                         return (
                           <tr key={submission.id} className="transition-colors hover:bg-white/[0.025]">
-                            <td className="px-5 py-4">
+                            <td className="px-5 py-4 text-center">
                               <p className="font-medium">{submission.user?.name || submission.user?.username}</p>
                               <p className="mt-0.5 text-xs text-white/35">{submission.user?.email}</p>
                             </td>
-                            <td className="px-5 py-4 text-white/65">{submission.problem?.title}</td>
-                            <td className="px-5 py-4 font-mono text-xs uppercase text-white/55">{submission.language}</td>
-                            <td className="px-5 py-4">
-                              <span className={`rounded-full px-3 py-1 text-xs ${accepted ? "bg-emerald-400/10 text-emerald-300" : "bg-red-400/10 text-red-300"}`}>{submission.status}</span>
+                            <td className="px-5 py-4 text-center text-white/65">{submission.problem?.title}</td>
+                            <td className="px-5 py-4 text-center font-mono text-xs uppercase text-white/55">{submission.language}</td>
+                            <td className="px-5 py-4 text-center">
+                              <span className={`text-xs font-semibold ${accepted ? "text-emerald-400" : "text-red-400"}`}>
+                                {formatSubmissionStatus(submission.status)}
+                              </span>
                             </td>
-                            <td className="px-5 py-4 text-white/55">{submission.time ? `${submission.time}s` : "—"}</td>
-                            <td className="px-5 py-4 text-white/55">{submission.memory || "—"}</td>
-                            <td className="px-5 py-4 text-xs text-white/40">{formatDate(submission.createdAt)}</td>
-                            <td className="px-5 py-4 text-right">
+                            <td className="px-5 py-4 text-center">
+                              <p className="font-medium tabular-nums text-white/75">{formatRuntime(submission.time)}</p>
+                              {runtimeSummary.count > 1 && <p className="mt-1 text-[11px] text-white/30">Average of {runtimeSummary.count} test cases</p>}
+                            </td>
+                            <td className="px-5 py-4 text-center font-medium tabular-nums text-white/60">{formatMemory(submission.memory)}</td>
+                            <td className="px-5 py-4 text-center text-xs text-white/40">{formatDate(submission.createdAt)}</td>
+                            <td className="px-5 py-4 text-center">
                               <button type="button" onClick={() => setSelectedSubmission(submission)} className="rounded-full border border-white/10 px-4 py-1.5 text-xs text-white/60 transition-colors hover:border-white/25 hover:text-white">View</button>
                             </td>
                           </tr>
@@ -351,7 +438,6 @@ const AdminDashboard = () => {
                 </div>
                 {!filteredSubmissions.length && <p className="p-10 text-center text-sm text-white/35">No submissions match your search.</p>}
               </div>
-              <p className="mt-3 text-right text-xs text-white/25">Showing the latest 250 submissions</p>
             </section>
           )}
 
@@ -443,6 +529,50 @@ const AdminDashboard = () => {
         </aside>
       </div>
 
+      {pendingRoleChange && (
+        <div className="fixed inset-0 z-[75] grid place-items-center bg-black/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Confirm role change">
+          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#111111] p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-white/35">Access control</p>
+                <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em]">
+                  {pendingRoleChange.nextRole === "ADMIN" ? "Make this user an admin?" : "Remove admin access?"}
+                </h2>
+              </div>
+              <button type="button" onClick={() => setPendingRoleChange(null)} disabled={isUpdatingUser} className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 text-white/45 transition-colors hover:text-white disabled:opacity-40" aria-label="Close role confirmation">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-white/10 bg-black/25 p-4">
+              <p className="font-medium">{pendingRoleChange.user.name || pendingRoleChange.user.username}</p>
+              <p className="mt-1 text-sm text-white/40">{pendingRoleChange.user.email}</p>
+            </div>
+
+            <p className="mt-5 text-sm leading-6 text-white/55">
+              {pendingRoleChange.nextRole === "ADMIN"
+                ? "This grants full access to the admin dashboard, user controls, submissions, system health, and problem management."
+                : "This removes access to all admin-only controls. The user will keep their normal LeetSpase account."}
+            </p>
+
+            <div className="mt-7 flex justify-end gap-3">
+              <button type="button" onClick={() => setPendingRoleChange(null)} disabled={isUpdatingUser} className="h-11 rounded-full border border-white/10 px-5 text-sm text-white/60 transition-colors hover:border-white/25 hover:text-white disabled:opacity-40">
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmRoleChange}
+                disabled={isUpdatingUser}
+                className={`inline-flex h-11 min-w-36 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 ${pendingRoleChange.nextRole === "ADMIN" ? "bg-violet-300 text-violet-950 hover:bg-violet-200" : "bg-amber-300 text-amber-950 hover:bg-amber-200"}`}
+              >
+                {updatingUserId === pendingRoleChange.user.id && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                {pendingRoleChange.nextRole === "ADMIN" ? "Grant admin" : "Remove admin"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {selectedSubmission && (
         <div className="fixed inset-0 z-[70] grid place-items-center bg-black/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Submission details">
           <div className="max-h-[86vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-[#111111] p-6 shadow-2xl">
@@ -457,14 +587,14 @@ const AdminDashboard = () => {
               {[
                 ["User", selectedSubmission.user?.name || selectedSubmission.user?.username],
                 ["Language", selectedSubmission.language],
-                ["Status", selectedSubmission.status],
-                ["Runtime", selectedSubmission.time ? `${selectedSubmission.time}s` : "—"],
-                ["Memory", selectedSubmission.memory || "—"],
+                ["Status", formatSubmissionStatus(selectedSubmission.status)],
+                ["Average runtime", formatRuntime(selectedSubmission.time)],
+                ["Average memory", formatMemory(selectedSubmission.memory)],
                 ["Submitted", formatDate(selectedSubmission.createdAt)],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-xl border border-white/10 bg-black/25 p-4">
                   <p className="text-xs text-white/30">{label}</p>
-                  <p className="mt-2 text-sm text-white/75">{value}</p>
+                  <p className={`mt-2 text-sm ${label === "Status" ? (normalizeSubmissionStatus(selectedSubmission.status) === "accepted" ? "font-medium text-emerald-300" : "font-medium text-red-300") : "text-white/75"}`}>{value}</p>
                 </div>
               ))}
             </div>

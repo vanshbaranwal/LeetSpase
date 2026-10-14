@@ -9,6 +9,7 @@ export const useAdminStore = create((set, get) => ({
     system: null,
     isLoading: false,
     isUpdatingUser: false,
+    updatingUserId: null,
 
     fetchDashboard: async () => {
         set({ isLoading: true });
@@ -44,23 +45,25 @@ export const useAdminStore = create((set, get) => ({
     },
 
     updateUserRole: async (userId, role) => {
-        set({ isUpdatingUser: true });
+        set({ isUpdatingUser: true, updatingUserId: userId });
 
         try {
             await axiosInstance.patch(`/admin/users/${userId}/role`, { role });
             set({
                 users: get().users.map((user) => user.id === userId ? { ...user, role } : user),
             });
-            toast.success("User role updated");
+            toast.success(role === "ADMIN" ? "Admin access granted" : "Admin access removed");
+            return true;
         } catch (error) {
             toast.error(error.response?.data?.error || "Failed to update user role");
+            return false;
         } finally {
-            set({ isUpdatingUser: false });
+            set({ isUpdatingUser: false, updatingUserId: null });
         }
     },
 
     updateUserStatus: async (userId, status) => {
-        set({ isUpdatingUser: true });
+        set({ isUpdatingUser: true, updatingUserId: userId });
 
         try {
             await axiosInstance.patch(`/admin/users/${userId}/status`, { status });
@@ -71,7 +74,7 @@ export const useAdminStore = create((set, get) => ({
         } catch (error) {
             toast.error(error.response?.data?.error || "Failed to update user status");
         } finally {
-            set({ isUpdatingUser: false });
+            set({ isUpdatingUser: false, updatingUserId: null });
         }
     },
 }));

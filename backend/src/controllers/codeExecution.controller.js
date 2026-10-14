@@ -117,6 +117,7 @@ const formatExecutionResult = ({
         testCase: result.testCase,
         passed: result.passed,
         stdout: result.stdout,
+        expected: result.expected,
         stderr: result.stderr,
         compileOutput: result.compileOutput,
         status: result.status,

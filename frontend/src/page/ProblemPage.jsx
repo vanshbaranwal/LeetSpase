@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import {
   ArrowLeft,
-  Bookmark,
   BookOpenText,
   Check,
   ChevronDown,
@@ -47,8 +46,18 @@ const formatLanguage = (language) => {
   return language.charAt(0) + language.slice(1).toLowerCase();
 };
 
-const getDraftKey = (userId, problemId, language) =>
-  `leetspase:code-draft:${userId || "user"}:${problemId}:${language}`;
+const getDraftKey = (userId, problemId, language, isDemo = false) =>
+  isDemo
+    ? `leetspase:code-draft:${userId || "user"}:${problemId}:demo-solution-v1:${language}`
+    : `leetspase:code-draft:${userId || "user"}:${problemId}:${language}`;
+
+const getEditorDefaultCode = (problem, language) => {
+  if (problem?.isDemo && problem.referenceSolutions?.[language]) {
+    return problem.referenceSolutions[language];
+  }
+
+  return problem?.codeSnippet?.[language] || "";
+};
 
 const readDraft = (draftKey) => {
   try {
@@ -98,12 +107,11 @@ const ProblemPage = () => {
   const [selectedLanguage, setSelectedLanguage] = useState("JAVASCRIPT");
   const [selectedCase, setSelectedCase] = useState(0);
   const [editorialLanguage, setEditorialLanguage] = useState("PYTHON");
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedSolution, setCopiedSolution] = useState(false);
   const draftKey = useMemo(
-    () => getDraftKey(authUser?.id, id, selectedLanguage),
-    [authUser?.id, id, selectedLanguage]
+    () => getDraftKey(authUser?.id, id, selectedLanguage, problem?.isDemo),
+    [authUser?.id, id, selectedLanguage, problem?.isDemo]
   );
 
   const publicExamples = useMemo(() => {
@@ -166,7 +174,7 @@ const ProblemPage = () => {
     if (problem) {
       const savedDraft = readDraft(draftKey);
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCode(savedDraft ?? problem.codeSnippet?.[selectedLanguage] ?? "");
+      setCode(savedDraft ?? getEditorDefaultCode(problem, selectedLanguage));
     }
   }, [draftKey, problem, selectedLanguage]);
 
@@ -175,10 +183,10 @@ const ProblemPage = () => {
   }, [activeTab, id, getSubmissionForProblem]);
 
   const handleLanguageChange = (language) => {
-    const nextDraftKey = getDraftKey(authUser?.id, id, language);
+    const nextDraftKey = getDraftKey(authUser?.id, id, language, problem?.isDemo);
     const savedDraft = readDraft(nextDraftKey);
     setSelectedLanguage(language);
-    setCode(savedDraft ?? problem.codeSnippet?.[language] ?? "");
+    setCode(savedDraft ?? getEditorDefaultCode(problem, language));
     clearResult();
   };
 
@@ -203,7 +211,7 @@ const ProblemPage = () => {
 
   const handleResetCode = () => {
     removeDraft(draftKey);
-    setCode(problem.codeSnippet?.[selectedLanguage] || "");
+    setCode(getEditorDefaultCode(problem, selectedLanguage));
     clearResult();
   };
 
@@ -421,12 +429,16 @@ const ProblemPage = () => {
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5">
-          <button type="button" onClick={() => setIsBookmarked((value) => !value)} className={`grid h-9 w-9 place-items-center rounded-xl transition-colors hover:bg-white/[0.06] ${isBookmarked ? "text-white" : "text-white/40"}`} aria-label={isBookmarked ? "Remove bookmark" : "Bookmark problem"}>
-            <Bookmark className="h-4 w-4" fill={isBookmarked ? "currentColor" : "none"} />
-          </button>
-          <button type="button" onClick={handleShare} className="grid h-9 w-9 place-items-center rounded-xl text-white/40 transition-colors hover:bg-white/[0.06] hover:text-white" aria-label="Copy problem link">
-            {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Share2 className="h-4 w-4" />}
-          </button>
+          <div className="relative">
+            <button type="button" onClick={handleShare} className="grid h-9 w-9 place-items-center rounded-xl text-white/40 transition-colors hover:bg-white/[0.06] hover:text-white" aria-label={copied ? "Problem link copied to clipboard" : "Copy problem link"}>
+              {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Share2 className="h-4 w-4" />}
+            </button>
+            {copied && (
+              <span role="status" aria-live="polite" className="absolute right-0 top-full z-30 mt-2 whitespace-nowrap rounded-lg border border-emerald-300/15 bg-[#111111] px-3 py-2 text-[11px] font-medium text-emerald-300 shadow-xl shadow-black/40">
+                Copied to clipboard
+              </span>
+            )}
+          </div>
           <LanguageSelector
             languages={Object.keys(problem.codeSnippet || {})}
             value={selectedLanguage}

@@ -106,6 +106,34 @@ export const updateUserRole = async (req, res) => {
     }
 
     try {
+        const existingUser = await db.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                role: true,
+            },
+        });
+
+        if(!existingUser){
+            return res.status(404).json({
+                success: false,
+                error: "user not found",
+            });
+        }
+
+        if(existingUser.role === "ADMIN" && role === "USER"){
+            const adminCount = await db.user.count({
+                where: { role: "ADMIN" },
+            });
+
+            if(adminCount <= 1){
+                return res.status(400).json({
+                    success: false,
+                    error: "the last admin cannot be removed",
+                });
+            }
+        }
+
         const user = await db.user.update({
             where: { id: userId },
             data: { role },
