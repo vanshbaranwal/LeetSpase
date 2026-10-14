@@ -4,17 +4,11 @@ import {z} from "zod"
 import {
   Plus,
   Trash2,
-  Code2,
-  FileText,
-  Lightbulb,
-  BookOpen,
   CheckCircle2,
   Download,
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  FlaskConical,
-  Tags,
 } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { useEffect, useState } from 'react';
@@ -556,13 +550,13 @@ public class Main {
 };
 
 const formTabs = [
-  { id: "basics", label: "Title & Description", caption: "Problem statement", icon: FileText },
-  { id: "classification", label: "Difficulty & Tags", caption: "Discovery details", icon: Tags },
-  { id: "testcases", label: "Test Cases", caption: "Validation inputs", icon: FlaskConical },
-  { id: "python", label: "Python", caption: "Template and solution", icon: Code2 },
-  { id: "java", label: "Java", caption: "Template and solution", icon: Code2 },
-  { id: "javascript", label: "JavaScript", caption: "Template and solution", icon: Code2 },
-  { id: "additional", label: "Additional Info", caption: "Constraints and guidance", icon: Lightbulb },
+  { id: "basics", label: "Title & Description", caption: "Write the problem statement" },
+  { id: "classification", label: "Difficulty & Tags", caption: "Organize problem discovery" },
+  { id: "testcases", label: "Test Cases", caption: "Define validation inputs" },
+  { id: "python", label: "Python", caption: "Template and reference answer" },
+  { id: "java", label: "Java", caption: "Template and reference answer" },
+  { id: "javascript", label: "JavaScript", caption: "Template and reference answer" },
+  { id: "additional", label: "Additional Info", caption: "Add editorial guidance" },
 ];
 
 const languageByTab = {
@@ -767,40 +761,43 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
   };
 
   return (
-    <div className={`${embedded ? "h-[calc(100vh-10rem)] min-h-[680px] rounded-2xl border border-white/10" : "h-screen"} w-full overflow-hidden bg-[#080808] text-white`}>
-      <div className="flex h-full w-full flex-col">
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex shrink-0 flex-col items-start justify-between gap-5 border-b border-white/10 bg-[#0d0d0d] px-5 py-6 md:flex-row md:items-center md:px-8 lg:px-10">
-            <h2 className="card-title text-2xl md:text-3xl flex items-center gap-3">
-              <FileText className="w-6 h-6 md:w-8 md:h-8 text-primary" />
-              Create Problem
-            </h2>
-
-            <div className="flex flex-col md:flex-row gap-3 mt-4 md:mt-0">
-              <button
-                type="button"
-                className="btn btn-secondary gap-2"
-                onClick={loadSampleData}
-              >
-                <Download className="w-4 h-4" />
-                Load Sample Problem
-              </button>
+    <div className={`${embedded ? "lg:h-full lg:overflow-hidden" : "h-screen overflow-hidden"} w-full bg-[#080808] text-white`}>
+      <div className={`flex w-full flex-col ${embedded ? "lg:h-full" : "h-full"}`}>
+        <div className={`flex flex-col ${embedded ? "lg:min-h-0 lg:flex-1" : "min-h-0 flex-1"}`}>
+          <div className="flex shrink-0 items-center justify-between gap-5 border-b border-white/10 bg-[#0b0b0b] px-5 py-4 sm:px-8 lg:px-10">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/30">Problem builder</p>
+              <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] sm:text-2xl">Create a new problem</h2>
             </div>
+
+            <button
+              type="button"
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-semibold text-white/65 transition-colors hover:border-white/20 hover:bg-white/[0.09] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
+              onClick={loadSampleData}
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Load sample</span>
+            </button>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit, handleInvalidForm)} className="create-problem-form grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] overflow-hidden lg:grid-cols-[280px_minmax(0,1fr)] lg:grid-rows-1">
-            <aside className="overflow-y-auto border-b border-white/10 bg-black/35 p-4 lg:border-b-0 lg:border-r lg:p-5">
-              <button
-                type="button"
-                onClick={() => onBack ? onBack() : navigation("/problems")}
-                className="mb-5 inline-flex items-center gap-2 px-2 text-sm text-white/45 transition-colors hover:text-white"
-              >
-                <ArrowLeft className="h-4 w-4" /> {embedded ? "Back to overview" : "Back to problems"}
-              </button>
+          <form
+            onSubmit={handleSubmit(onSubmit, handleInvalidForm)}
+            className={`create-problem-form grid lg:grid-cols-[280px_minmax(0,1fr)] ${embedded ? "lg:min-h-0 lg:flex-1 lg:grid-rows-1 lg:overflow-hidden" : "min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] overflow-hidden lg:grid-rows-1"}`}
+          >
+            <aside className={`${embedded ? "lg:overflow-y-auto" : "overflow-y-auto"} border-b border-white/10 bg-[#0a0a0a] px-4 py-5 lg:border-b-0 lg:border-r lg:px-5`}>
+              <div className="mb-6 flex items-center justify-between lg:block">
+                <button
+                  type="button"
+                  onClick={() => onBack ? onBack() : navigation("/problems")}
+                  className="inline-flex h-9 items-center gap-2 rounded-full px-2 text-sm font-medium text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+                >
+                  <ArrowLeft className="h-4 w-4" /> {embedded ? "Overview" : "Problems"}
+                </button>
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/25 lg:mt-7 lg:px-3">Sections</p>
+              </div>
 
-              <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-1" aria-label="Problem form sections">
+              <nav className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 lg:gap-0" aria-label="Problem form sections">
                 {formTabs.map((tab) => {
-                  const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
                   const hasError = tabHasError(tab.id);
 
@@ -809,15 +806,13 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id)}
-                      className={`group flex min-h-16 items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors ${
+                      className={`group flex min-h-14 items-center gap-3 border-l-2 px-3 py-2.5 text-left transition-colors ${
                         isActive
-                          ? "border-white/20 bg-white/[0.08] text-white"
-                          : "border-transparent text-white/45 hover:border-white/10 hover:bg-white/[0.035] hover:text-white/80"
+                          ? "border-white bg-white/[0.05] text-white"
+                          : "border-transparent text-white/40 hover:bg-white/[0.025] hover:text-white/75"
                       }`}
+                      aria-current={isActive ? "step" : undefined}
                     >
-                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg border ${isActive ? "border-white/15 bg-white text-black" : "border-white/10 bg-white/[0.04]"}`}>
-                        <Icon className="h-4 w-4" />
-                      </span>
                       <span className="min-w-0">
                         <span className="flex items-center gap-2 text-sm font-semibold">
                           <span className="truncate">{tab.label}</span>
@@ -831,12 +826,18 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
               </nav>
             </aside>
 
-            <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
-              <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-8 lg:p-10">
-                <div className="mb-8 flex items-end justify-between gap-4 border-b border-white/10 pb-6">
+            <div className={`flex min-w-0 flex-col ${embedded ? "lg:min-h-0 lg:overflow-hidden" : "min-h-0 overflow-hidden"}`}>
+              <div className={`${embedded ? "lg:min-h-0 lg:flex-1 lg:overflow-y-auto" : "min-h-0 flex-1 overflow-y-auto"} p-5 sm:p-8 lg:p-10`}>
+                <div className="mb-8">
                   <div>
-                    <h1 className="text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">{activeTabDetails.label}</h1>
+                    <h1 className="text-2xl font-semibold tracking-[-0.04em] sm:text-3xl">{activeTabDetails.label}</h1>
                     <p className="mt-2 text-sm text-white/40">{activeTabDetails.caption}</p>
+                  </div>
+                  <div className="mt-6 h-px overflow-hidden bg-white/[0.08]">
+                    <div
+                      className="h-full bg-white/70 transition-[width] duration-300"
+                      style={{ width: `${((activeTabIndex + 1) / formTabs.length) * 100}%` }}
+                    />
                   </div>
                 </div>
 
@@ -909,7 +910,7 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
                             aria-checked={isSelected}
                             onClick={() => field.onChange(option.value)}
                             onBlur={field.onBlur}
-                            className={`rounded-xl border px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] transition-colors focus:outline-none ${
+                            className={`h-11 rounded-full border px-5 text-sm font-semibold uppercase tracking-[0.16em] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 ${
                               isSelected ? option.activeClass : option.inactiveClass
                             }`}
                           >
@@ -931,7 +932,7 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
             </div>
 
             {/* Tags */}
-            <div className={`card mt-6 bg-base-200 p-4 shadow-md md:p-6 ${activeTab !== "classification" ? "hidden" : ""}`}>
+            <div className={`mt-8 border-t border-white/10 pt-7 ${activeTab !== "classification" ? "hidden" : ""}`}>
               <Controller
                 name="tags"
                 control={control}
@@ -953,17 +954,17 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
 
                   return (
                     <>
-                      <div className="mb-4 flex items-center justify-between">
-                        <h3 className="flex items-center gap-2 text-lg font-semibold md:text-xl">
-                          <BookOpen className="h-5 w-5" />
-                          Tags
-                        </h3>
+                      <div className="mb-5 flex items-end justify-between gap-4">
+                        <div>
+                          <h3 className="text-sm font-semibold text-white/80">Problem tags</h3>
+                          <p className="mt-1 text-xs text-white/30">Add focused topics that help users find this problem.</p>
+                        </div>
                         <button
                           type="button"
-                          className="btn btn-primary btn-sm"
+                          className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-4 text-xs font-semibold text-white/65 transition-colors hover:border-white/20 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
                           onClick={() => field.onChange([...tags, ""])}
                         >
-                          <Plus className="mr-1 h-4 w-4" /> Add Tag
+                          <Plus className="h-4 w-4" /> Add Tag
                         </button>
                       </div>
 
@@ -982,7 +983,7 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
                               />
                               <button
                                 type="button"
-                                className="tag-remove-button btn btn-ghost btn-square btn-sm"
+                                className="tag-remove-button grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-red-400/20 bg-red-500/10 text-red-400 transition-colors hover:border-red-400/40 hover:bg-red-500/20 hover:text-red-300 disabled:cursor-not-allowed disabled:border-white/5 disabled:bg-white/[0.03] disabled:text-white/15"
                                 onClick={() => removeTag(index)}
                                 disabled={tags.length === 1}
                                 aria-label={`Remove tag ${index + 1}`}
@@ -1013,35 +1014,35 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
             </div>
 
             {/* Test Cases */}
-            <div className={`card bg-base-200 p-4 shadow-md md:p-6 ${activeTab !== "testcases" ? "hidden" : ""}`}>
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg md:text-xl font-semibold flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5" />
-                  Test Cases
-                </h3>
+            <div className={`${activeTab !== "testcases" ? "hidden" : ""}`}>
+              <div className="mb-6 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-white/80">Validation set</p>
+                  <p className="mt-1 text-xs text-white/30">{testCaseFields.length} {testCaseFields.length === 1 ? "test case" : "test cases"} configured</p>
+                </div>
                 <button
                   type="button"
-                  className="btn btn-primary btn-sm"
+                  className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-4 text-xs font-semibold text-white/65 transition-colors hover:border-white/20 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
                   onClick={() => appendTestCase({ input: "", output: "" })}
                 >
-                  <Plus className="w-4 h-4 mr-1" /> Add Test Case
+                  <Plus className="h-4 w-4" /> Add Test Case
                 </button>
               </div>
               <div className="space-y-6">
                 {testCaseFields.map((field, index) => (
-                  <div key={field.id} className="card bg-base-100 shadow-md">
-                    <div className="card-body p-4 md:p-6">
-                      <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-base md:text-lg font-semibold">
-                          Test Case #{index + 1}
+                  <div key={field.id} className="border-t border-white/10 py-6 first:border-t-0 first:pt-0 last:pb-0">
+                    <div>
+                      <div className="mb-4 flex items-center justify-between">
+                        <h4 className="font-mono text-xs uppercase tracking-[0.16em] text-white/45">
+                          Case {String(index + 1).padStart(2, "0")}
                         </h4>
                         <button
                           type="button"
-                          className="btn btn-ghost btn-sm text-error"
+                          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-red-400/20 bg-red-500/10 px-4 text-sm font-semibold text-red-400 transition-colors hover:border-red-400/40 hover:bg-red-500/20 hover:text-red-300 disabled:cursor-not-allowed disabled:border-white/5 disabled:bg-white/[0.03] disabled:text-white/15"
                           onClick={() => removeTestCase(index)}
                           disabled={testCaseFields.length === 1}
                         >
-                          <Trash2 className="w-4 h-4 mr-1" /> Remove
+                          <Trash2 className="h-4 w-4" /> Remove
                         </button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -1100,23 +1101,16 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
             {/* Code Editor Sections */}
             <div className={`space-y-8 ${!activeLanguage ? "hidden" : ""}`}>
               {[activeLanguage].filter(Boolean).map((language) => (
-                <div
-                  key={language}
-                  className="card bg-base-200 p-4 md:p-6 shadow-md"
-                >
-                  <h3 className="text-lg md:text-xl font-semibold mb-6 flex items-center gap-2">
-                    <Code2 className="w-5 h-5" />
-                    {language}
-                  </h3>
-
+                <div key={language}>
                   <div className="space-y-6">
                     {/* Starter Code */}
-                    <div className="card bg-base-100 shadow-md">
-                      <div className="card-body p-4 md:p-6">
-                        <h4 className="font-semibold text-base md:text-lg mb-4">
-                          Starter Code Template
-                        </h4>
-                        <div className="border rounded-md overflow-hidden">
+                    <div>
+                      <div>
+                        <div className="mb-4">
+                          <h4 className="text-base font-semibold text-white/85">Starter code</h4>
+                          <p className="mt-1 text-xs text-white/30">The template users receive when they open the editor.</p>
+                        </div>
+                        <div className="overflow-hidden rounded-xl border border-white/10 bg-[#0a0a0a] transition-colors focus-within:border-white/20">
                           <Controller
                             name={`codeSnippet.${language}`}
                             control={control}
@@ -1150,13 +1144,13 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
                     </div>
 
                     {/* Reference Solution */}
-                    <div className="card bg-base-100 shadow-md">
-                      <div className="card-body p-4 md:p-6">
-                        <h4 className="font-semibold text-base md:text-lg mb-4 flex items-center gap-2">
-                          <CheckCircle2 className="w-5 h-5 text-success" />
-                          Reference Solution
-                        </h4>
-                        <div className="border rounded-md overflow-hidden">
+                    <div className="border-t border-white/10 pt-7">
+                      <div>
+                        <div className="mb-4">
+                          <h4 className="text-base font-semibold text-white/85">Reference solution</h4>
+                          <p className="mt-1 text-xs text-white/30">Used to verify the problem and power its editorial answer.</p>
+                        </div>
+                        <div className="overflow-hidden rounded-xl border border-white/10 bg-[#0a0a0a] transition-colors focus-within:border-white/20">
                           <Controller
                             name={`referenceSolutions.${language}`}
                             control={control}
@@ -1190,11 +1184,12 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
                     </div>
 
                     {/* Examples */}
-                    <div className="card bg-base-100 shadow-md">
-                      <div className="card-body p-4 md:p-6">
-                        <h4 className="font-semibold text-base md:text-lg mb-4">
-                          Example
-                        </h4>
+                    <div className="border-t border-white/10 pt-7">
+                      <div>
+                        <div className="mb-4">
+                          <h4 className="text-base font-semibold text-white/85">Public example</h4>
+                          <p className="mt-1 text-xs text-white/30">Show users how input maps to the expected output.</p>
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="form-control">
                             <label className="label">
@@ -1255,11 +1250,7 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
             </div>
 
             {/* Additional Information */}
-            <div className={`card bg-base-200 p-4 shadow-md md:p-6 ${activeTab !== "additional" ? "hidden" : ""}`}>
-              <h3 className="text-lg md:text-xl font-semibold mb-6 flex items-center gap-2">
-                <Lightbulb className="w-5 h-5 text-warning" />
-                Additional Information
-              </h3>
+            <div className={`${activeTab !== "additional" ? "hidden" : ""}`}>
               <div className="space-y-6">
                 <div className="form-control">
                   <label className="label">
@@ -1380,27 +1371,37 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
 
               </div>
 
-              <div className="shrink-0 border-t border-white/10 bg-[#0d0d0d]/95 px-5 py-4 backdrop-blur sm:px-8 lg:px-10">
-                <div className="flex items-center justify-between gap-4">
+              <div className="shrink-0 border-t border-white/10 bg-[#0b0b0b]/95 px-5 py-3.5 backdrop-blur sm:px-8 lg:px-10">
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
                   <button
                     type="button"
                     disabled={activeTabIndex === 0}
                     onClick={() => setActiveTab(formTabs[activeTabIndex - 1].id)}
-                    className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2.5 text-sm font-semibold text-white/65 transition-colors hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-25"
+                    className="inline-flex h-10 items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-5 text-sm font-semibold text-white/65 transition-colors hover:border-white/20 hover:bg-white/[0.07] hover:text-white disabled:cursor-not-allowed disabled:opacity-25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
                   >
                     <ChevronLeft className="h-4 w-4" /> Previous
                   </button>
 
-                  {activeTabIndex < formTabs.length - 1 ? (
+                  <div className="hidden items-center gap-1.5 sm:flex" aria-label={`Step ${activeTabIndex + 1} of ${formTabs.length}`}>
+                    {formTabs.map((tab, index) => (
+                      <span
+                        key={tab.id}
+                        className={`h-1.5 rounded-full transition-all ${index === activeTabIndex ? "w-6 bg-white" : index < activeTabIndex ? "w-1.5 bg-white/45" : "w-1.5 bg-white/15"}`}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="justify-self-end">
+                    {activeTabIndex < formTabs.length - 1 ? (
                     <button
                       type="button"
                       onClick={() => setActiveTab(formTabs[activeTabIndex + 1].id)}
-                      className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-[#e6e6e6]"
+                      className="inline-flex h-10 items-center gap-2 rounded-full border border-white bg-white px-5 text-sm font-semibold text-black shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-[#e6e6e6] hover:bg-[#e6e6e6] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                       Next <ChevronRight className="h-4 w-4" />
                     </button>
-                  ) : (
-                    <button type="submit" disabled={isLoading} className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-[#e6e6e6] disabled:cursor-not-allowed disabled:opacity-50">
+                    ) : (
+                    <button type="submit" disabled={isLoading} className="inline-flex h-10 items-center gap-2 rounded-full border border-white bg-white px-5 text-sm font-semibold text-black shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-[#e6e6e6] hover:bg-[#e6e6e6] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30">
                       {isLoading ? (
                         <span className="loading loading-spinner loading-sm"></span>
                       ) : (
@@ -1409,7 +1410,8 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
                         </>
                       )}
                     </button>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

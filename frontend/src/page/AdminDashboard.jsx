@@ -172,8 +172,11 @@ const AdminDashboard = () => {
     { label: "Problems", value: overview?.problems ?? 0 },
     { label: "Submissions", value: overview?.submissions ?? 0 },
   ];
-  const acceptanceRate = overview?.submissions
-    ? Math.round((overview.acceptedSubmissions / overview.submissions) * 100)
+  const totalSubmissions = overview?.submissions ?? 0;
+  const acceptedSubmissions = overview?.acceptedSubmissions ?? 0;
+  const unsuccessfulSubmissions = Math.max(totalSubmissions - acceptedSubmissions, 0);
+  const acceptanceRate = totalSubmissions
+    ? Math.round((acceptedSubmissions / totalSubmissions) * 100)
     : 0;
   const systemServices = [
     {
@@ -214,7 +217,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#080808] text-white">
+    <div className={`min-h-screen w-full bg-[#080808] text-white ${activeSection === "add-problem" ? "lg:h-screen lg:overflow-hidden" : ""}`}>
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#080808]/95 backdrop-blur">
         <div className="mx-auto flex h-20 w-full items-center justify-between px-5 sm:px-8">
           <Link to="/" className="flex items-center gap-3">
@@ -228,8 +231,8 @@ const AdminDashboard = () => {
         </div>
       </header>
 
-      <div className="mx-auto grid w-full max-w-[1800px] grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <main className="min-w-0 px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
+      <div className={`mx-auto grid w-full grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] ${activeSection === "add-problem" ? "lg:h-[calc(100vh-5rem)] lg:max-w-none lg:overflow-hidden" : "max-w-[1800px]"}`}>
+        <main className={`min-w-0 ${activeSection === "add-problem" ? "p-0 lg:h-full lg:overflow-hidden" : "px-5 py-8 sm:px-8 lg:px-10 lg:py-10"}`}>
           {activeSection === "overview" && (
             <section>
               <div className="mb-8">
@@ -251,36 +254,53 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="mt-10 border-y border-white/10 xl:grid xl:grid-cols-[1.15fr_0.85fr] xl:divide-x xl:divide-white/10">
-                <section className="py-8 xl:pr-10">
-                  <p className="text-sm font-semibold">Platform activity</p>
-                  <p className="mt-1 text-xs text-white/35">Acceptance and participation at a glance</p>
+              <div className="mt-10 border-y border-white/10 xl:grid xl:grid-cols-[1.1fr_0.9fr] xl:divide-x xl:divide-white/10">
+                <section className="py-7 xl:pr-10">
+                  <div className="flex items-start justify-between gap-6">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-[0.16em] text-white/35">Submission quality</p>
+                      <p className="mt-2 text-sm text-white/45">How consistently solutions clear every test case</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-4xl font-semibold tabular-nums tracking-[-0.05em] sm:text-5xl">{acceptanceRate}%</p>
+                      <p className="mt-1 text-xs text-white/30">acceptance rate</p>
+                    </div>
+                  </div>
 
-                  <dl className="mt-8 divide-y divide-white/[0.08]">
-                    <div className="flex items-center justify-between py-4 first:pt-0">
-                      <dt className="text-sm text-white/45">Accepted submissions</dt>
-                      <dd className="text-lg font-semibold tabular-nums">{overview?.acceptedSubmissions ?? 0}</dd>
+                  <div className="mt-7 h-2 overflow-hidden rounded-full bg-white/[0.08]" aria-label={`${acceptanceRate}% acceptance rate`}>
+                    <div className="h-full rounded-full bg-emerald-400 transition-[width]" style={{ width: `${acceptanceRate}%` }} />
+                  </div>
+
+                  <div className="mt-6 grid grid-cols-3 divide-x divide-white/10 border-t border-white/[0.08] pt-5">
+                    <div>
+                      <p className="text-xl font-semibold tabular-nums">{acceptedSubmissions}</p>
+                      <p className="mt-1 text-xs text-emerald-400/75">Accepted</p>
                     </div>
-                    <div className="py-4 last:pb-0">
-                      <div className="flex items-center justify-between">
-                        <dt className="text-sm text-white/45">Acceptance rate</dt>
-                        <dd className="text-lg font-semibold tabular-nums">{acceptanceRate}%</dd>
-                      </div>
-                      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[0.08]" aria-label={`${acceptanceRate}% acceptance rate`}>
-                        <div className="h-full rounded-full bg-emerald-400 transition-[width]" style={{ width: `${acceptanceRate}%` }} />
-                      </div>
+                    <div className="px-5">
+                      <p className="text-xl font-semibold tabular-nums">{unsuccessfulSubmissions}</p>
+                      <p className="mt-1 text-xs text-red-400/70">Unsuccessful</p>
                     </div>
-                  </dl>
+                    <div className="pl-5">
+                      <p className="text-xl font-semibold tabular-nums">{totalSubmissions}</p>
+                      <p className="mt-1 text-xs text-white/35">Total attempts</p>
+                    </div>
+                  </div>
                 </section>
 
-                <section className="border-t border-white/10 py-8 xl:border-t-0 xl:pl-10">
-                  <p className="text-sm font-semibold">Service health</p>
-                  <p className="mt-1 text-xs text-white/35">Current state of the platform dependencies</p>
-                  <div className="mt-8 divide-y divide-white/[0.08]">
-                    {systemServices.map(({ label, status }) => (
-                      <div key={label} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
-                        <span className="text-sm text-white/55">{label}</span>
-                        <span className={`text-xs font-semibold ${getServiceStatusClass(status)}`}>
+                <section className="border-t border-white/10 py-7 xl:border-t-0 xl:pl-10">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-white/35">Service pulse</p>
+                    <p className="mt-2 text-sm text-white/45">Live dependency checks and response times</p>
+                  </div>
+
+                  <div className="mt-5 divide-y divide-white/[0.08]">
+                    {systemServices.map(({ label, status, response }) => (
+                      <div key={label} className="grid grid-cols-[1fr_auto_auto] items-center gap-5 py-3.5 first:pt-0 last:pb-0">
+                        <span className="text-sm font-medium text-white/65">{label}</span>
+                        <span className="text-xs tabular-nums text-white/30">
+                          {response === null || response === undefined ? "—" : `${response} ms`}
+                        </span>
+                        <span className={`min-w-20 text-right text-xs font-semibold ${getServiceStatusClass(status)}`}>
                           {formatServiceStatus(status)}
                         </span>
                       </div>
@@ -520,7 +540,7 @@ const AdminDashboard = () => {
           )}
 
           {activeSection === "add-problem" && (
-            <section>
+            <section className="w-full lg:h-full">
               <CreateProblemForm
                 embedded
                 onBack={() => setActiveSection("overview")}

@@ -50,6 +50,54 @@ const formatTimestamp = (value) => new Intl.DateTimeFormat("en-IN", {
   minute: "2-digit",
 }).format(new Date(value));
 
+const parseMetricValues = (value) => {
+  if (value === null || value === undefined || value === "") return [];
+  if (Array.isArray(value)) return value.flatMap(parseMetricValues);
+  if (typeof value === "number") return Number.isFinite(value) ? [value] : [];
+
+  const stringValue = String(value).trim();
+  if (!stringValue) return [];
+
+  try {
+    const parsed = JSON.parse(stringValue);
+    if (parsed !== stringValue) return parseMetricValues(parsed);
+  } catch {
+    // Plain metric strings such as "0.110 s" are handled below.
+  }
+
+  const matches = stringValue.match(/-?\d+(?:\.\d+)?/g);
+  return matches ? matches.map(Number).filter(Number.isFinite) : [];
+};
+
+const getMetricSummary = (value) => {
+  const values = parseMetricValues(value);
+
+  if (!values.length) return { average: null, count: 0 };
+
+  return {
+    average: values.reduce((total, item) => total + item, 0) / values.length,
+    count: values.length,
+  };
+};
+
+const formatRuntime = (value) => {
+  const { average } = getMetricSummary(value);
+  return average === null ? "—" : `${average.toFixed(3)} s`;
+};
+
+const formatMemory = (value) => {
+  const { average } = getMetricSummary(value);
+  return average === null ? "—" : `${Math.round(average)} KB`;
+};
+
+const normalizeSubmissionStatus = (status) => String(status || "").trim().toLowerCase();
+
+const formatSubmissionStatus = (status) => {
+  const normalized = normalizeSubmissionStatus(status);
+  if (!normalized) return "Unknown";
+  return normalized.replace(/_/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
+};
+
 const dayKey = (value) => new Date(value).toISOString().slice(0, 10);
 
 const activityClass = (count) => {
@@ -183,7 +231,7 @@ const ProfilePage = () => {
       <Navbar variant="problems" />
 
       <main className="mx-auto w-full max-w-[1500px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
-        <section className="rounded-3xl border border-white/10 bg-[#111111] p-6 sm:p-8">
+        <section className="border-b border-white/10 pb-8">
           <div className="flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center">
               <div className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white text-3xl font-semibold text-black sm:h-28 sm:w-28">
@@ -229,13 +277,13 @@ const ProfilePage = () => {
           </div>
         </section>
 
-        <nav className="mt-6 flex gap-2 overflow-x-auto rounded-2xl border border-white/10 bg-[#0d0d0d] p-2" aria-label="Profile sections">
+        <nav className="mt-2 flex gap-7 overflow-x-auto border-b border-white/10" aria-label="Profile sections">
           {sections.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               type="button"
               onClick={() => setActiveSection(id)}
-              className={`inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-medium transition-colors ${activeSection === id ? "bg-white text-black" : "text-white/45 hover:bg-white/[0.05] hover:text-white"}`}
+              className={`inline-flex h-14 shrink-0 items-center gap-2 border-b-2 px-1 text-sm font-medium transition-colors ${activeSection === id ? "border-white text-white" : "border-transparent text-white/40 hover:text-white/75"}`}
             >
               <Icon className="h-4 w-4" /> {label}
             </button>
@@ -244,15 +292,15 @@ const ProfilePage = () => {
 
         {activeSection === "overview" && (
           <div className="mt-6 space-y-6">
-            <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <section className="grid border-y border-white/10 sm:grid-cols-4 sm:divide-x sm:divide-white/10">
               {statCards.map(({ label, value, icon: Icon }) => (
-                <article key={label} className="rounded-2xl border border-white/10 bg-[#111111] p-5">
+                <article key={label} className="border-b border-white/10 px-3 py-6 last:border-b-0 sm:border-b-0 sm:px-6 sm:first:pl-0 sm:last:pr-0">
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-sm text-white/40">{label}</p>
                       <p className="mt-4 text-3xl font-semibold tracking-[-0.04em]">{value}</p>
                     </div>
-                    <span className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04]">
+                    <span className="grid h-9 w-9 place-items-center text-white/40">
                       <Icon className="h-4 w-4 text-white/60" />
                     </span>
                   </div>
@@ -260,8 +308,8 @@ const ProfilePage = () => {
               ))}
             </section>
 
-            <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-              <article className="rounded-2xl border border-white/10 bg-[#111111] p-6">
+            <section className="grid border-y border-white/10 xl:grid-cols-[1.2fr_0.8fr] xl:divide-x xl:divide-white/10">
+              <article className="py-8 xl:pr-10">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-semibold">Problem-solving progress</h2>
@@ -292,7 +340,7 @@ const ProfilePage = () => {
                 </div>
               </article>
 
-              <article className="rounded-2xl border border-white/10 bg-[#111111] p-6">
+              <article className="border-t border-white/10 py-8 xl:border-t-0 xl:pl-10">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h2 className="text-lg font-semibold">Coding activity</h2>
@@ -326,14 +374,14 @@ const ProfilePage = () => {
         {activeSection === "playlists" && (
           <section className="mt-6">
             {playlists.length ? (
-              <div className="grid overflow-hidden rounded-2xl border border-white/10 bg-[#111111] lg:grid-cols-[310px_minmax(0,1fr)]">
-                <aside className="border-b border-white/[0.08] bg-[#0d0d0d] lg:border-b-0 lg:border-r" aria-label="Your playlists">
+              <div className="grid border-y border-white/10 lg:grid-cols-[310px_minmax(0,1fr)]">
+                <aside className="border-b border-white/[0.08] lg:border-b-0 lg:border-r" aria-label="Your playlists">
                   <div className="border-b border-white/[0.08] px-5 py-5">
                     <div className="flex items-center justify-between">
                       <div>
                         <h2 className="font-semibold">Your playlists</h2>
                       </div>
-                      <span className="rounded-full bg-white/[0.06] px-2.5 py-1 text-xs text-white/40">{playlists.length}</span>
+                      <span className="text-xs tabular-nums text-white/35">{playlists.length}</span>
                     </div>
                   </div>
 
@@ -351,10 +399,10 @@ const ProfilePage = () => {
                             setEditingPlaylist(null);
                           }}
                           aria-pressed={selected}
-                          className={`min-w-[245px] rounded-xl border p-4 text-left transition-colors lg:min-w-0 ${selected ? "border-white/15 bg-white/[0.075]" : "border-transparent hover:bg-white/[0.035]"}`}
+                          className={`min-w-[245px] border-l-2 px-4 py-3.5 text-left transition-colors lg:min-w-0 ${selected ? "border-white bg-white/[0.045]" : "border-transparent hover:bg-white/[0.025]"}`}
                         >
                           <div className="flex items-start gap-3">
-                            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${selected ? "bg-white text-black" : "bg-white/[0.055] text-white/35"}`}>
+                            <span className={`grid h-9 w-9 shrink-0 place-items-center ${selected ? "text-white" : "text-white/30"}`}>
                               <FileText className="h-4 w-4" />
                             </span>
                             <div className="min-w-0 flex-1">
@@ -375,7 +423,7 @@ const ProfilePage = () => {
                 {selectedPlaylist && (
                   <div className="min-w-0 p-5 sm:p-7">
                     {editingPlaylist === selectedPlaylist.id ? (
-                      <div className="max-w-2xl rounded-2xl border border-white/10 bg-black/20 p-5">
+                      <div className="max-w-2xl border-y border-white/10 py-6">
                         <h2 className="text-lg font-semibold">Edit playlist</h2>
                         <div className="mt-5 space-y-3">
                           <input value={playlistForm.name} onChange={(event) => setPlaylistForm((value) => ({ ...value, name: event.target.value }))} className="h-11 w-full rounded-xl border border-white/10 bg-black/25 px-4 text-sm outline-none focus:border-white/25" />
@@ -401,7 +449,7 @@ const ProfilePage = () => {
                           </div>
                         </div>
 
-                        <div className="mt-6 rounded-xl border border-white/[0.08] bg-black/20 p-4">
+                        <div className="mt-7 border-y border-white/[0.08] py-5">
                           <div className="flex items-end justify-between gap-4">
                             <div>
                               <p className="text-xs text-white/35">Completion</p>
@@ -423,7 +471,7 @@ const ProfilePage = () => {
                         </div>
 
                         {selectedPlaylist.problems?.length ? (
-                          <div className="mt-4 overflow-hidden rounded-xl border border-white/[0.08]">
+                          <div className="mt-4 border-y border-white/[0.08]">
                             {selectedPlaylist.problems.map((problem, index) => (
                               <Link key={problem.id} to={`/problem/${problem.id}`} className="flex items-center gap-4 border-b border-white/[0.065] px-4 py-4 transition-colors last:border-b-0 hover:bg-white/[0.035] sm:px-5">
                                 <span className="w-7 shrink-0 text-center font-mono text-xs text-white/25">{String(index + 1).padStart(2, "0")}</span>
@@ -442,7 +490,7 @@ const ProfilePage = () => {
                             ))}
                           </div>
                         ) : (
-                          <div className="mt-4 rounded-xl border border-dashed border-white/10 px-6 py-12 text-center">
+                          <div className="mt-4 border-y border-dashed border-white/10 px-6 py-12 text-center">
                             <ListChecks className="mx-auto h-7 w-7 text-white/20" />
                             <p className="mt-3 text-sm text-white/40">This playlist does not contain any problems yet.</p>
                             <Link to="/problems" className="mt-4 inline-flex text-xs font-semibold text-white/65 hover:text-white">Add problems</Link>
@@ -454,7 +502,7 @@ const ProfilePage = () => {
                 )}
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-white/10 bg-[#111111] p-12 text-center">
+              <div className="border-y border-dashed border-white/10 p-12 text-center">
                 <FolderOpen className="mx-auto h-8 w-8 text-white/20" />
                 <p className="mt-4 text-sm text-white/45">You have not created any playlists yet.</p>
                 <Link to="/problems" className="mt-5 inline-flex rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-black">Explore problems</Link>
@@ -464,8 +512,8 @@ const ProfilePage = () => {
         )}
 
         {activeSection === "settings" && (
-          <div className="mt-6 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-            <section className="rounded-2xl border border-white/10 bg-[#111111] p-6 sm:p-8">
+          <div className="mt-6 grid border-y border-white/10 xl:grid-cols-[1.15fr_0.85fr] xl:divide-x xl:divide-white/10">
+            <section className="py-8 xl:pr-10">
               <div>
                 <h2 className="text-xl font-semibold">Profile information</h2>
                 <p className="mt-2 text-sm text-white/35">Control how your LeetSpase profile appears.</p>
@@ -501,8 +549,8 @@ const ProfilePage = () => {
               </form>
             </section>
 
-            <div className="space-y-6">
-              <section className="rounded-2xl border border-white/10 bg-[#111111] p-6">
+            <div className="divide-y divide-white/10 xl:pl-10">
+              <section className="py-8">
                 <h2 className="text-lg font-semibold">Account</h2>
                 <div className="mt-5 space-y-3">
                   <AccountRow label="Email" value={profile.email} />
@@ -513,7 +561,7 @@ const ProfilePage = () => {
               </section>
 
               {profile.canChangePassword && (
-                <section className="rounded-2xl border border-white/10 bg-[#111111] p-6">
+                <section className="py-8">
                   <div className="flex items-center gap-3">
                     <KeyRound className="h-5 w-5 text-white/40" />
                     <h2 className="text-lg font-semibold">Change password</h2>
@@ -528,7 +576,7 @@ const ProfilePage = () => {
                 </section>
               )}
 
-              <section className="rounded-2xl border border-red-400/15 bg-red-400/[0.035] p-6">
+              <section className="py-8">
                 <div className="flex items-center gap-3 text-red-300">
                   <LockKeyhole className="h-5 w-5" />
                   <h2 className="text-lg font-semibold">Delete account</h2>
@@ -581,15 +629,15 @@ const Field = ({ label, hint, children }) => (
 );
 
 const AccountRow = ({ label, value, valueClass = "text-white/60" }) => (
-  <div className="flex items-center justify-between gap-4 rounded-xl border border-white/[0.07] bg-black/20 px-4 py-3 text-sm">
+  <div className="flex items-center justify-between gap-4 border-b border-white/[0.07] py-3.5 text-sm last:border-b-0">
     <span className="text-white/35">{label}</span>
     <span className={`truncate text-right ${valueClass}`}>{value}</span>
   </div>
 );
 
 const SubmissionList = ({ submissions }) => (
-  <section className="overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
-    <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+  <section className="border-y border-white/10">
+    <div className="flex items-center justify-between border-b border-white/10 py-5">
       <div>
         <h2 className="text-lg font-semibold">Recent submissions</h2>
         <p className="mt-1 text-sm text-white/35">Your latest CodeBox execution results.</p>
@@ -597,21 +645,25 @@ const SubmissionList = ({ submissions }) => (
     </div>
     {submissions.length ? (
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left text-sm">
+        <table className="w-full min-w-[860px] text-left text-sm">
           <thead className="border-b border-white/[0.07] text-xs uppercase tracking-[0.12em] text-white/30">
-            <tr><th className="px-6 py-4">Problem</th><th className="px-5 py-4">Language</th><th className="px-5 py-4">Status</th><th className="px-5 py-4">Runtime</th><th className="px-5 py-4">Memory</th><th className="px-6 py-4 text-right">Submitted</th></tr>
+            <tr><th className="px-6 py-4">Problem</th><th className="px-5 py-4 text-center">Language</th><th className="px-5 py-4 text-center">Status</th><th className="px-5 py-4 text-center">Avg runtime</th><th className="px-5 py-4 text-center">Avg memory</th><th className="px-6 py-4 text-center">Submitted</th></tr>
           </thead>
           <tbody className="divide-y divide-white/[0.06]">
             {submissions.map((submission) => {
-              const accepted = submission.status?.toLowerCase() === "accepted";
+              const accepted = normalizeSubmissionStatus(submission.status) === "accepted";
+              const runtimeSummary = getMetricSummary(submission.time);
               return (
                 <tr key={submission.id} className="hover:bg-white/[0.02]">
                   <td className="px-6 py-4"><Link to={`/problem/${submission.problem.id}`} className="font-medium text-white/75 hover:text-white">{submission.problem.title}</Link><p className={`mt-1 text-xs ${difficultyStyles[submission.problem.difficulty]?.text}`}>{submission.problem.difficulty}</p></td>
-                  <td className="px-5 py-4 font-mono text-xs text-white/50">{submission.language}</td>
-                  <td className="px-5 py-4"><span className={`rounded-full px-3 py-1 text-xs ${accepted ? "bg-emerald-400/10 text-emerald-300" : "bg-red-400/10 text-red-300"}`}>{submission.status}</span></td>
-                  <td className="px-5 py-4 text-white/45">{submission.time ? `${submission.time}s` : "—"}</td>
-                  <td className="px-5 py-4 text-white/45">{submission.memory || "—"}</td>
-                  <td className="px-6 py-4 text-right text-xs text-white/30">{formatTimestamp(submission.createdAt)}</td>
+                  <td className="px-5 py-4 text-center font-mono text-xs uppercase text-white/50">{String(submission.language || "—").toUpperCase()}</td>
+                  <td className={`px-5 py-4 text-center text-xs font-semibold ${accepted ? "text-emerald-400" : "text-red-400"}`}>{formatSubmissionStatus(submission.status)}</td>
+                  <td className="px-5 py-4 text-center">
+                    <p className="font-medium tabular-nums text-white/75">{formatRuntime(submission.time)}</p>
+                    {runtimeSummary.count > 1 && <p className="mt-1 text-[11px] text-white/30">Average of {runtimeSummary.count} test cases</p>}
+                  </td>
+                  <td className="px-5 py-4 text-center font-medium tabular-nums text-white/60">{formatMemory(submission.memory)}</td>
+                  <td className="px-6 py-4 text-center text-xs text-white/30">{formatTimestamp(submission.createdAt)}</td>
                 </tr>
               );
             })}

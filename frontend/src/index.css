@@ -112,10 +112,46 @@ a.btn:hover {
   resize: none;
 }
 
+/* A quiet, consistent field system for the problem builder. */
+.create-problem-form :where(.input, .textarea, .select) {
+  border-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  background-color: #111111;
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: none;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.create-problem-form :where(.input, .textarea, .select):hover {
+  border-color: rgba(255, 255, 255, 0.17);
+  background-color: #131313;
+}
+
+.create-problem-form :where(.input, .textarea)::placeholder {
+  color: rgba(255, 255, 255, 0.24);
+}
+
+.create-problem-form .label {
+  padding: 0.25rem 0 0.55rem;
+}
+
+.create-problem-form .label-text {
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.create-problem-form .label-text-alt {
+  font-size: 0.75rem;
+}
+
 /* Keep the create-problem fields neutral instead of showing DaisyUI's white focus ring. */
 .create-problem-form :where(.input, .textarea, .select):focus,
 .create-problem-form :where(.input, .textarea, .select):focus-visible {
-  border-color: #3a3a3a !important;
+  border-color: rgba(255, 255, 255, 0.26) !important;
+  background-color: #141414 !important;
   outline: none !important;
   box-shadow: none !important;
 }
@@ -137,7 +173,7 @@ a.btn:hover {
 
 .create-problem-form .additional-info-textarea {
   min-height: 12rem;
-  background-color: #181818;
+  background-color: #111111;
 }
 
 .create-problem-form .hints-textarea {
