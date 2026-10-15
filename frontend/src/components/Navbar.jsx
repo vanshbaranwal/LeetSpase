@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Code2, LayoutDashboard, LoaderCircle, LogOut, User } from "lucide-react";
+import { Code2, LayoutDashboard, LoaderCircle, LogOut, Menu, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useProblemStore } from "../store/useProblemStore";
@@ -40,6 +40,45 @@ const Navbar = ({ variant = "default" }) => {
         </div>
 
         <div className="flex shrink-0 items-center gap-2.5">
+          <div className={`dropdown dropdown-end ${isProblemsPage ? "md:hidden" : "lg:hidden"}`}>
+            <button
+              type="button"
+              tabIndex={0}
+              className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-white/65 transition-colors hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+              aria-label="Open navigation menu"
+            >
+              <Menu className="h-4.5 w-4.5" />
+            </button>
+            <div tabIndex={0} className="dropdown-content z-[60] mt-3 w-64 rounded-2xl border border-white/10 bg-[#111111] p-2 text-sm text-white shadow-2xl shadow-black/60">
+              {isProblemsPage ? (
+                <>
+                  <Link to="/problems" className="flex h-11 items-center rounded-xl px-3 font-medium text-white transition-colors hover:bg-white/[0.06]">Problems</Link>
+                  <div className="flex h-11 cursor-not-allowed items-center justify-between rounded-xl px-3 text-white/40" aria-disabled="true">
+                    <span>Discussion</span><span className="text-[10px] uppercase tracking-[0.12em] text-white/25">Soon</span>
+                  </div>
+                  <div className="flex h-11 cursor-not-allowed items-center justify-between rounded-xl px-3 text-white/40" aria-disabled="true">
+                    <span>Contest</span><span className="text-[10px] uppercase tracking-[0.12em] text-white/25">Soon</span>
+                  </div>
+                  {dailyProblem ? (
+                    <Link to={`/problem/${dailyProblem.id}`} className="flex h-11 items-center rounded-xl px-3 font-medium text-orange-400 transition-colors hover:bg-orange-400/[0.08] hover:text-orange-300">Problem of the Day</Link>
+                  ) : (
+                    <span className="flex h-11 items-center gap-2 rounded-xl px-3 text-orange-400/40">
+                      {isDailyProblemLoading && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                      Problem of the Day
+                    </span>
+                  )}
+                </>
+              ) : (
+                <>
+                  <a href="/#features" className="flex h-11 items-center rounded-xl px-3 font-medium text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white">Features</a>
+                  <a href="/#how-it-works" className="flex h-11 items-center rounded-xl px-3 font-medium text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white">How it works</a>
+                  <Link to="/problems" className="flex h-11 items-center rounded-xl px-3 font-medium text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white">Problems</Link>
+                  <a href="/#about" className="flex h-11 items-center rounded-xl px-3 font-medium text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white">About</a>
+                </>
+              )}
+            </div>
+          </div>
+
           {isProblemsPage && (
             <div className="mr-5 hidden items-center gap-8 font-mono text-sm font-semibold uppercase tracking-[0.06em] md:flex">
               <Link to="/problems" className="text-white">Problems</Link>

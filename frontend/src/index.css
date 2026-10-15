@@ -48,6 +48,26 @@
   height: 0;
 }
 
+/* Horizontal data regions retain a subtle scroll affordance. */
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  display: block;
+  height: 5px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
 /* Monaco renders its own scrollbar elements instead of native scrollbars. */
 .monaco-editor .scrollbar {
   display: none !important;
@@ -64,6 +84,11 @@ body {
   background-position: 0 0, 80px 0, 20px 0, 0 0;
   background-attachment: fixed;
   color: var(--brand-white);
+}
+
+:where(a, button, input, textarea, select):focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.72);
+  outline-offset: 3px;
 }
 
 button.btn,

@@ -128,7 +128,7 @@ const ProblemsPage = () => {
       : "No problems found.";
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-[1500px] px-4 pb-24 pt-10 text-white sm:px-6">
+    <main className="mx-auto min-h-screen w-full max-w-[1500px] overflow-x-clip px-4 pb-24 pt-10 text-white sm:px-6">
       <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_300px]">
         <section className="min-w-0">
           {isProblemsLoading ? (

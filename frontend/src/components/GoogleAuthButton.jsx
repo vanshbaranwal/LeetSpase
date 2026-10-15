@@ -83,10 +83,10 @@ const GoogleAuthButton = () => {
         buttonRef.current.replaceChildren();
         window.google.accounts.id.renderButton(buttonRef.current, {
           type: "standard",
-          theme: "filled_blue",
+          theme: "filled_black",
           size: "large",
           text: "continue_with",
-          shape: "rectangular",
+          shape: "pill",
           logo_alignment: "left",
           width: Math.min(buttonRef.current.clientWidth || 400, 400),
         });
@@ -109,7 +109,7 @@ const GoogleAuthButton = () => {
     return (
       <button
         type="button"
-        className="btn btn-outline w-full"
+        className="h-11 w-full cursor-not-allowed rounded-xl border border-white/10 bg-white/[0.025] px-4 text-sm text-white/35"
         disabled
         title={configurationError}
       >
@@ -123,7 +123,7 @@ const GoogleAuthButton = () => {
       <div ref={buttonRef} className="flex w-full justify-center" />
 
       {isGoogleLoggingIn && (
-        <div className="absolute inset-0 flex items-center justify-center rounded bg-base-100/90">
+        <div className="absolute inset-0 flex items-center justify-center rounded-xl border border-white/10 bg-[#111111]/95">
           <Loader2 className="h-5 w-5 animate-spin" />
           <span className="ml-2 text-sm">Signing in with Google...</span>
         </div>

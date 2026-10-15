@@ -2,18 +2,27 @@ import { useState } from "react";
 import { CheckCircle2, Clock3, MemoryStick, XCircle } from "lucide-react";
 
 const parseMetric = (value) => {
-  if (Array.isArray(value)) return value;
+  if (value === null || value === undefined || value === "") return [];
+  if (Array.isArray(value)) return value.flatMap(parseMetric);
+  if (typeof value === "number") return Number.isFinite(value) ? [value] : [];
+
+  const stringValue = String(value).trim();
+  if (!stringValue) return [];
+
   try {
-    const parsed = JSON.parse(value || "[]");
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed = JSON.parse(stringValue);
+    if (parsed !== stringValue) return parseMetric(parsed);
   } catch {
-    return [];
+    // Plain values such as "0.110 s" are parsed below.
   }
+
+  const matches = stringValue.match(/-?\d+(?:\.\d+)?/g);
+  return matches ? matches.map(Number).filter(Number.isFinite) : [];
 };
 
 const average = (values) => {
-  const numbers = values.map((value) => Number.parseFloat(value)).filter(Number.isFinite);
-  return numbers.length ? numbers.reduce((sum, value) => sum + value, 0) / numbers.length : 0;
+  const numbers = parseMetric(values);
+  return numbers.length ? numbers.reduce((sum, value) => sum + value, 0) / numbers.length : null;
 };
 
 const formatStatus = (status) => String(status || "Unknown")
@@ -24,8 +33,8 @@ const formatStatus = (status) => String(status || "Unknown")
 const SubmissionResults = ({ submission }) => {
   const [activeTab, setActiveTab] = useState("results");
   const testCases = Array.isArray(submission?.testCases) ? submission.testCases : [];
-  const avgMemory = average(parseMetric(submission?.memory));
-  const avgTime = average(parseMetric(submission?.time));
+  const avgMemory = average(submission?.memory);
+  const avgTime = average(submission?.time);
   const passedTests = testCases.filter((testCase) => testCase.passed).length;
   const isAccepted = submission?.status?.toLowerCase() === "accepted";
   const successRate = testCases.length ? Math.round((passedTests / testCases.length) * 100) : 0;
@@ -59,9 +68,9 @@ const SubmissionResults = ({ submission }) => {
               valueClass={isAccepted ? "text-emerald-300" : "text-red-300"}
               iconClass={isAccepted ? "text-emerald-300" : "text-red-300"}
             />
-            <SummaryMetric label="Success rate" value={`${successRate}%`} detail={`${passedTests}/${testCases.length} passed`} icon={CheckCircle2} />
-            <SummaryMetric label="Average time" value={`${avgTime.toFixed(3)} s`} icon={Clock3} />
-            <SummaryMetric label="Average memory" value={`${avgMemory.toFixed(0)} KB`} icon={MemoryStick} />
+            <SummaryMetric label="Success rate" value={testCases.length ? `${successRate}%` : "—"} detail={testCases.length ? `${passedTests}/${testCases.length} passed` : "No testcase data"} icon={CheckCircle2} />
+            <SummaryMetric label="Average time" value={avgTime === null ? "—" : `${avgTime.toFixed(3)} s`} detail={avgTime === null ? "Not reported" : undefined} icon={Clock3} />
+            <SummaryMetric label="Average memory" value={avgMemory === null ? "—" : `${avgMemory.toFixed(0)} KB`} detail={avgMemory === null ? "Not reported" : undefined} icon={MemoryStick} />
           </div>
 
           {!!testCases.length && (

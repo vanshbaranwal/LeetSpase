@@ -62,14 +62,14 @@ function reverseList(head) {
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % codeSnippets.length)
-    }, 2000)
+    }, 4000)
     return () => clearInterval(interval)
   }, [codeSnippets.length])
 
   return (
-    <div className="hidden lg:flex flex-col items-center justify-center bg-base-100 text-white p-12 relative overflow-hidden">
+    <div className="relative hidden min-h-dvh flex-col items-center justify-center overflow-hidden border-l border-white/10 bg-[#090909] p-12 text-white lg:flex">
       {/* Animated code symbols in background */}
-      <div className="absolute inset-0 opacity-10">
+      <div className="absolute inset-0 opacity-[0.06]">
         <div className="absolute top-[10%] left-[15%] animate-pulse">
           <Braces size={40} />
         </div>
@@ -90,22 +90,22 @@ function reverseList(head) {
         </div>
       </div>
 
-      <div className="z-10 max-w-md flex flex-col items-center">
+      <div className="z-10 flex max-w-md flex-col items-center">
         {/* Code editor mockup */}
-        <div className="w-full bg-slate-800 rounded-lg shadow-xl mb-8 overflow-hidden">
+        <div className="mb-9 w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0d0d0d] shadow-2xl shadow-black/50">
           {/* Editor header */}
-          <div className="bg-slate-700 px-4 py-2 flex items-center">
+          <div className="flex items-center border-b border-white/[0.08] bg-[#151515] px-4 py-3">
             <div className="flex space-x-2 mr-4">
               <div className="w-3 h-3 rounded-full bg-red-500"></div>
               <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
               <div className="w-3 h-3 rounded-full bg-green-500"></div>
             </div>
-            <div className="text-xs font-mono opacity-70">problem.js</div>
+            <div className="font-mono text-xs text-white/45">problem.js</div>
           </div>
 
           {/* Code content */}
-          <div className="p-4 font-mono text-xs sm:text-sm overflow-hidden relative h-64">
-            <pre className="whitespace-pre-wrap text-green-400 transition-opacity duration-1000">
+          <div className="relative h-64 overflow-hidden p-5 font-mono text-xs sm:text-sm">
+            <pre className="whitespace-pre-wrap leading-6 text-emerald-300/75 transition-opacity duration-1000">
               {codeSnippets[activeIndex]}
             </pre>
 
@@ -115,15 +115,15 @@ function reverseList(head) {
         </div>
 
         {/* Logo */}
-        <div className="flex items-center justify-center mb-6">
-          <div className="w-12 h-12 rounded-xl bg-primary/10  flex items-center justify-center">
+        <div className="mb-6 flex items-center justify-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05]">
             <Code className="w-6 h-6 text-primary" />
           </div>
         </div>
 
         {/* Text content */}
-        <h2 className="text-2xl font-bold mb-4 text-center">{title}</h2>
-        <p className="text-slate-300 text-center">{subtitle}</p>
+        <h2 className="mb-3 text-center text-2xl font-semibold tracking-[-0.035em]">{title}</h2>
+        <p className="text-center text-sm leading-6 text-white/40">{subtitle}</p>
       </div>
     </div>
   )

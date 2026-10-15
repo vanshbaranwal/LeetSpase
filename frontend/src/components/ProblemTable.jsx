@@ -139,14 +139,14 @@ const ProblemsTable = ({
 
       {/* Filters */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <div ref={difficultyMenuRef} className="relative w-44 shrink-0">
+        <div className="grid w-full min-w-0 grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-2 sm:flex sm:w-auto sm:items-center sm:gap-3">
+          <div ref={difficultyMenuRef} className="relative w-full sm:w-44 sm:shrink-0">
             <button
               type="button"
               onClick={() => setIsDifficultyOpen((isOpen) => !isOpen)}
               aria-haspopup="listbox"
               aria-expanded={isDifficultyOpen}
-              className="flex h-10 w-full items-center gap-2 rounded-full border border-white/10 bg-base-200 px-4 text-sm font-medium text-white/75 outline-none transition-colors hover:border-white/20 hover:text-white focus:border-white/10 focus:outline-none"
+              className="flex h-10 w-full items-center gap-2 rounded-full border border-white/10 bg-base-200 px-3 text-sm font-medium text-white/75 outline-none transition-colors hover:border-white/20 hover:text-white focus:border-white/10 focus:outline-none sm:px-4"
             >
               <span className="flex-1 text-left">Difficulty</span>
               <ChevronDown className={`h-4 w-4 text-white/45 transition-transform ${isDifficultyOpen ? "rotate-180" : ""}`} />
@@ -202,7 +202,7 @@ const ProblemsTable = ({
             )}
           </div>
 
-          <label className="flex h-10 w-48 min-w-0 items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.07] px-3.5 focus-within:border-white/20 focus-within:bg-white/[0.09] sm:w-56">
+          <label className="flex h-10 w-full min-w-0 items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.07] px-3.5 focus-within:border-white/20 focus-within:bg-white/[0.09] sm:w-56">
             <Search className="h-4 w-4 shrink-0 text-white/45" />
             <input
               type="search"
@@ -216,7 +216,7 @@ const ProblemsTable = ({
         </div>
         <button
           type="button"
-          className="inline-flex h-10 items-center justify-center rounded-full border border-white bg-white px-5 text-sm font-semibold text-black shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-[#e6e6e6] hover:bg-[#e6e6e6] active:translate-y-0"
+          className="inline-flex h-10 w-full items-center justify-center rounded-full border border-white bg-white px-5 text-sm font-semibold text-black shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-[#e6e6e6] hover:bg-[#e6e6e6] active:translate-y-0 sm:w-auto"
           onClick={handleCreatePlaylistClick}
         >
           Create Playlist
@@ -282,11 +282,11 @@ const ProblemsTable = ({
                       )}
                     </td>
                     <td className="text-center">
-                      <div className="flex flex-wrap justify-center gap-1">
+                      <div className="flex flex-wrap justify-center gap-x-2 gap-y-1">
                         {(problem.tags || []).map((tag, idx) => (
                           <span
                             key={idx}
-                            className="text-xs font-semibold text-white/55"
+                            className="text-xs font-semibold text-white/55 after:ml-2 after:text-white/15 after:content-['•'] last:after:hidden"
                           >
                             {tag}
                           </span>
@@ -331,6 +331,7 @@ const ProblemsTable = ({
                           </div>
                         )}
                         <button
+                          type="button"
                           className="btn btn-sm rounded-full border border-white/10 bg-[#000000] text-[#FFFFFF] hover:border-white/20 hover:bg-[#101010] hover:text-[#FFFFFF]"
                           onClick={() => handleAddToPlaylist(problem.id)}
                         >

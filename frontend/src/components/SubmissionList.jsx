@@ -12,18 +12,32 @@ import {
 } from "lucide-react";
 
 const parseMetric = (value) => {
-  if (Array.isArray(value)) return value;
+  if (value === null || value === undefined || value === "") return [];
+  if (Array.isArray(value)) return value.flatMap(parseMetric);
+  if (typeof value === "number") return Number.isFinite(value) ? [value] : [];
+
+  const stringValue = String(value).trim();
+  if (!stringValue) return [];
+
   try {
-    const parsed = JSON.parse(value || "[]");
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed = JSON.parse(stringValue);
+    if (parsed !== stringValue) return parseMetric(parsed);
   } catch {
-    return [];
+    // Plain values such as "0.110 s" are parsed below.
   }
+
+  const matches = stringValue.match(/-?\d+(?:\.\d+)?/g);
+  return matches ? matches.map(Number).filter(Number.isFinite) : [];
 };
 
 const average = (value) => {
-  const numbers = parseMetric(value).map((item) => Number.parseFloat(item)).filter(Number.isFinite);
-  return numbers.length ? numbers.reduce((sum, item) => sum + item, 0) / numbers.length : 0;
+  const numbers = parseMetric(value);
+  return numbers.length ? numbers.reduce((sum, item) => sum + item, 0) / numbers.length : null;
+};
+
+const formatMetric = (value, unit, precision) => {
+  const result = average(value);
+  return result === null ? "—" : `${result.toFixed(precision)} ${unit}`;
 };
 
 const getSubmittedCode = (sourceCode, language) => {
@@ -86,7 +100,7 @@ const SubmissionsList = ({ submissions, isLoading }) => {
         const normalizedStatus = String(submission.status || "").trim().toLowerCase();
         const isAccepted = normalizedStatus === "accepted";
         const statusLabel = normalizedStatus
-          ? normalizedStatus.replace(/\b\w/g, (letter) => letter.toUpperCase())
+          ? normalizedStatus.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase())
           : "Unknown";
         const isExpanded = expandedSubmissionId === submission.id;
         const submittedCode = getSubmittedCode(submission.sourceCode, submission.language);
@@ -111,8 +125,8 @@ const SubmissionsList = ({ submissions, isLoading }) => {
                 </span>
               </span>
               <span className="flex flex-wrap items-center gap-3 text-[11px] text-white/38">
-                <span className="flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5" />{average(submission.time).toFixed(3)} s</span>
-                <span className="flex items-center gap-1.5"><MemoryStick className="h-3.5 w-3.5" />{average(submission.memory).toFixed(0)} KB</span>
+                <span className="flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5" />{formatMetric(submission.time, "s", 3)}</span>
+                <span className="flex items-center gap-1.5"><MemoryStick className="h-3.5 w-3.5" />{formatMetric(submission.memory, "KB", 0)}</span>
                 <span className="flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" />{new Date(submission.createdAt).toLocaleDateString()}</span>
                 <span className="ml-1 flex items-center gap-1.5 text-white/48">
                   <Code2 className="h-3.5 w-3.5" />

@@ -24,15 +24,27 @@ const App = () => {
 
   if (isCheckingAuth && !authUser) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader className="size-10 animate-spin" />
+      <div className="flex min-h-dvh items-center justify-center" role="status" aria-label="Loading LeetSpase">
+        <Loader className="size-8 animate-spin text-white/60" />
       </div>
     );
   }
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-start">
-      <Toaster />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3500,
+          style: {
+            background: "#151515",
+            color: "#ffffff",
+            border: "1px solid rgba(255,255,255,0.10)",
+            borderRadius: "14px",
+            boxShadow: "0 18px 50px rgba(0,0,0,0.45)",
+          },
+        }}
+      />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route

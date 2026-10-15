@@ -44,10 +44,11 @@ const PlaylistSidebar = ({
   onSelectTag,
 }) => {
   const activeKey = selectionKey(selectedCollection);
+  const allTagsSelected = !selectedTag || selectedTag === "ALL";
 
   return (
-    <aside className="order-first self-start lg:order-last lg:sticky lg:top-28">
-      <div className="max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl border border-white/10 bg-[#101010]/90 p-3 text-center shadow-2xl shadow-black/25">
+    <aside className="order-first min-w-0 max-w-full self-start lg:order-last lg:sticky lg:top-28">
+      <div className="max-h-[calc(100vh-8rem)] w-full min-w-0 overflow-y-auto overflow-x-hidden rounded-2xl border border-white/10 bg-[#101010]/90 p-3 text-center shadow-2xl shadow-black/25">
         <div className="px-2 pb-2 pt-1">
           <p className="text-sm font-semibold text-white">Playlists</p>
         </div>
@@ -149,22 +150,24 @@ const PlaylistSidebar = ({
         <div className="mt-3 flex flex-wrap justify-center gap-x-3.5 gap-y-3 px-2">
           <button
             type="button"
-            onClick={() => onSelectTag("")}
-            className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${!selectedTag ? "text-white" : "text-white/70 hover:text-white"}`}
+            onClick={() => onSelectTag("ALL")}
+            className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${allTagsSelected ? "text-white" : "text-white/70 hover:text-white"}`}
+            aria-pressed={allTagsSelected}
           >
             All
-            <span className={`rounded-full border px-2 py-0.5 font-mono text-[11px] ${!selectedTag ? "border-white/20 bg-white/[0.16] text-white/80" : "border-white/10 bg-white/[0.1] text-white/65"}`}>
+            <span className={`rounded-full border px-2 py-0.5 font-mono text-[11px] ${allTagsSelected ? "border-white/20 bg-white/[0.16] text-white/80" : "border-white/10 bg-white/[0.1] text-white/65"}`}>
               {problemCount}
             </span>
           </button>
 
           {tags.map(({ name, count }) => {
-            const active = selectedTag === name;
+            const active = selectedTag?.toLowerCase() === name.toLowerCase();
             return (
               <button
                 key={name}
                 type="button"
-                onClick={() => onSelectTag(active ? "" : name)}
+                onClick={() => onSelectTag(active ? "ALL" : name)}
+                aria-pressed={active}
                 className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${active ? "text-white" : "text-white/70 hover:text-white"}`}
               >
                 {name}

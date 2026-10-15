@@ -120,6 +120,13 @@ const getUserPresence = (user) => {
   return { label: "Active", className: "text-amber-300" };
 };
 
+const AdminMobileField = ({ label, value, valueClass = "text-white/65", mono = false }) => (
+  <div className="min-w-0 text-center">
+    <p className="text-[10px] uppercase tracking-[0.12em] text-white/30">{label}</p>
+    <p className={`mt-1.5 truncate text-xs font-medium ${mono ? "font-mono" : ""} ${valueClass}`} title={String(value ?? "—")}>{value ?? "—"}</p>
+  </div>
+);
+
 const AdminDashboard = () => {
   const { authUser } = useAuthStore();
   const {
@@ -327,7 +334,61 @@ const AdminDashboard = () => {
               </div>
 
               <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
-                <div className="w-full overflow-hidden">
+                <div className="divide-y divide-white/[0.07] xl:hidden">
+                  {filteredUsers.map((user) => {
+                    const presence = getUserPresence(user);
+
+                    return (
+                      <article key={user.id} className="p-4 sm:p-5">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-sm font-semibold text-black">
+                            {user.image ? <img src={user.image} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" /> : (user.name?.[0] || "U").toUpperCase()}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-semibold" title={user.name || "Unnamed user"}>{user.name || "Unnamed user"}</p>
+                            <p className="mt-0.5 truncate text-xs text-white/35" title={user.email}>{user.email}</p>
+                          </div>
+                          <span className={`shrink-0 text-xs font-semibold ${presence.className}`}>{presence.label}</span>
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-white/[0.07] py-4 text-sm sm:grid-cols-4">
+                          <AdminMobileField label="Username" value={`@${user.username}`} mono />
+                          <AdminMobileField label="Role" value={user.role} valueClass={user.role === "ADMIN" ? "text-violet-300" : "text-white/65"} />
+                          <AdminMobileField label="Solved" value={user.solvedProblems} />
+                          <AdminMobileField label="Verification" value={user.isVerified ? "Verified" : "Not verified"} valueClass={user.isVerified ? "text-emerald-400" : "text-red-400"} />
+                        </div>
+
+                        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <p className="text-xs text-white/35">Joined {formatDate(user.createdAt)}</p>
+                          <div className="flex flex-wrap items-center gap-3">
+                            <button
+                              type="button"
+                              disabled={isUpdatingUser || user.id === authUser.id}
+                              onClick={() => setPendingRoleChange({
+                                user,
+                                nextRole: user.role === "ADMIN" ? "USER" : "ADMIN",
+                              })}
+                              title={user.id === authUser.id ? "You cannot remove your own admin access" : undefined}
+                              className={`whitespace-nowrap py-1.5 text-xs font-semibold transition-colors hover:underline hover:underline-offset-4 disabled:cursor-not-allowed disabled:no-underline disabled:opacity-35 ${user.id === authUser.id || user.role === "ADMIN" ? "text-amber-300" : "text-violet-300"}`}
+                            >
+                              {user.id === authUser.id ? "Current admin" : user.role === "ADMIN" ? "Remove admin" : "Make admin"}
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isUpdatingUser || user.id === authUser.id}
+                              onClick={() => updateUserStatus(user.id, user.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE")}
+                              className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-30 ${user.status === "ACTIVE" ? "border-red-400/20 text-red-300 hover:bg-red-400/10" : "border-emerald-400/20 text-emerald-300 hover:bg-emerald-400/10"}`}
+                            >
+                              {user.status === "ACTIVE" ? "Suspend" : "Activate"}
+                            </button>
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+
+                <div className="hidden w-full overflow-hidden xl:block">
                   <table className="w-full table-fixed text-left text-sm">
                     <colgroup>
                       <col className="w-[20%]" />

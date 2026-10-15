@@ -19,7 +19,7 @@ import { useAuthStore } from '../store/useAuthStore';
 
 const LoginSchema = z.object({
   email:z.string().email("Enter a valid email"),
-  password:z.string().min(6 , "Password must be atleast of 6 characters"),
+  password:z.string().min(6 , "Password must be at least 6 characters"),
 
 })
 
@@ -41,35 +41,36 @@ const LoginPage = () => {
       await login(data)
       
     } catch (error) {
-      console.error("Signup failed" , error)
+      console.error("Login failed" , error)
     }
   }
 
 
   return (
-    <div className='h-screen grid lg:grid-cols-2'>
-        <div className="flex flex-col justify-center items-center p-6 sm:p-12">
-        <div className="w-full max-w-md space-y-8">
+    <div className='grid min-h-dvh lg:grid-cols-2'>
+        <div className="flex items-center justify-center px-6 py-10 sm:px-12 sm:py-14">
+        <div className="w-full max-w-md space-y-7">
           {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="flex flex-col items-center gap-2 group">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+          <div className="text-center">
+            <Link to="/" className="group mx-auto flex w-fit items-center gap-2.5 text-white">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] transition-colors group-hover:bg-white/[0.09]">
                 <Code className="w-6 h-6 text-primary" />
               </div>
-              <h1 className="text-2xl font-bold mt-2">Welcome Back</h1>
-              <p className="text-base-content/60">Login to your account</p>
-            </div>
+              <span className="text-xl font-semibold tracking-[-0.03em]">LeetSpase</span>
+            </Link>
+            <h1 className="mt-8 text-3xl font-semibold tracking-[-0.04em]">Welcome back</h1>
+            <p className="mt-2 text-sm text-white/40">Sign in to continue solving.</p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             
            
           
 
             {/* Email */}
             <div className="form-control">
-              <label className="label">
+              <label htmlFor="login-email" className="label">
                 <span className="label-text font-medium">Email</span>
               </label>
               <div className="relative">
@@ -78,21 +79,23 @@ const LoginPage = () => {
                 </div>
                 <input
                   type="email"
+                  id="login-email"
+                  autoComplete="email"
                   {...register("email")}
-                  className={`input input-bordered w-full pl-10 ${
-                    errors.email ? "input-error" : ""
+                  className={`h-12 w-full rounded-xl border bg-[#111111] pl-10 pr-4 text-sm text-white outline-none transition-colors placeholder:text-white/25 ${
+                    errors.email ? "border-red-400/60" : "border-white/10 hover:border-white/20 focus:border-white/30"
                   }`}
                   placeholder="you@example.com"
                 />
               </div>
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                <p className="mt-1.5 text-xs text-red-400">{errors.email.message}</p>
               )}
             </div>
 
             {/* Password */}
             <div className="form-control">
-              <label className="label">
+              <label htmlFor="login-password" className="label">
                 <span className="label-text font-medium">Password</span>
               </label>
               <div className="relative">
@@ -101,9 +104,11 @@ const LoginPage = () => {
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
+                  id="login-password"
+                  autoComplete="current-password"
                   {...register("password")}
-                  className={`input input-bordered w-full pl-10 ${
-                    errors.password ? "input-error" : ""
+                  className={`h-12 w-full rounded-xl border bg-[#111111] pl-10 pr-12 text-sm text-white outline-none transition-colors placeholder:text-white/25 ${
+                    errors.password ? "border-red-400/60" : "border-white/10 hover:border-white/20 focus:border-white/30"
                   }`}
                   placeholder="••••••••"
                 />
@@ -111,6 +116,7 @@ const LoginPage = () => {
                   type="button"
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-base-content/40" />
@@ -120,20 +126,20 @@ const LoginPage = () => {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+                <p className="mt-1.5 text-xs text-red-400">{errors.password.message}</p>
               )}
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
-              className="btn btn-primary w-full"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-semibold text-black transition-colors hover:bg-[#e6e6e6] disabled:cursor-wait disabled:opacity-55"
               disabled={isLoggingIn}
             >
                {isLoggingIn ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  Loading...
+                  Signing in...
                 </>
               ) : (
                 "Sign in"
@@ -153,9 +159,9 @@ const LoginPage = () => {
 
           {/* Footer */}
           <div className="text-center">
-            <p className="text-base-content/60">
+            <p className="text-sm text-white/45">
               Don't have an account?{" "}
-              <Link to="/signup" className="link link-primary">
+              <Link to="/signup" className="font-semibold text-white transition-colors hover:text-white/70">
                 Sign up
               </Link>
             </p>
