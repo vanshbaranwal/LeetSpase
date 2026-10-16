@@ -1,20 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, Bookmark, Braces, CheckCircle2, Code2, Heart, History,
-  Layers3, ListChecks, Play, ShieldCheck, Terminal,
+  ArrowRight, Code2, Heart, Play, Terminal,
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import LanguageBrandIcon from "../components/LanguageBrandIcon";
-
-const features = [
-  [Terminal, "Run real code", "Write and execute JavaScript, Python, and Java directly in a focused browser editor."],
-  [ListChecks, "Test every solution", "Run your code against multiple test cases and see clear, structured results instantly."],
-  [History, "Track submissions", "Review past attempts, execution status, runtime, and test-case performance in one place."],
-  [Bookmark, "Build playlists", "Organize problems into personal practice lists for interviews, topics, or revision sessions."],
-  [Layers3, "Filter with focus", "Find the right challenge by title, difficulty, and topic without losing momentum."],
-  [ShieldCheck, "Validated problems", "Reference solutions are checked against test cases before a problem enters the library."],
-];
 
 const languageExamples = {
   PYTHON: {
@@ -162,26 +152,28 @@ const HomePage = () => {
 
   return (
     <main className="w-full overflow-hidden text-white">
-      <section className="relative mx-auto grid min-h-[calc(100vh-96px)] max-w-7xl items-center gap-12 px-6 py-16 sm:py-20 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16 lg:px-8 lg:py-20">
-        <div>
-          <h1 className="max-w-3xl text-5xl font-semibold leading-[1.03] tracking-[-0.055em] sm:text-6xl lg:text-7xl">
-            Your workspace to code,<span className="block text-white/40">practice, and prove.</span>
+      <section className="relative mx-auto grid min-h-[calc(100dvh-96px)] max-w-7xl items-center gap-12 px-6 py-14 sm:py-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-14 lg:px-8 lg:py-16">
+        <div className="max-w-2xl">
+          <h1 className="text-5xl font-semibold leading-[0.96] tracking-[-0.06em] sm:text-6xl lg:text-[4.5rem] xl:text-[5rem]">
+            <span className="block">Your place to code.</span>
+            <span className="mt-3 block text-white/45">Practice. Improve. Prove.</span>
           </h1>
-          <p className="mt-7 max-w-2xl text-base leading-7 text-white/55 sm:text-lg">
-            LeetSpase is a clutter-free coding workspace for solving curated problems, running test cases, tracking submissions, and building personal playlists.
-          </p>
-          <div className="mt-9 flex flex-wrap items-center gap-3">
+          <div className="mt-9">
             {authUser ? (
-              <Link to="/problems" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition-transform hover:-translate-y-0.5">Explore problems <ArrowRight className="h-4 w-4" /></Link>
+              <Link to="/problems" className="group inline-flex h-12 items-center gap-3 rounded-full bg-white py-2 pl-6 pr-2 text-sm font-semibold text-black shadow-[0_10px_30px_rgba(255,255,255,0.07)] transition-[background-color,box-shadow] duration-200 hover:bg-white/90 hover:shadow-[0_12px_32px_rgba(255,255,255,0.1)]">
+                Continue solving
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-black/[0.08] transition-colors duration-200 group-hover:bg-black/[0.12]">
+                  <ArrowRight className="h-4 w-4" />
+                </span>
+              </Link>
             ) : (
-              <Link to="/problems" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition-transform hover:-translate-y-0.5">Start solving free <ArrowRight className="h-4 w-4" /></Link>
+              <Link to="/problems" className="group inline-flex h-12 items-center gap-3 rounded-full bg-white py-2 pl-6 pr-2 text-sm font-semibold text-black shadow-[0_10px_30px_rgba(255,255,255,0.07)] transition-[background-color,box-shadow] duration-200 hover:bg-white/90 hover:shadow-[0_12px_32px_rgba(255,255,255,0.1)]">
+                Start solving
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-black/[0.08] transition-colors duration-200 group-hover:bg-black/[0.12]">
+                  <ArrowRight className="h-4 w-4" />
+                </span>
+              </Link>
             )}
-            <a href="#features" className="rounded-xl border border-white/15 px-5 py-3 text-sm font-medium text-white/75 transition-colors hover:border-white/30 hover:text-white">See what’s inside</a>
-          </div>
-          <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-xs text-white/40">
-            {["Multi-language execution", "Real test cases", "Progress tracking"].map((item) => (
-              <span key={item} className="flex items-center gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-white/70" /> {item}</span>
-            ))}
           </div>
         </div>
 
@@ -222,42 +214,49 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section id="features" className="scroll-mt-28 border-y border-white/10 bg-black/25 px-6 py-20 sm:py-24 lg:py-28">
-        <div className="mx-auto max-w-7xl">
-          <div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/40">Everything in one workspace</p><h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-5xl">Practice with purpose.</h2><p className="mt-4 text-white/50">Every feature is built to reduce friction between choosing a problem and understanding your solution.</p></div>
-          <div className="mt-10 grid gap-4 sm:mt-12 md:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-            {features.map(([Icon, title, description], index) => (
-              <article key={title} className="group rounded-2xl border border-white/10 bg-white/[0.025] p-6 transition-colors hover:border-white/20 hover:bg-white/[0.045]">
-                <div className="flex items-start justify-between"><div className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.05]"><Icon className="h-5 w-5 text-white/80" /></div><span className="font-mono text-xs text-white/20">0{index + 1}</span></div>
-                <h3 className="mt-7 text-lg font-semibold">{title}</h3><p className="mt-3 text-sm leading-6 text-white/45">{description}</p>
-              </article>
+      <section id="features" className="scroll-mt-28 border-y border-white/10 bg-black/20 px-6 py-20 sm:py-24">
+        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/35">The essentials</p>
+            <h2 className="mt-4 max-w-md text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Everything you need. Nothing you don’t.</h2>
+          </div>
+
+          <div className="border-t border-white/10">
+            {[
+              ["Problem library", "Curated challenges, language tracks, and playlists."],
+              ["Code execution", "Python, Java, and JavaScript with real test cases."],
+              ["Progress", "Submissions, streaks, and solved problems in one place."],
+            ].map(([title, description]) => (
+              <div key={title} className="grid gap-2 border-b border-white/10 py-6 sm:grid-cols-[180px_1fr] sm:items-center sm:gap-8 sm:py-7">
+                <h3 className="font-semibold text-white/90">{title}</h3>
+                <p className="text-sm leading-6 text-white/40">{description}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="how-it-works" className="mx-auto max-w-7xl scroll-mt-28 px-6 py-20 sm:py-24 lg:py-28">
-        <div className="grid gap-12 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16">
-          <div><p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/40">A simple loop</p><h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-5xl">Learn by doing.</h2><p className="mt-5 max-w-md leading-7 text-white/50">No complicated setup. Choose a challenge, write your approach, and learn from every run.</p></div>
-          <div className="space-y-3">
-            {[["01", "Choose", "Search by topic or difficulty and pick the challenge that fits today’s goal."], ["02", "Code", "Work inside the integrated editor with starter code for your chosen language."], ["03", "Run", "Execute against real inputs and inspect output, errors, runtime, and test results."], ["04", "Improve", "Review submissions, revisit playlists, and turn weak topics into strengths."]].map(([step, title, description]) => (
-              <div key={step} className="grid gap-4 rounded-2xl border border-white/10 p-5 sm:grid-cols-[52px_120px_1fr] sm:items-center"><span className="font-mono text-sm text-white/30">{step}</span><span className="font-semibold">{title}</span><span className="text-sm leading-6 text-white/45">{description}</span></div>
-            ))}
+      <section id="how-it-works" className="mx-auto max-w-7xl scroll-mt-28 px-6 py-20 text-center sm:py-28">
+        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/35">The loop</p>
+        <h2 className="mt-6 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl lg:text-7xl">
+          Choose. <span className="text-white/35">Code.</span> Improve.
+        </h2>
+        <p className="mx-auto mt-6 max-w-md text-sm leading-7 text-white/40">One focused workflow from problem to progress.</p>
+      </section>
+
+      <section id="about" className="scroll-mt-28 border-t border-white/10 px-6 py-20 sm:py-24">
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/35">LeetSpase</p>
+            <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">A quieter way to practice coding.</h2>
           </div>
-        </div>
-      </section>
-
-      <section id="problems" className="scroll-mt-28 border-y border-white/10 bg-black/20 px-4 py-20 sm:px-6 sm:py-24 lg:py-28">
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto mb-12 max-w-2xl text-center"><p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/40">Problem library</p><h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-5xl">Your next challenge is here.</h2><p className="mt-4 text-white/50">Filter, solve, save, and return stronger.</p></div>
-          <div className="mx-auto max-w-4xl rounded-3xl border border-white/10 bg-[#111111]/90 p-8 text-center sm:p-12"><Braces className="mx-auto h-10 w-10 text-white/60" /><h3 className="mt-5 text-2xl font-semibold">Enter your coding space</h3><p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-white/45">{authUser ? "Continue to the problem library and choose your next challenge." : "Create an account to unlock the curated problem library, code execution, submissions, and personal playlists."}</p><Link to={authUser ? "/problems" : "/signup"} className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black">{authUser ? "Open problems" : "Create your account"} <ArrowRight className="h-4 w-4" /></Link></div>
-        </div>
-      </section>
-
-      <section id="about" className="mx-auto max-w-7xl scroll-mt-28 px-6 py-20 sm:py-24 lg:py-28">
-        <div className="grid overflow-hidden rounded-3xl border border-white/10 bg-[#111111]/90 lg:grid-cols-2">
-          <div className="p-8 sm:p-12"><p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/40">About LeetSpase</p><h2 className="mt-5 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">A quieter place to become a stronger developer.</h2></div>
-          <div className="border-t border-white/10 p-8 text-sm leading-7 text-white/50 sm:p-12 lg:border-l lg:border-t-0">LeetSpase brings problem discovery, code execution, automated testing, submission tracking, and custom playlists into one deliberate workflow. It is designed for students and developers preparing for interviews or strengthening their fundamentals—one solved problem at a time.</div>
+          <Link
+            to={authUser ? "/problems" : "/signup"}
+            className="inline-flex w-fit items-center gap-2 border-b border-white/40 pb-1 text-sm font-semibold text-white transition-colors hover:border-white"
+          >
+            {authUser ? "Open problems" : "Start practicing"}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
