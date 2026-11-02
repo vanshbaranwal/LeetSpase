@@ -83,12 +83,12 @@ const GoogleAuthButton = () => {
         buttonRef.current.replaceChildren();
         window.google.accounts.id.renderButton(buttonRef.current, {
           type: "standard",
-          theme: "filled_black",
-          size: "large",
+          theme: "outline_dark",
+          size: "medium",
           text: "continue_with",
           shape: "pill",
           logo_alignment: "left",
-          width: Math.min(buttonRef.current.clientWidth || 400, 400),
+          width: Math.min(buttonRef.current.clientWidth || 320, 320),
         });
       })
       .catch((error) => {
@@ -109,7 +109,7 @@ const GoogleAuthButton = () => {
     return (
       <button
         type="button"
-        className="h-11 w-full cursor-not-allowed rounded-xl border border-white/10 bg-white/[0.025] px-4 text-sm text-white/35"
+        className="mx-auto flex h-10 w-full max-w-80 cursor-not-allowed items-center justify-center rounded-full border border-white/10 bg-white/[0.025] px-4 text-sm text-white/35"
         disabled
         title={configurationError}
       >
@@ -119,12 +119,18 @@ const GoogleAuthButton = () => {
   }
 
   return (
-    <div className="relative flex min-h-11 w-full justify-center">
-      <div ref={buttonRef} className="flex w-full justify-center" />
+    <div className="relative mx-auto flex min-h-10 w-full max-w-80 items-center justify-center overflow-hidden rounded-full">
+      <div
+        ref={buttonRef}
+        className="flex min-h-10 w-full items-center justify-center overflow-hidden rounded-full [&>div]:!mx-auto"
+      />
 
       {isGoogleLoggingIn && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-xl border border-white/10 bg-[#111111]/95">
-          <Loader2 className="h-5 w-5 animate-spin" />
+        <div
+          className="absolute inset-0 flex items-center justify-center rounded-full border border-white/10 bg-[#131314]/95"
+          aria-live="polite"
+        >
+          <Loader2 className="h-4 w-4 animate-spin" />
           <span className="ml-2 text-sm">Signing in with Google...</span>
         </div>
       )}
