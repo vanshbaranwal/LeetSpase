@@ -29,6 +29,17 @@ app.get("/", (req, res) => {
     res.send("LeetSpase🔥 - by VanshBaranwal");
 });
 
+app.get("/health", (req, res) => {
+    res.set("Cache-Control", "no-store");
+    res.status(200).json({
+        success: true,
+        status: "healthy",
+        service: "LeetSpase API",
+        uptimeSeconds: Math.floor(process.uptime()),
+        timestamp: new Date().toISOString()
+    });
+});
+
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/problems", problemRoutes);
 app.use("/api/v1/execute-code", executionRoute);
