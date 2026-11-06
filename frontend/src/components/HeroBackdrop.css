@@ -1,0 +1,80 @@
+.ls-hero-backdrop {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  z-index: -1;
+  width: 100vw;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateX(-50%);
+  background: #101c34;
+}
+
+.ls-hero-backdrop-mesh,
+.ls-hero-backdrop-grid,
+.ls-hero-backdrop-art,
+.ls-hero-backdrop-shade {
+  position: absolute;
+  inset: 0;
+}
+
+.ls-hero-backdrop-mesh {
+  background:
+    radial-gradient(ellipse at 82% 30%, #314c8d9e 0, transparent 54%),
+    radial-gradient(ellipse at 61% 88%, #4d53a56e 0, transparent 47%),
+    radial-gradient(ellipse at 100% 10%, #37589a70 0, transparent 35%),
+    linear-gradient(128deg, #131e36 16%, #172848 66%, #142342);
+}
+
+.ls-hero-backdrop-grid {
+  background-image: linear-gradient(#b1c6ff19 1px, transparent 1px), linear-gradient(90deg, #b1c6ff19 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(ellipse at 82% 49%, #000 0, #000a 37%, transparent 72%);
+}
+
+.ls-hero-backdrop-art {
+  width: 100%;
+  height: 100%;
+  mask-image: linear-gradient(90deg, transparent, #0009 34%, #000 58%);
+}
+
+.ls-hero-constellation { fill: #b6caff; }
+
+.ls-hero-traces path {
+  stroke: #d4e1ff;
+  stroke-width: 1.6px;
+  stroke-dasharray: 9 91;
+  stroke-dashoffset: 12;
+  opacity: 0;
+  filter: drop-shadow(0 0 4px #a4baff);
+  animation: ls-hero-signal 4.1s .2s cubic-bezier(.36,.09,.38,.97) both;
+}
+
+.ls-hero-traces path:nth-child(2) { stroke: #aab3ff; animation-delay: .45s; }
+.ls-hero-traces path:nth-child(3) { stroke: #9acbff; stroke-width: 1px; animation-delay: .7s; }
+
+.ls-hero-backdrop-shade {
+  background:
+    linear-gradient(0deg, #101c34 0%, transparent 19%),
+    linear-gradient(90deg, #101b32a8 0%, #101b3255 27%, transparent 61%),
+    linear-gradient(180deg, #111d34 0%, transparent 20%);
+}
+
+@keyframes ls-hero-signal {
+  0% { stroke-dashoffset: 12; opacity: 0; }
+  22% { opacity: .82; }
+  76% { opacity: .7; }
+  100% { stroke-dashoffset: -96; opacity: 0; }
+}
+
+@media (max-width: 767px) {
+  .ls-hero-backdrop-mesh {
+    background: radial-gradient(ellipse at 74% 66%, #324e8a9e, transparent 59%), linear-gradient(158deg, #15203a 18%, #1a2a4a 73%, #101c34);
+  }
+  .ls-hero-backdrop-grid { background-size: 42px 42px; mask-image: radial-gradient(ellipse at 75% 66%, #000b, transparent 68%); }
+  .ls-hero-backdrop-art { width: 128%; inset-inline-start: -20%; mask-image: linear-gradient(180deg, transparent 14%, #0008 54%, #000 80%); }
+  .ls-hero-backdrop-shade { background: linear-gradient(0deg, #101c34 0%, transparent 18%), linear-gradient(180deg, #111d34 0%, transparent 40%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-hero-traces { display: none; }
+}

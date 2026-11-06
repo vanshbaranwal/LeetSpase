@@ -5,6 +5,8 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import LanguageBrandIcon from "../components/LanguageBrandIcon";
+import LandingShowcase from "../components/LandingShowcase";
+import HeroBackdrop from "../components/HeroBackdrop";
 
 const languageExamples = {
   PYTHON: {
@@ -152,22 +154,23 @@ const HomePage = () => {
 
   return (
     <main className="w-full overflow-hidden text-white">
-      <section className="relative mx-auto grid min-h-[calc(100dvh-96px)] max-w-7xl items-center gap-12 px-6 py-14 sm:py-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-14 lg:px-8 lg:py-16">
-        <div className="max-w-2xl">
+      <section className="ls-hero-motion relative mx-auto grid min-h-[calc(100dvh-96px)] max-w-7xl items-center gap-12 px-6 py-14 sm:py-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-14 lg:px-8 lg:py-16">
+        <HeroBackdrop />
+        <div className="landing-enter max-w-2xl">
           <h1 className="text-5xl font-semibold leading-[0.96] tracking-[-0.06em] sm:text-6xl lg:text-[4.5rem] xl:text-[5rem]">
             <span className="block">Your place to code.</span>
-            <span className="mt-3 block text-white/45">Practice. Improve. Prove.</span>
+            <span className="ls-hero-highlight mt-3 block text-[#c4ceff]">Practice. Improve. Prove.</span>
           </h1>
           <div className="mt-9">
             {authUser ? (
-              <Link to="/problems" className="group inline-flex h-12 items-center gap-3 rounded-full bg-white py-2 pl-6 pr-2 text-sm font-semibold text-black shadow-[0_10px_30px_rgba(255,255,255,0.07)] transition-[background-color,box-shadow] duration-200 hover:bg-white/90 hover:shadow-[0_12px_32px_rgba(255,255,255,0.1)]">
+              <Link to="/problems" className="group inline-flex h-12 items-center gap-3 rounded-full bg-[#a9b8ff] py-2 pl-6 pr-2 text-sm font-semibold text-[#14213d] transition-colors duration-200 hover:bg-[#c4ceff]">
                 Continue solving
                 <span className="grid h-8 w-8 place-items-center rounded-full bg-black/[0.08] transition-colors duration-200 group-hover:bg-black/[0.12]">
                   <ArrowRight className="h-4 w-4" />
                 </span>
               </Link>
             ) : (
-              <Link to="/problems" className="group inline-flex h-12 items-center gap-3 rounded-full bg-white py-2 pl-6 pr-2 text-sm font-semibold text-black shadow-[0_10px_30px_rgba(255,255,255,0.07)] transition-[background-color,box-shadow] duration-200 hover:bg-white/90 hover:shadow-[0_12px_32px_rgba(255,255,255,0.1)]">
+              <Link to="/problems" className="group inline-flex h-12 items-center gap-3 rounded-full bg-[#a9b8ff] py-2 pl-6 pr-2 text-sm font-semibold text-[#14213d] transition-colors duration-200 hover:bg-[#c4ceff]">
                 Start solving
                 <span className="grid h-8 w-8 place-items-center rounded-full bg-black/[0.08] transition-colors duration-200 group-hover:bg-black/[0.12]">
                   <ArrowRight className="h-4 w-4" />
@@ -177,16 +180,17 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div className="relative mx-auto w-full max-w-xl">
-          <div className="absolute -inset-8 rounded-full bg-white/[0.035] blur-3xl" />
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#080808] shadow-2xl shadow-black/50">
+        <div className="ls-hero-editor relative mx-auto w-full max-w-xl">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#111e36] shadow-2xl shadow-black/50">
             <div className="flex border-b border-white/10 p-1.5 sm:p-2">
               {Object.entries(languageExamples).map(([key, language]) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setSelectedLanguage(key)}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-2 py-3 text-xs font-medium transition-colors sm:text-sm ${selectedLanguage === key ? languageTabActiveStyles[key] : "text-white/40 hover:bg-white/[0.035] hover:text-white/75"}`}
+                  aria-label={language.label}
+                  aria-pressed={selectedLanguage === key}
+                  className={`ls-hero-language flex flex-1 items-center justify-center gap-2 rounded-xl px-2 py-3 text-xs font-medium transition-colors sm:text-sm ${selectedLanguage === key ? languageTabActiveStyles[key] : "text-white/40 hover:bg-white/[0.035] hover:text-white/75"}`}
                 >
                   <LanguageBrandIcon language={language.logo} />
                   <span className="hidden sm:inline">{language.label}</span>
@@ -194,9 +198,9 @@ const HomePage = () => {
               ))}
             </div>
 
-            <div className="relative m-2 grid min-h-80 grid-cols-[42px_1fr] overflow-hidden rounded-xl border border-white/10 bg-[#1c1c1c] font-mono text-xs sm:m-3 sm:text-sm">
+            <div className="relative m-2 grid min-h-80 grid-cols-[42px_1fr] overflow-hidden rounded-xl border border-white/10 bg-[#1d304f] font-mono text-xs sm:m-3 sm:text-sm">
               <div className="select-none border-r border-white/5 bg-black/75 py-6 text-center leading-7 text-white/20">{activeExample.code.split("\n").map((_, index) => <div key={index}>{index + 1}</div>)}</div>
-              <pre key={selectedLanguage} className="landing-code-float overflow-auto bg-[#e6e6e6] p-6 leading-7 text-[#1c1c1c]"><code>{activeExample.code.split("\n").map((line, index) => <span key={index} className="block min-h-7">{highlightCodeLine(line, selectedLanguage)}</span>)}</code></pre>
+              <pre key={selectedLanguage} className="landing-code-float overflow-auto bg-[#e8e0d3] p-6 leading-7 text-[#1d304f]"><code>{activeExample.code.split("\n").map((line, index) => <span key={index} className="ls-hero-code-line block min-h-7" style={{ "--line": index }}>{highlightCodeLine(line, selectedLanguage)}</span>)}</code></pre>
             </div>
 
             <div className="flex items-center justify-between border-t border-white/10 bg-black/75 px-5 py-4">
@@ -214,51 +218,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section id="features" className="scroll-mt-28 border-y border-white/10 bg-black/20 px-6 py-20 sm:py-24">
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/35">The essentials</p>
-            <h2 className="mt-4 max-w-md text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Everything you need. Nothing you don’t.</h2>
-          </div>
-
-          <div className="border-t border-white/10">
-            {[
-              ["Problem library", "Curated challenges, language tracks, and playlists."],
-              ["Code execution", "Python, Java, and JavaScript with real test cases."],
-              ["Progress", "Submissions, streaks, and solved problems in one place."],
-            ].map(([title, description]) => (
-              <div key={title} className="grid gap-2 border-b border-white/10 py-6 sm:grid-cols-[180px_1fr] sm:items-center sm:gap-8 sm:py-7">
-                <h3 className="font-semibold text-white/90">{title}</h3>
-                <p className="text-sm leading-6 text-white/40">{description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="how-it-works" className="mx-auto max-w-7xl scroll-mt-28 px-6 py-20 text-center sm:py-28">
-        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/35">The loop</p>
-        <h2 className="mt-6 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl lg:text-7xl">
-          Choose. <span className="text-white/35">Code.</span> Improve.
-        </h2>
-        <p className="mx-auto mt-6 max-w-md text-sm leading-7 text-white/40">One focused workflow from problem to progress.</p>
-      </section>
-
-      <section id="about" className="scroll-mt-28 border-t border-white/10 px-6 py-20 sm:py-24">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/35">LeetSpase</p>
-            <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">A quieter way to practice coding.</h2>
-          </div>
-          <Link
-            to={authUser ? "/problems" : "/signup"}
-            className="inline-flex w-fit items-center gap-2 border-b border-white/40 pb-1 text-sm font-semibold text-white transition-colors hover:border-white"
-          >
-            {authUser ? "Open problems" : "Start practicing"}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
+      <LandingShowcase authUser={authUser} />
 
       <footer className="border-t border-white/10 px-6 py-10">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 text-xs text-white/35 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-2"><Code2 className="h-4 w-4" /> © {new Date().getFullYear()} LeetSpase</div><p className="flex items-center gap-1.5 sm:justify-end">Made with <Heart className="h-4 w-4 fill-red-500 text-red-500" aria-label="love" /> by vanshbaranwal</p></div>

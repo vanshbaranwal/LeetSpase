@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@theme {
+  --color-white: #f4ede0;
+  --color-black: #101d34;
+}
 @plugin "daisyui" {
   themes: monochrome;
 }
@@ -9,31 +13,32 @@
   prefersdark: true;
   color-scheme: dark;
 
-  --color-base-100: #1c1c1c;
-  --color-base-200: #1c1c1c;
-  --color-base-300: #000000;
-  --color-base-content: #ffffff;
-  --color-primary: #ffffff;
-  --color-primary-content: #000000;
-  --color-secondary: #e6e6e6;
-  --color-secondary-content: #000000;
-  --color-accent: #f2f2f2;
-  --color-accent-content: #000000;
-  --color-neutral: #000000;
-  --color-neutral-content: #ffffff;
+  --color-base-100: #1d304f;
+  --color-base-200: #192b49;
+  --color-base-300: #14213d;
+  --color-base-content: #f4ede0;
+  --color-primary: #a9b8ff;
+  --color-primary-content: #14213d;
+  --color-secondary: #e8e0d3;
+  --color-secondary-content: #14213d;
+  --color-accent: #a9b8ff;
+  --color-accent-content: #14213d;
+  --color-neutral: #101d34;
+  --color-neutral-content: #f4ede0;
   --color-info: #e6e6e6;
   --color-success: #e6e6e6;
   --color-warning: #f2f2f2;
-  --color-error: #ffffff;
+  --color-error: #ff6b5b;
 }
 
 :root {
-  --brand-black: #000000;
-  --brand-dark: #111111;
-  --brand-surface: #1c1c1c;
-  --brand-white: #ffffff;
-  --brand-light: #f2f2f2;
-  --brand-gray: #e6e6e6;
+  --brand-black: #14213d;
+  --brand-dark: #192b49;
+  --brand-surface: #1d304f;
+  --brand-white: #f4ede0;
+  --brand-light: #f4ede0;
+  --brand-gray: #e8e0d3;
+  --brand-accent: #a9b8ff;
 }
 
 /* Keep every area scrollable while hiding browser scrollbar chrome. */
@@ -76,33 +81,29 @@
 body {
   background-color: var(--brand-black);
   background-image:
-    repeating-linear-gradient(112deg, transparent 0 9px, rgba(0, 0, 0, 0.24) 10px 11px, transparent 12px 21px),
-    repeating-linear-gradient(108deg, transparent 0 34px, rgba(0, 0, 0, 0.16) 35px 37px, transparent 38px 62px),
-    repeating-linear-gradient(116deg, rgba(255, 255, 255, 0.008) 0 1px, transparent 2px 28px),
-    linear-gradient(112deg, #030303, #0d0d0d 48%, #050505);
-  background-size: 240px 100%, 470px 100%, 130px 100%, 100% 100%;
-  background-position: 0 0, 80px 0, 20px 0, 0 0;
+    radial-gradient(ellipse at 85% 0%, rgba(169, 184, 255, 0.09), transparent 32%),
+    linear-gradient(145deg, #14213d, #101d34 70%);
   background-attachment: fixed;
   color: var(--brand-white);
 }
 
 :where(a, button, input, textarea, select):focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.72);
+  outline: 2px solid #a9b8ff;
   outline-offset: 3px;
 }
 
 button.btn,
 a.btn {
-  background-color: #ffffff;
-  border-color: #ffffff;
-  color: #000000;
+  background-color: #f4ede0;
+  border-color: #f4ede0;
+  color: #14213d;
 }
 
 button.btn:hover,
 a.btn:hover {
-  background-color: #e6e6e6;
-  border-color: #e6e6e6;
-  color: #000000;
+  background-color: #c4ceff;
+  border-color: #c4ceff;
+  color: #14213d;
 }
 
 .profile-input {
@@ -110,9 +111,9 @@ a.btn:hover {
   height: 2.75rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.75rem;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(16, 29, 52, 0.7);
   padding: 0 1rem;
-  color: #ffffff;
+  color: #f4ede0;
   font-size: 0.875rem;
   transition: border-color 160ms ease, background-color 160ms ease;
 }
@@ -141,7 +142,7 @@ a.btn:hover {
 .create-problem-form :where(.input, .textarea, .select) {
   border-color: rgba(255, 255, 255, 0.1);
   border-radius: 0.75rem;
-  background-color: #111111;
+  background-color: #192b49;
   color: rgba(255, 255, 255, 0.9);
   box-shadow: none;
   transition: border-color 160ms ease, background-color 160ms ease;
@@ -149,7 +150,7 @@ a.btn:hover {
 
 .create-problem-form :where(.input, .textarea, .select):hover {
   border-color: rgba(255, 255, 255, 0.17);
-  background-color: #131313;
+  background-color: #1d304f;
 }
 
 .create-problem-form :where(.input, .textarea)::placeholder {
@@ -176,7 +177,7 @@ a.btn:hover {
 .create-problem-form :where(.input, .textarea, .select):focus,
 .create-problem-form :where(.input, .textarea, .select):focus-visible {
   border-color: rgba(255, 255, 255, 0.26) !important;
-  background-color: #141414 !important;
+  background-color: #203451 !important;
   outline: none !important;
   box-shadow: none !important;
 }
@@ -198,7 +199,7 @@ a.btn:hover {
 
 .create-problem-form .additional-info-textarea {
   min-height: 12rem;
-  background-color: #111111;
+  background-color: #192b49;
 }
 
 .create-problem-form .hints-textarea {
@@ -243,8 +244,17 @@ a.btn:hover {
   will-change: transform;
 }
 
+@keyframes landing-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.landing-enter {
+  animation: landing-enter 600ms ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .landing-code-float {
+  .landing-code-float, .landing-enter, .animate-blink, .animate-pulse {
     animation: none;
   }
 }

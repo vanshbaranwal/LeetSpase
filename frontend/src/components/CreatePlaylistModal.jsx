@@ -34,7 +34,7 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSubmit }) => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="create-playlist-title"
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[#111111] text-white shadow-[0_28px_90px_rgba(0,0,0,0.65)]"
+        className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[#192b49] text-white shadow-[0_28px_90px_rgba(0,0,0,0.65)]"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <header className="flex items-start justify-between gap-6 border-b border-white/[0.08] px-6 py-5 sm:px-7">
@@ -59,7 +59,7 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSubmit }) => {
               id="playlist-name"
               type="text"
               autoFocus
-              className={`mt-2 h-12 w-full rounded-xl border bg-[#090909] px-4 text-sm text-white outline-none transition-colors placeholder:text-white/20 ${errors.name ? "border-red-400/60 focus:border-red-400" : "border-white/10 focus:border-white/30"}`}
+              className={`mt-2 h-12 w-full rounded-xl border bg-[#111e36] px-4 text-sm text-white outline-none transition-colors placeholder:text-white/20 ${errors.name ? "border-red-400/60 focus:border-red-400" : "border-white/10 focus:border-white/30"}`}
               placeholder="e.g. Dynamic Programming"
               {...register("name", {
                 required: "Playlist name is required",
@@ -77,7 +77,7 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSubmit }) => {
             <textarea
               id="playlist-description"
               rows={4}
-              className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-[#090909] px-4 py-3 text-sm leading-6 text-white outline-none transition-colors placeholder:text-white/20 focus:border-white/30"
+              className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-[#111e36] px-4 py-3 text-sm leading-6 text-white outline-none transition-colors placeholder:text-white/20 focus:border-white/30"
               placeholder="What are you planning to practice?"
               {...register("description")}
             />
@@ -87,7 +87,7 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSubmit }) => {
             <button type="button" onClick={handleClose} className="h-11 rounded-full border border-white/10 px-5 text-sm font-medium text-white/50 transition-colors hover:border-white/20 hover:text-white">
               Cancel
             </button>
-            <button type="submit" disabled={isSubmitting} className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-black transition-colors hover:bg-[#e6e6e6] disabled:cursor-not-allowed disabled:opacity-50">
+            <button type="submit" disabled={isSubmitting} className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-black transition-colors hover:bg-[#e8e0d3] disabled:cursor-not-allowed disabled:opacity-50">
               {isSubmitting && <LoaderCircle className="h-4 w-4 animate-spin" />}
               {isSubmitting ? "Creating..." : "Create playlist"}
             </button>

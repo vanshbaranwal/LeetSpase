@@ -37,7 +37,7 @@ const AddToPlaylistModal = ({ isOpen, onClose, problemId }) => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-to-playlist-title"
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[#111111] text-white shadow-[0_28px_90px_rgba(0,0,0,0.65)]"
+        className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[#192b49] text-white shadow-[0_28px_90px_rgba(0,0,0,0.65)]"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <header className="flex items-start justify-between gap-6 border-b border-white/[0.08] px-6 py-5 sm:px-7">
@@ -60,7 +60,7 @@ const AddToPlaylistModal = ({ isOpen, onClose, problemId }) => {
 
           <div className="mt-3 max-h-64 space-y-2 overflow-y-auto pr-1">
             {isLoading && !playlists.length ? (
-              <div className="grid min-h-32 place-items-center rounded-xl border border-white/[0.08] bg-[#090909]">
+              <div className="grid min-h-32 place-items-center rounded-xl border border-white/[0.08] bg-[#111e36]">
                 <LoaderCircle className="h-5 w-5 animate-spin text-white/35" />
               </div>
             ) : playlists.length ? (
@@ -74,7 +74,7 @@ const AddToPlaylistModal = ({ isOpen, onClose, problemId }) => {
                     type="button"
                     onClick={() => setSelectedPlaylist(playlist.id)}
                     aria-pressed={selected}
-                    className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors ${selected ? "border-white/25 bg-white/[0.075]" : "border-white/[0.08] bg-[#090909] hover:border-white/15 hover:bg-white/[0.035]"}`}
+                    className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors ${selected ? "border-white/25 bg-white/[0.075]" : "border-white/[0.08] bg-[#111e36] hover:border-white/15 hover:bg-white/[0.035]"}`}
                   >
                     <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg ${selected ? "bg-white text-black" : "bg-white/[0.055] text-white/35"}`}>
                       <FileText className="h-4 w-4" />
@@ -90,7 +90,7 @@ const AddToPlaylistModal = ({ isOpen, onClose, problemId }) => {
                 );
               })
             ) : (
-              <div className="rounded-xl border border-dashed border-white/10 bg-[#090909] px-5 py-10 text-center">
+              <div className="rounded-xl border border-dashed border-white/10 bg-[#111e36] px-5 py-10 text-center">
                 <FileText className="mx-auto h-6 w-6 text-white/20" />
                 <p className="mt-3 text-sm text-white/40">No playlists available.</p>
                 <p className="mt-1 text-xs text-white/25">Create a playlist before saving this problem.</p>
@@ -102,7 +102,7 @@ const AddToPlaylistModal = ({ isOpen, onClose, problemId }) => {
             <button type="button" onClick={handleClose} className="h-11 rounded-full border border-white/10 px-5 text-sm font-medium text-white/50 transition-colors hover:border-white/20 hover:text-white">
               Cancel
             </button>
-            <button type="submit" disabled={!selectedPlaylist || isSubmitting} className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-black transition-colors hover:bg-[#e6e6e6] disabled:cursor-not-allowed disabled:opacity-35">
+            <button type="submit" disabled={!selectedPlaylist || isSubmitting} className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-black transition-colors hover:bg-[#e8e0d3] disabled:cursor-not-allowed disabled:opacity-35">
               {isSubmitting && <LoaderCircle className="h-4 w-4 animate-spin" />}
               {isSubmitting ? "Adding..." : "Add to playlist"}
             </button>

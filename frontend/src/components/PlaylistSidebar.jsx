@@ -48,7 +48,7 @@ const PlaylistSidebar = ({
 
   return (
     <aside className="order-first min-w-0 max-w-full self-start lg:order-last lg:sticky lg:top-28">
-      <div className="max-h-[calc(100vh-8rem)] w-full min-w-0 overflow-y-auto overflow-x-hidden rounded-2xl border border-white/10 bg-[#101010]/90 p-3 text-center shadow-2xl shadow-black/25">
+      <div className="max-h-[calc(100vh-8rem)] w-full min-w-0 overflow-y-auto overflow-x-hidden rounded-2xl border border-white/10 bg-[#172844]/90 p-3 text-center shadow-2xl shadow-black/25">
         <div className="px-2 pb-2 pt-1">
           <p className="text-sm font-semibold text-white">Playlists</p>
         </div>

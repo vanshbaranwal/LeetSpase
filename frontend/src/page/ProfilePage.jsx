@@ -209,7 +209,7 @@ const ProfilePage = () => {
 
   if (isLoading && !profile) {
     return (
-      <div className="grid min-h-screen w-full place-items-center bg-[#080808] text-white">
+      <div className="grid min-h-screen w-full place-items-center bg-[#111e36] text-white">
         <div className="flex items-center gap-3 text-sm text-white/50">
           <LoaderCircle className="h-5 w-5 animate-spin" /> Loading your profile
         </div>
@@ -227,7 +227,7 @@ const ProfilePage = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[#080808] text-white">
+    <div className="min-h-screen w-full bg-[#111e36] text-white">
       <Navbar variant="problems" />
 
       <main className="mx-auto w-full max-w-[1500px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
@@ -270,7 +270,7 @@ const ProfilePage = () => {
                   <ShieldCheck className="h-3.5 w-3.5" /> Admin dashboard
                 </Link>
               )}
-              <button type="button" onClick={() => setActiveSection("settings")} className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-5 text-xs font-semibold text-black transition-colors hover:bg-[#e6e6e6]">
+              <button type="button" onClick={() => setActiveSection("settings")} className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-5 text-xs font-semibold text-black transition-colors hover:bg-[#e8e0d3]">
                 <Edit3 className="h-3.5 w-3.5" /> Edit profile
               </button>
             </div>
@@ -543,7 +543,7 @@ const ProfilePage = () => {
                     ))}
                   </div>
                 </Field>
-                <button type="submit" disabled={isSaving} className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-black transition-colors hover:bg-[#e6e6e6] disabled:opacity-50">
+                <button type="submit" disabled={isSaving} className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-black transition-colors hover:bg-[#e8e0d3] disabled:opacity-50">
                   {isSaving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save changes
                 </button>
               </form>
@@ -603,7 +603,7 @@ const ProfilePage = () => {
 
       {playlistPendingDeletion && (
         <div className="fixed inset-0 z-[80] grid place-items-center bg-black/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Delete playlist">
-          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#111111] p-7 shadow-2xl">
+          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#192b49] p-7 shadow-2xl">
             <button type="button" onClick={() => setPlaylistPendingDeletion(null)} className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full border border-white/10 text-white/40 hover:text-white" aria-label="Close"><X className="h-4 w-4" /></button>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-400/70">Delete playlist</p>
             <h2 className="mt-4 pr-10 text-xl font-semibold">Delete “{playlistPendingDeletion.name}”?</h2>

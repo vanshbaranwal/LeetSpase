@@ -107,7 +107,7 @@ const SubmissionsList = ({ submissions, isLoading }) => {
         const codePanelId = `submission-code-${submission.id}`;
 
         return (
-          <article key={submission.id} className={`overflow-hidden rounded-2xl border bg-[#0d0d0d] transition-colors ${isExpanded ? "border-white/[0.16]" : "border-white/[0.08] hover:border-white/[0.14]"}`}>
+          <article key={submission.id} className={`overflow-hidden rounded-2xl border bg-[#14213d] transition-colors ${isExpanded ? "border-white/[0.16]" : "border-white/[0.08] hover:border-white/[0.14]"}`}>
             <button
               type="button"
               onClick={() => setExpandedSubmissionId(isExpanded ? null : submission.id)}

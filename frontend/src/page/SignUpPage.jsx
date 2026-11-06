@@ -78,7 +78,7 @@ const SignUpPage = () => {
                   id="signup-name"
                   autoComplete="name"
                   {...register("name")}
-                  className={`h-12 w-full rounded-xl border bg-[#111111] pl-10 pr-4 text-sm text-white outline-none transition-colors placeholder:text-white/25 ${
+                  className={`h-12 w-full rounded-xl border bg-[#192b49] pl-10 pr-4 text-sm text-white outline-none transition-colors placeholder:text-white/25 ${
                     errors.name ? "border-red-400/60" : "border-white/10 hover:border-white/20 focus:border-white/30"
                   }`}
                   placeholder="John Doe"
@@ -103,7 +103,7 @@ const SignUpPage = () => {
                   id="signup-email"
                   autoComplete="email"
                   {...register("email")}
-                  className={`h-12 w-full rounded-xl border bg-[#111111] pl-10 pr-4 text-sm text-white outline-none transition-colors placeholder:text-white/25 ${
+                  className={`h-12 w-full rounded-xl border bg-[#192b49] pl-10 pr-4 text-sm text-white outline-none transition-colors placeholder:text-white/25 ${
                     errors.email ? "border-red-400/60" : "border-white/10 hover:border-white/20 focus:border-white/30"
                   }`}
                   placeholder="you@example.com"
@@ -128,7 +128,7 @@ const SignUpPage = () => {
                   id="signup-password"
                   autoComplete="new-password"
                   {...register("password")}
-                  className={`h-12 w-full rounded-xl border bg-[#111111] pl-10 pr-12 text-sm text-white outline-none transition-colors placeholder:text-white/25 ${
+                  className={`h-12 w-full rounded-xl border bg-[#192b49] pl-10 pr-12 text-sm text-white outline-none transition-colors placeholder:text-white/25 ${
                     errors.password ? "border-red-400/60" : "border-white/10 hover:border-white/20 focus:border-white/30"
                   }`}
                   placeholder="••••••••"
@@ -154,7 +154,7 @@ const SignUpPage = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-semibold text-black transition-colors hover:bg-[#e6e6e6] disabled:cursor-wait disabled:opacity-55"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-semibold text-black transition-colors hover:bg-[#e8e0d3] disabled:cursor-wait disabled:opacity-55"
              disabled={isSigninUp}
             >
                {isSigninUp ? (

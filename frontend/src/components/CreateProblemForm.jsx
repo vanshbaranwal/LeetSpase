@@ -761,10 +761,10 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
   };
 
   return (
-    <div className={`${embedded ? "lg:h-full lg:overflow-hidden" : "h-screen overflow-hidden"} w-full bg-[#080808] text-white`}>
+    <div className={`${embedded ? "lg:h-full lg:overflow-hidden" : "h-screen overflow-hidden"} w-full bg-[#111e36] text-white`}>
       <div className={`flex w-full flex-col ${embedded ? "lg:h-full" : "h-full"}`}>
         <div className={`flex flex-col ${embedded ? "lg:min-h-0 lg:flex-1" : "min-h-0 flex-1"}`}>
-          <div className="flex shrink-0 items-center justify-between gap-5 border-b border-white/10 bg-[#0b0b0b] px-5 py-4 sm:px-8 lg:px-10">
+          <div className="flex shrink-0 items-center justify-between gap-5 border-b border-white/10 bg-[#162540] px-5 py-4 sm:px-8 lg:px-10">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/30">Problem builder</p>
               <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] sm:text-2xl">Create a new problem</h2>
@@ -784,7 +784,7 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
             onSubmit={handleSubmit(onSubmit, handleInvalidForm)}
             className={`create-problem-form grid lg:grid-cols-[280px_minmax(0,1fr)] ${embedded ? "lg:min-h-0 lg:flex-1 lg:grid-rows-1 lg:overflow-hidden" : "min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] overflow-hidden lg:grid-rows-1"}`}
           >
-            <aside className={`${embedded ? "lg:overflow-y-auto" : "overflow-y-auto"} border-b border-white/10 bg-[#0a0a0a] px-4 py-5 lg:border-b-0 lg:border-r lg:px-5`}>
+            <aside className={`${embedded ? "lg:overflow-y-auto" : "overflow-y-auto"} border-b border-white/10 bg-[#14213d] px-4 py-5 lg:border-b-0 lg:border-r lg:px-5`}>
               <div className="mb-6 flex items-center justify-between lg:block">
                 <button
                   type="button"
@@ -1110,7 +1110,7 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
                           <h4 className="text-base font-semibold text-white/85">Starter code</h4>
                           <p className="mt-1 text-xs text-white/30">The template users receive when they open the editor.</p>
                         </div>
-                        <div className="overflow-hidden rounded-xl border border-white/10 bg-[#0a0a0a] transition-colors focus-within:border-white/20">
+                        <div className="overflow-hidden rounded-xl border border-white/10 bg-[#14213d] transition-colors focus-within:border-white/20">
                           <Controller
                             name={`codeSnippet.${language}`}
                             control={control}
@@ -1150,7 +1150,7 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
                           <h4 className="text-base font-semibold text-white/85">Reference solution</h4>
                           <p className="mt-1 text-xs text-white/30">Used to verify the problem and power its editorial answer.</p>
                         </div>
-                        <div className="overflow-hidden rounded-xl border border-white/10 bg-[#0a0a0a] transition-colors focus-within:border-white/20">
+                        <div className="overflow-hidden rounded-xl border border-white/10 bg-[#14213d] transition-colors focus-within:border-white/20">
                           <Controller
                             name={`referenceSolutions.${language}`}
                             control={control}
@@ -1371,7 +1371,7 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
 
               </div>
 
-              <div className="shrink-0 border-t border-white/10 bg-[#0b0b0b]/95 px-5 py-3.5 backdrop-blur sm:px-8 lg:px-10">
+              <div className="shrink-0 border-t border-white/10 bg-[#162540]/95 px-5 py-3.5 backdrop-blur sm:px-8 lg:px-10">
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
                   <button
                     type="button"
@@ -1396,12 +1396,12 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
                     <button
                       type="button"
                       onClick={() => setActiveTab(formTabs[activeTabIndex + 1].id)}
-                      className="inline-flex h-10 items-center gap-2 rounded-full border border-white bg-white px-5 text-sm font-semibold text-black shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-[#e6e6e6] hover:bg-[#e6e6e6] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                      className="inline-flex h-10 items-center gap-2 rounded-full border border-white bg-white px-5 text-sm font-semibold text-black shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-[#e8e0d3] hover:bg-[#e8e0d3] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                       Next <ChevronRight className="h-4 w-4" />
                     </button>
                     ) : (
-                    <button type="submit" disabled={isLoading} className="inline-flex h-10 items-center gap-2 rounded-full border border-white bg-white px-5 text-sm font-semibold text-black shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-[#e6e6e6] hover:bg-[#e6e6e6] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30">
+                    <button type="submit" disabled={isLoading} className="inline-flex h-10 items-center gap-2 rounded-full border border-white bg-white px-5 text-sm font-semibold text-black shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-[#e8e0d3] hover:bg-[#e8e0d3] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30">
                       {isLoading ? (
                         <span className="loading loading-spinner loading-sm"></span>
                       ) : (

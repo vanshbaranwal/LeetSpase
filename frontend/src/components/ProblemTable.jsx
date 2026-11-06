@@ -156,7 +156,7 @@ const ProblemsTable = ({
               <div
                 role="listbox"
                 aria-label="Filter problems by difficulty"
-                className="absolute left-0 top-[calc(100%+0.55rem)] z-40 w-48 overflow-hidden rounded-2xl border border-white/10 bg-[#151515] p-2 shadow-2xl shadow-black/60"
+                className="absolute left-0 top-[calc(100%+0.55rem)] z-40 w-48 overflow-hidden rounded-2xl border border-white/10 bg-[#203451] p-2 shadow-2xl shadow-black/60"
               >
                 {difficultyOptions.map((option) => {
                   const isSelected = difficulty === option;
@@ -216,7 +216,7 @@ const ProblemsTable = ({
         </div>
         <button
           type="button"
-          className="inline-flex h-10 w-full items-center justify-center rounded-full border border-white bg-white px-5 text-sm font-semibold text-black shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-[#e6e6e6] hover:bg-[#e6e6e6] active:translate-y-0 sm:w-auto"
+          className="inline-flex h-10 w-full items-center justify-center rounded-full border border-white bg-white px-5 text-sm font-semibold text-black shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-[#e8e0d3] hover:bg-[#e8e0d3] active:translate-y-0 sm:w-auto"
           onClick={handleCreatePlaylistClick}
         >
           Create Playlist
@@ -332,7 +332,7 @@ const ProblemsTable = ({
                         )}
                         <button
                           type="button"
-                          className="btn btn-sm rounded-full border border-white/10 bg-[#000000] text-[#FFFFFF] hover:border-white/20 hover:bg-[#101010] hover:text-[#FFFFFF]"
+                          className="btn btn-sm rounded-full border border-white/10 bg-[#000000] text-[#FFFFFF] hover:border-white/20 hover:bg-[#172844] hover:text-[#FFFFFF]"
                           onClick={() => handleAddToPlaylist(problem.id)}
                         >
                           <span>Save to Playlist</span>
@@ -364,7 +364,7 @@ const ProblemsTable = ({
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-problem-title"
-            className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#111111] p-7 text-left shadow-2xl shadow-black sm:p-8"
+            className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#192b49] p-7 text-left shadow-2xl shadow-black sm:p-8"
             onClick={(event) => event.stopPropagation()}
           >
             <button
@@ -419,7 +419,7 @@ const ProblemsTable = ({
             role="dialog"
             aria-modal="true"
             aria-labelledby="auth-required-title"
-            className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#111111] p-7 shadow-2xl shadow-black sm:p-8"
+            className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#192b49] p-7 shadow-2xl shadow-black sm:p-8"
             onClick={(event) => event.stopPropagation()}
           >
             <button
@@ -440,7 +440,7 @@ const ProblemsTable = ({
             </p>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
-              <Link to="/login" className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#e6e6e6]">
+              <Link to="/login" className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#e8e0d3]">
                 <LogIn className="h-4 w-4" /> Log in
               </Link>
               <Link to="/signup" className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-4 py-3 text-sm font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.05]">
