@@ -1,7 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LeetSpase logo">
-  <rect width="64" height="64" rx="15" fill="#101010"/>
-  <rect x="1" y="1" width="62" height="62" rx="14" fill="none" stroke="#333333" stroke-width="2"/>
-  <path d="M25 19 13 32l12 13" fill="none" stroke="#f5f5f5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="m39 19 12 13-12 13" fill="none" stroke="#f5f5f5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="m36 15-8 34" fill="none" stroke="#a3a3a3" stroke-width="4" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-labelledby="title">
+  <title id="title">LeetSpase</title>
+  <defs>
+    <linearGradient id="tile" x2="1" y2="1">
+      <stop stop-color="#293c68"/>
+      <stop offset="1" stop-color="#101d34"/>
+    </linearGradient>
+  </defs>
+  <rect x=".75" y=".75" width="30.5" height="30.5" rx="7.25" fill="url(#tile)" stroke="#8296e0" stroke-width="1.5"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
+    <path d="m11.5 11-5 5 5 5m9-10 5 5-5 5" stroke="#a9b8ff"/>
+    <path d="m18.25 8.5-4.5 15" stroke="#f4ede0"/>
+  </g>
 </svg>

@@ -48,8 +48,10 @@ export const useAuthStore = create((set) => ({
 
       toast.success(res.data.message);
     } catch (error) {
-      console.log("Error signing up", error);
-      toast.error("Error signing up");
+      if (error.response?.status === 400 && error.response.data?.error === "user already exists") {
+        return "An account already uses this email. Sign in or try a different address.";
+      }
+      return "We couldn’t create your account. Please try again.";
     } finally {
       set({ isSigninUp: false });
     }
@@ -64,8 +66,9 @@ export const useAuthStore = create((set) => ({
 
       toast.success(res.data.message);
     } catch (error) {
-      console.log("Error logging in", error);
-      toast.error("Error logging in");
+      if (error.response?.status === 401) return "Email or password is incorrect. Check your details and try again.";
+      if (error.response?.status === 403) return "This account has been suspended.";
+      return "We couldn’t sign you in. Please try again.";
     } finally {
       set({ isLoggingIn: false });
     }

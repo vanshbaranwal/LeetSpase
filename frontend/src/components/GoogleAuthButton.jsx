@@ -58,6 +58,7 @@ const GoogleAuthButton = () => {
 
   useEffect(() => {
     let isMounted = true;
+    let resizeObserver;
 
     if (!clientId) {
       return undefined;
@@ -80,16 +81,28 @@ const GoogleAuthButton = () => {
           },
         });
 
-        buttonRef.current.replaceChildren();
-        window.google.accounts.id.renderButton(buttonRef.current, {
-          type: "standard",
-          theme: "outline_dark",
-          size: "medium",
-          text: "continue_with",
-          shape: "pill",
-          logo_alignment: "left",
-          width: Math.min(buttonRef.current.clientWidth || 320, 320),
-        });
+        const container = buttonRef.current;
+        let renderedWidth = 0;
+        const renderButton = () => {
+          const width = Math.min(container.clientWidth, 400);
+          if (width === 0 || width === renderedWidth) return;
+
+          container.replaceChildren();
+          window.google.accounts.id.renderButton(container, {
+            type: "standard",
+            theme: "outline_dark",
+            size: "large",
+            text: "continue_with",
+            shape: "pill",
+            logo_alignment: "center",
+            width: String(width),
+          });
+          renderedWidth = width;
+        };
+
+        renderButton();
+        resizeObserver = new ResizeObserver(renderButton);
+        resizeObserver.observe(container);
       })
       .catch((error) => {
         console.error(error);
@@ -100,6 +113,7 @@ const GoogleAuthButton = () => {
 
     return () => {
       isMounted = false;
+      resizeObserver?.disconnect();
     };
   }, [clientId, googleLogin, navigate]);
 
@@ -109,7 +123,7 @@ const GoogleAuthButton = () => {
     return (
       <button
         type="button"
-        className="mx-auto flex h-10 w-full max-w-80 cursor-not-allowed items-center justify-center rounded-full border border-white/10 bg-white/[0.025] px-4 text-sm text-white/35"
+        className="mx-auto block h-11 w-full max-w-[400px] cursor-not-allowed rounded-full border border-white/15 px-4 text-sm text-white/55"
         disabled
         title={configurationError}
       >
@@ -119,18 +133,12 @@ const GoogleAuthButton = () => {
   }
 
   return (
-    <div className="relative mx-auto flex min-h-10 w-full max-w-80 items-center justify-center overflow-hidden rounded-full">
-      <div
-        ref={buttonRef}
-        className="flex min-h-10 w-full items-center justify-center overflow-hidden rounded-full [&>div]:!mx-auto"
-      />
+    <div className="relative mx-auto flex min-h-11 w-full max-w-[400px] justify-center">
+      <div ref={buttonRef} className="flex w-full justify-center" />
 
       {isGoogleLoggingIn && (
-        <div
-          className="absolute inset-0 flex items-center justify-center rounded-full border border-white/10 bg-[#131314]/95"
-          aria-live="polite"
-        >
-          <Loader2 className="h-4 w-4 animate-spin" />
+        <div className="absolute inset-0 flex items-center justify-center rounded-full border border-white/15 bg-[#14223b]">
+          <Loader2 className="h-5 w-5 animate-spin" />
           <span className="ml-2 text-sm">Signing in with Google...</span>
         </div>
       )}
