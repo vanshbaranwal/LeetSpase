@@ -15,9 +15,12 @@ const ProblemsTable = ({
   onSearchChange,
   selectedTag = "ALL",
   title = "Problems",
+  showSaveToPlaylist = true,
   emptyMessage = "No problems found.",
 }) => {
   const { authUser } = useAuthStore();
+  const isAdmin = authUser?.role === "ADMIN";
+  const showActions = isAdmin || showSaveToPlaylist;
   const { onDeleteProblem, isDeletingProblem } = useActions();
   const { createPlaylist } = usePlaylistStore();
   const [difficulty, setDifficulty] = useState("ALL");
@@ -202,7 +205,7 @@ const ProblemsTable = ({
             )}
           </div>
 
-          <label className="flex h-10 w-full min-w-0 items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.07] px-3.5 focus-within:border-white/20 focus-within:bg-white/[0.09] sm:w-56">
+          <label className="flex h-10 w-full min-w-0 items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.07] px-3.5 focus-within:border-[#a9b8ff]/65 focus-within:bg-white/[0.09] focus-within:ring-1 focus-within:ring-[#a9b8ff]/25 sm:w-56">
             <Search className="h-4 w-4 shrink-0 text-white/45" />
             <input
               type="search"
@@ -210,7 +213,7 @@ const ProblemsTable = ({
               onChange={onSearchChange}
               placeholder="Search problems"
               aria-label="Search problems by name"
-              className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/30"
+              className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none focus-visible:outline-none! placeholder:text-white/30"
             />
           </label>
         </div>
@@ -233,7 +236,7 @@ const ProblemsTable = ({
               <th>Title</th>
               <th>Tags</th>
               <th>Difficulty</th>
-              <th>Actions</th>
+              {showActions && <th>Actions</th>}
             </tr>
           </thead>
           <tbody role="rowgroup">
@@ -307,45 +310,49 @@ const ProblemsTable = ({
                         {problem.difficulty}
                       </span>
                     </td>
-                    <td role="cell" className="text-center">
-                      <div className="flex flex-col items-center justify-center gap-2 md:flex-row">
-                        {authUser?.role === "ADMIN" && (
-                          <div className="flex gap-2">
+                    {showActions && (
+                      <td role="cell" className="text-center">
+                        <div className="flex flex-col items-center justify-center gap-2 md:flex-row">
+                          {isAdmin && (
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(problem)}
+                                title="Delete problem"
+                                aria-label={`Delete ${problem.title}`}
+                                className="grid h-10 w-10 place-items-center rounded-lg border border-red-400/25 bg-red-500/15 text-red-400 shadow-sm shadow-red-950/20 transition-all duration-200 hover:border-red-400/45 hover:bg-red-500/25 hover:text-red-300"
+                              >
+                                <TrashIcon className="h-[18px] w-[18px]" strokeWidth={2.2} />
+                              </button>
+                              <button
+                                type="button"
+                                disabled
+                                title="Problem editing is not available yet"
+                                aria-label="Edit problem unavailable"
+                                className="grid h-10 w-10 cursor-not-allowed place-items-center rounded-lg border border-amber-400/25 bg-amber-400/15 text-amber-300 opacity-65 shadow-sm shadow-amber-950/20"
+                              >
+                                <PencilIcon className="h-[18px] w-[18px]" strokeWidth={2.2} />
+                              </button>
+                            </div>
+                          )}
+                          {showSaveToPlaylist && (
                             <button
                               type="button"
-                              onClick={() => handleDelete(problem)}
-                              title="Delete problem"
-                              aria-label={`Delete ${problem.title}`}
-                              className="grid h-10 w-10 place-items-center rounded-lg border border-red-400/25 bg-red-500/15 text-red-400 shadow-sm shadow-red-950/20 transition-all duration-200 hover:border-red-400/45 hover:bg-red-500/25 hover:text-red-300"
+                              className="btn btn-sm rounded-full border border-white/10 bg-[#000000] text-[#FFFFFF] hover:border-white/20 hover:bg-[#172844] hover:text-[#FFFFFF]"
+                              onClick={() => handleAddToPlaylist(problem.id)}
                             >
-                              <TrashIcon className="h-[18px] w-[18px]" strokeWidth={2.2} />
+                              <span>Save to Playlist</span>
                             </button>
-                            <button
-                              type="button"
-                              disabled
-                              title="Problem editing is not available yet"
-                              aria-label="Edit problem unavailable"
-                              className="grid h-10 w-10 cursor-not-allowed place-items-center rounded-lg border border-amber-400/25 bg-amber-400/15 text-amber-300 opacity-65 shadow-sm shadow-amber-950/20"
-                            >
-                              <PencilIcon className="h-[18px] w-[18px]" strokeWidth={2.2} />
-                            </button>
-                          </div>
-                        )}
-                        <button
-                          type="button"
-                          className="btn btn-sm rounded-full border border-white/10 bg-[#000000] text-[#FFFFFF] hover:border-white/20 hover:bg-[#172844] hover:text-[#FFFFFF]"
-                          onClick={() => handleAddToPlaylist(problem.id)}
-                        >
-                          <span>Save to Playlist</span>
-                        </button>
-                      </div>
-                    </td>
+                          )}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 );
               })
             ) : (
               <tr role="row">
-                <td role="cell" colSpan={6} className="text-center py-6 text-gray-500">
+                <td role="cell" colSpan={showActions ? 6 : 5} className="text-center py-6 text-gray-500">
                   {emptyMessage}
                 </td>
               </tr>
@@ -460,7 +467,7 @@ const ProblemsTable = ({
             onSubmit={handleCreatePlaylist}
           />
           <AddToPlaylistModal
-            isOpen={isAddToPlaylistModalOpen}
+            isOpen={showSaveToPlaylist && isAddToPlaylistModalOpen}
             onClose={() => setIsAddToPlaylistModalOpen(false)}
             problemId={selectedProblemId}
           />

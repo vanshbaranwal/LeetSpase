@@ -148,6 +148,7 @@ const ProblemPage = () => {
   const [copied, setCopied] = useState(false);
   const [copiedSolution, setCopiedSolution] = useState(false);
   const consoleRef = useRef(null);
+  const consoleContentRef = useRef(null);
   const [layout, setLayout] = useState(readWorkspaceLayout);
   const { problemWidth, editorHeight, showProblem, showConsole } = layout;
   const draftKey = useMemo(
@@ -232,8 +233,14 @@ const ProblemPage = () => {
   }, [layout]);
 
   useEffect(() => {
+    if (executionResult && consoleContentRef.current) {
+      consoleContentRef.current.scrollTop = 0;
+    }
+  }, [executionResult]);
+
+  useEffect(() => {
     if (executionResult && showConsole && !window.matchMedia("(min-width: 64rem)").matches) {
-      consoleRef.current?.scrollIntoView({ block: "nearest" });
+      consoleRef.current?.scrollIntoView({ block: "start" });
     }
   }, [executionResult, showConsole]);
 
@@ -662,9 +669,9 @@ const ProblemPage = () => {
                 </div>
                 {showConsole && !executionResult && <span className="text-[10px] uppercase tracking-[0.12em] text-white/25">Sample cases</span>}
               </div>
-              <div id="problem-console-content" hidden={!showConsole} className="min-h-0 flex-1 overflow-y-auto p-4">
+              <div id="problem-console-content" ref={consoleContentRef} hidden={!showConsole} className="min-h-0 flex-1 overflow-y-auto p-4">
                 {executionResult ? (
-                  <Submission submission={executionResult} />
+                  <Submission key={`${lastAction}-${executionResult.createdAt}`} submission={executionResult} />
                 ) : testcases.length ? (
                   <div>
                     <div className="flex items-center gap-2 overflow-x-auto">

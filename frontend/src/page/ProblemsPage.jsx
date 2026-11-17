@@ -143,6 +143,7 @@ const ProblemsPage = () => {
               onSearchChange={handleProblemSearch}
               selectedTag={selectedTag}
               title={activeCollection.name}
+              showSaveToPlaylist={activeCollection.type !== "playlist"}
               emptyMessage={emptyMessage}
             />
           )}

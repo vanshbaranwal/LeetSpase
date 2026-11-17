@@ -18,8 +18,7 @@
     grid-template-areas:
       "number title solved"
       ". level level"
-      ". tags tags"
-      ". actions actions";
+      ". tags tags";
     gap: 0.4rem 0.65rem;
     align-items: start;
     padding: 0.875rem;
@@ -35,7 +34,7 @@
   .problem-records tbody td:nth-child(3) { grid-area: title; }
   .problem-records tbody td:nth-child(4) { grid-area: tags; }
   .problem-records tbody td:nth-child(5) { grid-area: level; }
-  .problem-records tbody td:nth-child(6) { grid-area: actions; margin-top: 0.25rem; }
+  .problem-records tbody td:nth-child(6) { grid-column: 2 / -1; grid-row: 4; margin-top: 0.25rem; }
   .problem-records tbody td[colspan] { grid-area: 1 / 1 / 2 / -1; padding: 0.75rem; text-align: center; }
   .problem-records tbody td:nth-child(3) > :is(a, button) {
     display: flex;

@@ -4,8 +4,14 @@ import toast from "react-hot-toast";
 
 
 
-const getErrorMessage = (error, fallback) =>
-    error.response?.data?.error || fallback;
+const executionRequestOptions = { timeout: 60_000 };
+
+const getErrorMessage = (error, fallback) => {
+    if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") {
+        return "LeetSpase did not receive a result in time. Please try again.";
+    }
+    return error.response?.data?.error || fallback;
+};
 
 export const useExecutionStore = create((set) => ({
     isRunning: false,
@@ -20,7 +26,7 @@ export const useExecutionStore = create((set) => ({
                 source_code,
                 language_id,
                 problemId
-            });
+            }, executionRequestOptions);
 
             set({ result: response.data.result, lastAction: "run" });
             toast.success(response.data.message);
@@ -41,7 +47,7 @@ export const useExecutionStore = create((set) => ({
                 source_code,
                 language_id,
                 problemId
-            });
+            }, executionRequestOptions);
 
             set({ result: response.data.result, lastAction: "submit" });
             toast.success(response.data.message);
