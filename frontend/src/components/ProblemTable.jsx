@@ -224,9 +224,9 @@ const ProblemsTable = ({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl shadow-md">
-        <table className="table table-zebra table-lg bg-base-200 text-base-content">
-          <thead className="bg-base-300 text-center">
+      <div className="problem-records overflow-x-auto rounded-xl shadow-md">
+        <table role="table" className="table table-zebra table-lg bg-base-200 text-base-content">
+          <thead role="rowgroup" className="bg-base-300 text-center">
             <tr>
               <th>#</th>
               <th>Solved</th>
@@ -236,26 +236,27 @@ const ProblemsTable = ({
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody role="rowgroup">
             {filteredProblems.length > 0 ? (
               filteredProblems.map((problem) => {
                 const isSolved = problem.solvedBy?.some(
                   (user) => user.userId === authUser?.id
                 ) ?? false;
                 return (
-                  <tr key={problem.id}>
-                    <td className="text-center font-mono text-sm text-white/45">
+                  <tr role="row" key={problem.id}>
+                    <td role="cell" className="text-center font-mono text-sm text-white/45">
                       {problemNumberById.get(problem.id) ?? "—"}
                     </td>
-                    <td className="text-center">
+                    <td role="cell" className="text-center">
                       <input
                         type="checkbox"
                         checked={isSolved}
                         readOnly
+                        aria-label={isSolved ? "Solved" : "Unsolved"}
                         className="checkbox checkbox-sm"
                       />
                     </td>
-                    <td className="text-center">
+                    <td role="cell" className="text-center">
                       {authUser ? (
                         <Link to={`/problem/${problem.id}`} className="group inline-flex items-center justify-center gap-2.5 font-semibold no-underline transition-colors hover:text-white/65 hover:no-underline">
                           <span className="no-underline">{problem.title}</span>
@@ -281,7 +282,7 @@ const ProblemsTable = ({
                         </button>
                       )}
                     </td>
-                    <td className="text-center">
+                    <td role="cell" className="text-center">
                       <div className="flex flex-wrap justify-center gap-x-2 gap-y-1">
                         {(problem.tags || []).map((tag, idx) => (
                           <span
@@ -293,7 +294,7 @@ const ProblemsTable = ({
                         ))}
                       </div>
                     </td>
-                    <td className="text-center">
+                    <td role="cell" className="text-center">
                       <span
                         className={`text-xs font-semibold ${
                           problem.difficulty === "EASY"
@@ -306,7 +307,7 @@ const ProblemsTable = ({
                         {problem.difficulty}
                       </span>
                     </td>
-                    <td className="text-center">
+                    <td role="cell" className="text-center">
                       <div className="flex flex-col items-center justify-center gap-2 md:flex-row">
                         {authUser?.role === "ADMIN" && (
                           <div className="flex gap-2">
@@ -343,8 +344,8 @@ const ProblemsTable = ({
                 );
               })
             ) : (
-              <tr>
-                <td colSpan={6} className="text-center py-6 text-gray-500">
+              <tr role="row">
+                <td role="cell" colSpan={6} className="text-center py-6 text-gray-500">
                   {emptyMessage}
                 </td>
               </tr>

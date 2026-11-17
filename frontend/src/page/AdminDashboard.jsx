@@ -224,7 +224,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className={`min-h-screen w-full bg-[#111e36] text-white ${activeSection === "add-problem" ? "lg:h-screen lg:overflow-hidden" : ""}`}>
+    <div className={`min-h-screen w-full bg-[#111e36] text-white ${activeSection === "add-problem" ? "xl:h-dvh xl:overflow-hidden" : ""}`}>
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#111e36]/95 backdrop-blur">
         <div className="mx-auto flex h-20 w-full items-center justify-between px-5 sm:px-8">
           <Link to="/" className="flex items-center gap-3">
@@ -238,8 +238,8 @@ const AdminDashboard = () => {
         </div>
       </header>
 
-      <div className={`mx-auto grid w-full grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] ${activeSection === "add-problem" ? "lg:h-[calc(100vh-5rem)] lg:max-w-none lg:overflow-hidden" : "max-w-[1800px]"}`}>
-        <main className={`min-w-0 ${activeSection === "add-problem" ? "p-0 lg:h-full lg:overflow-hidden" : "px-5 py-8 sm:px-8 lg:px-10 lg:py-10"}`}>
+      <div className={`mx-auto grid w-full grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] ${activeSection === "add-problem" ? "xl:h-[calc(100dvh-5rem)] xl:max-w-none xl:overflow-hidden" : "max-w-[1800px]"}`}>
+        <main className={`min-w-0 ${activeSection === "add-problem" ? "p-0 xl:h-full xl:overflow-hidden" : "px-5 py-8 sm:px-8 lg:px-10 lg:py-10"}`}>
           {activeSection === "overview" && (
             <section>
               <div className="mb-8">
@@ -496,9 +496,9 @@ const AdminDashboard = () => {
               </div>
 
               <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#192b49]">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[1050px] text-left text-sm">
-                    <thead className="border-b border-white/10 bg-black/20 text-xs uppercase tracking-[0.12em] text-white/35">
+                <div className="submission-records overflow-x-auto">
+                  <table role="table" className="w-full min-w-[1050px] text-left text-sm">
+                    <thead role="rowgroup" className="border-b border-white/10 bg-black/20 text-xs uppercase tracking-[0.12em] text-white/35">
                       <tr>
                         <th className="px-5 py-4 text-center">User</th>
                         <th className="px-5 py-4 text-center">Problem</th>
@@ -510,31 +510,31 @@ const AdminDashboard = () => {
                         <th className="px-5 py-4 text-center">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/[0.07]">
+                    <tbody role="rowgroup" className="divide-y divide-white/[0.07]">
                       {filteredSubmissions.map((submission) => {
                         const accepted = normalizeSubmissionStatus(submission.status) === "accepted";
                         const runtimeSummary = getMetricSummary(submission.time);
 
                         return (
-                          <tr key={submission.id} className="transition-colors hover:bg-white/[0.025]">
-                            <td className="px-5 py-4 text-center">
+                          <tr role="row" key={submission.id} className="transition-colors hover:bg-white/[0.025]">
+                            <td role="cell" data-label="User" className="px-5 py-4 text-center">
                               <p className="font-medium">{submission.user?.name || submission.user?.username}</p>
                               <p className="mt-0.5 text-xs text-white/35">{submission.user?.email}</p>
                             </td>
-                            <td className="px-5 py-4 text-center text-white/65">{submission.problem?.title}</td>
-                            <td className="px-5 py-4 text-center font-mono text-xs uppercase text-white/55">{submission.language}</td>
-                            <td className="px-5 py-4 text-center">
+                            <td role="cell" data-label="Problem" className="px-5 py-4 text-center text-white/65">{submission.problem?.title}</td>
+                            <td role="cell" data-label="Language" className="px-5 py-4 text-center font-mono text-xs uppercase text-white/55">{submission.language}</td>
+                            <td role="cell" data-label="Status" className="px-5 py-4 text-center">
                               <span className={`text-xs font-semibold ${accepted ? "text-emerald-400" : "text-red-400"}`}>
                                 {formatSubmissionStatus(submission.status)}
                               </span>
                             </td>
-                            <td className="px-5 py-4 text-center">
+                            <td role="cell" data-label="Avg runtime" className="px-5 py-4 text-center">
                               <p className="font-medium tabular-nums text-white/75">{formatRuntime(submission.time)}</p>
                               {runtimeSummary.count > 1 && <p className="mt-1 text-[11px] text-white/30">Average of {runtimeSummary.count} test cases</p>}
                             </td>
-                            <td className="px-5 py-4 text-center font-medium tabular-nums text-white/60">{formatMemory(submission.memory)}</td>
-                            <td className="px-5 py-4 text-center text-xs text-white/40">{formatDate(submission.createdAt)}</td>
-                            <td className="px-5 py-4 text-center">
+                            <td role="cell" data-label="Avg memory" className="px-5 py-4 text-center font-medium tabular-nums text-white/60">{formatMemory(submission.memory)}</td>
+                            <td role="cell" data-label="Timestamp" className="px-5 py-4 text-center text-xs text-white/40">{formatDate(submission.createdAt)}</td>
+                            <td role="cell" data-label="Actions" className="px-5 py-4 text-center">
                               <button type="button" onClick={() => setSelectedSubmission(submission)} className="rounded-full border border-white/10 px-4 py-1.5 text-xs text-white/60 transition-colors hover:border-white/25 hover:text-white">View</button>
                             </td>
                           </tr>
@@ -614,7 +614,7 @@ const AdminDashboard = () => {
           )}
         </main>
 
-        <aside className="order-first border-b border-white/10 bg-[#14213d] p-5 lg:order-none lg:sticky lg:top-20 lg:h-[calc(100vh-5rem)] lg:border-b-0 lg:border-l lg:p-6">
+        <aside className="order-first border-b border-white/10 bg-[#14213d] p-5 lg:order-none lg:sticky lg:top-20 lg:h-[calc(100dvh-5rem)] lg:overflow-y-auto lg:border-b-0 lg:border-l lg:p-6">
           <div className="flex items-center gap-3 border-b border-white/10 pb-5">
             <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-white font-semibold text-black">
               {authUser.image ? <img src={authUser.image} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" /> : (authUser.name?.[0] || "A").toUpperCase()}
@@ -625,7 +625,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <nav className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-5 lg:grid-cols-1" aria-label="Admin dashboard sections">
+          <nav className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-1" aria-label="Admin dashboard sections">
             {navItems.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
@@ -634,7 +634,7 @@ const AdminDashboard = () => {
                 className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-left text-sm transition-colors ${activeSection === id ? "bg-white text-black" : "text-white/45 hover:bg-white/[0.05] hover:text-white"}`}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                <span className="truncate">{label}</span>
+                <span className="min-w-0">{label}</span>
               </button>
             ))}
           </nav>
@@ -644,7 +644,7 @@ const AdminDashboard = () => {
 
       {pendingRoleChange && (
         <div className="fixed inset-0 z-[75] grid place-items-center bg-black/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Confirm role change">
-          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#192b49] p-6 shadow-2xl">
+          <div className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl border border-white/10 bg-[#192b49] p-5 shadow-2xl sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-white/35">Access control</p>
@@ -668,7 +668,7 @@ const AdminDashboard = () => {
                 : "This removes access to all admin-only controls. The user will keep their normal LeetSpase account."}
             </p>
 
-            <div className="mt-7 flex justify-end gap-3">
+            <div className="mt-7 flex flex-wrap justify-end gap-3">
               <button type="button" onClick={() => setPendingRoleChange(null)} disabled={isUpdatingUser} className="h-11 rounded-full border border-white/10 px-5 text-sm text-white/60 transition-colors hover:border-white/25 hover:text-white disabled:opacity-40">
                 Cancel
               </button>
@@ -688,7 +688,7 @@ const AdminDashboard = () => {
 
       {selectedSubmission && (
         <div className="fixed inset-0 z-[70] grid place-items-center bg-black/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Submission details">
-          <div className="max-h-[86vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-[#192b49] p-6 shadow-2xl">
+          <div className="max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-[#192b49] p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-white/35">Submission details</p>

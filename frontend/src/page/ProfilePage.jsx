@@ -277,13 +277,13 @@ const ProfilePage = () => {
           </div>
         </section>
 
-        <nav className="mt-2 flex gap-7 overflow-x-auto border-b border-white/10" aria-label="Profile sections">
+        <nav className="mt-2 flex gap-2 overflow-x-auto border-b sm:gap-7 border-white/10" aria-label="Profile sections">
           {sections.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               type="button"
               onClick={() => setActiveSection(id)}
-              className={`inline-flex h-14 shrink-0 items-center gap-2 border-b-2 px-1 text-sm font-medium transition-colors ${activeSection === id ? "border-white text-white" : "border-transparent text-white/40 hover:text-white/75"}`}
+              className={`inline-flex h-12 shrink-0 items-center gap-1.5 border-b-2 px-1 text-xs font-medium sm:h-14 sm:gap-2 sm:text-sm transition-colors ${activeSection === id ? "border-white text-white" : "border-transparent text-white/40 hover:text-white/75"}`}
             >
               <Icon className="h-4 w-4" /> {label}
             </button>
@@ -308,7 +308,7 @@ const ProfilePage = () => {
               ))}
             </section>
 
-            <section className="grid border-y border-white/10 xl:grid-cols-[1.2fr_0.8fr] xl:divide-x xl:divide-white/10">
+            <section className="grid grid-cols-1 border-y border-white/10 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] xl:divide-x xl:divide-white/10">
               <article className="py-8 xl:pr-10">
                 <div className="flex items-center justify-between">
                   <div>
@@ -340,7 +340,7 @@ const ProfilePage = () => {
                 </div>
               </article>
 
-              <article className="border-t border-white/10 py-8 xl:border-t-0 xl:pl-10">
+              <article className="min-w-0 border-t border-white/10 py-8 xl:border-t-0 xl:pl-10">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h2 className="text-lg font-semibold">Coding activity</h2>
@@ -353,7 +353,7 @@ const ProfilePage = () => {
                   </div>
                 </div>
 
-                <div className="mt-7 overflow-x-auto pb-2">
+                <div className="mt-7 overflow-x-auto pb-2" tabIndex={0} aria-label="Coding activity calendar">
                   <div className="grid w-max grid-flow-col grid-rows-7 gap-1">
                     {calendarDays.map((day) => (
                       <span
@@ -374,8 +374,8 @@ const ProfilePage = () => {
         {activeSection === "playlists" && (
           <section className="mt-6">
             {playlists.length ? (
-              <div className="grid border-y border-white/10 lg:grid-cols-[310px_minmax(0,1fr)]">
-                <aside className="border-b border-white/[0.08] lg:border-b-0 lg:border-r" aria-label="Your playlists">
+              <div className="grid grid-cols-1 border-y border-white/10 lg:grid-cols-[310px_minmax(0,1fr)]">
+                <aside className="min-w-0 border-b border-white/[0.08] lg:border-b-0 lg:border-r" aria-label="Your playlists">
                   <div className="border-b border-white/[0.08] px-5 py-5">
                     <div className="flex items-center justify-between">
                       <div>
@@ -439,7 +439,7 @@ const ProfilePage = () => {
                         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0">
                             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/30">Playlist</p>
-                            <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{selectedPlaylist.name}</h2>
+                            <h2 className="mt-2 wrap-anywhere text-2xl font-semibold tracking-[-0.03em]">{selectedPlaylist.name}</h2>
                             {selectedPlaylist.description && <p className="mt-2 max-w-2xl text-sm leading-6 text-white/40">{selectedPlaylist.description}</p>}
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
@@ -476,7 +476,7 @@ const ProfilePage = () => {
                               <Link key={problem.id} to={`/problem/${problem.id}`} className="flex items-center gap-4 border-b border-white/[0.065] px-4 py-4 transition-colors last:border-b-0 hover:bg-white/[0.035] sm:px-5">
                                 <span className="w-7 shrink-0 text-center font-mono text-xs text-white/25">{String(index + 1).padStart(2, "0")}</span>
                                 <div className="min-w-0 flex-1">
-                                  <p className="truncate text-sm font-medium text-white/75">{problem.title}</p>
+                                  <p className="wrap-anywhere text-sm font-medium text-white/75">{problem.title}</p>
                                   <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[10px]">
                                     <span className={`font-semibold ${difficultyStyles[problem.difficulty]?.text}`}>{problem.difficulty}</span>
                                     {problem.tags?.slice(0, 2).map((tag) => <span key={tag} className="text-white/25">{tag}</span>)}
@@ -603,7 +603,7 @@ const ProfilePage = () => {
 
       {playlistPendingDeletion && (
         <div className="fixed inset-0 z-[80] grid place-items-center bg-black/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Delete playlist">
-          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#192b49] p-7 shadow-2xl">
+          <div className="relative max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-[#192b49] p-5 shadow-2xl sm:p-7">
             <button type="button" onClick={() => setPlaylistPendingDeletion(null)} className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full border border-white/10 text-white/40 hover:text-white" aria-label="Close"><X className="h-4 w-4" /></button>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-400/70">Delete playlist</p>
             <h2 className="mt-4 pr-10 text-xl font-semibold">Delete “{playlistPendingDeletion.name}”?</h2>
@@ -644,26 +644,26 @@ const SubmissionList = ({ submissions }) => (
       </div>
     </div>
     {submissions.length ? (
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[860px] text-left text-sm">
-          <thead className="border-b border-white/[0.07] text-xs uppercase tracking-[0.12em] text-white/30">
+      <div className="submission-records overflow-x-auto">
+        <table role="table" className="w-full min-w-[860px] text-left text-sm">
+          <thead role="rowgroup" className="border-b border-white/[0.07] text-xs uppercase tracking-[0.12em] text-white/30">
             <tr><th className="px-6 py-4">Problem</th><th className="px-5 py-4 text-center">Language</th><th className="px-5 py-4 text-center">Status</th><th className="px-5 py-4 text-center">Avg runtime</th><th className="px-5 py-4 text-center">Avg memory</th><th className="px-6 py-4 text-center">Submitted</th></tr>
           </thead>
-          <tbody className="divide-y divide-white/[0.06]">
+          <tbody role="rowgroup" className="divide-y divide-white/[0.06]">
             {submissions.map((submission) => {
               const accepted = normalizeSubmissionStatus(submission.status) === "accepted";
               const runtimeSummary = getMetricSummary(submission.time);
               return (
-                <tr key={submission.id} className="hover:bg-white/[0.02]">
-                  <td className="px-6 py-4"><Link to={`/problem/${submission.problem.id}`} className="font-medium text-white/75 hover:text-white">{submission.problem.title}</Link><p className={`mt-1 text-xs ${difficultyStyles[submission.problem.difficulty]?.text}`}>{submission.problem.difficulty}</p></td>
-                  <td className="px-5 py-4 text-center font-mono text-xs uppercase text-white/50">{String(submission.language || "—").toUpperCase()}</td>
-                  <td className={`px-5 py-4 text-center text-xs font-semibold ${accepted ? "text-emerald-400" : "text-red-400"}`}>{formatSubmissionStatus(submission.status)}</td>
-                  <td className="px-5 py-4 text-center">
+                <tr role="row" key={submission.id} className="hover:bg-white/[0.02]">
+                  <td role="cell" data-label="Problem" className="px-6 py-4"><Link to={`/problem/${submission.problem.id}`} className="font-medium text-white/75 hover:text-white">{submission.problem.title}</Link><p className={`mt-1 text-xs ${difficultyStyles[submission.problem.difficulty]?.text}`}>{submission.problem.difficulty}</p></td>
+                  <td role="cell" data-label="Language" className="px-5 py-4 text-center font-mono text-xs uppercase text-white/50">{String(submission.language || "—").toUpperCase()}</td>
+                  <td role="cell" data-label="Status" className={`px-5 py-4 text-center text-xs font-semibold ${accepted ? "text-emerald-400" : "text-red-400"}`}>{formatSubmissionStatus(submission.status)}</td>
+                  <td role="cell" data-label="Avg runtime" className="px-5 py-4 text-center">
                     <p className="font-medium tabular-nums text-white/75">{formatRuntime(submission.time)}</p>
                     {runtimeSummary.count > 1 && <p className="mt-1 text-[11px] text-white/30">Average of {runtimeSummary.count} test cases</p>}
                   </td>
-                  <td className="px-5 py-4 text-center font-medium tabular-nums text-white/60">{formatMemory(submission.memory)}</td>
-                  <td className="px-6 py-4 text-center text-xs text-white/30">{formatTimestamp(submission.createdAt)}</td>
+                  <td role="cell" data-label="Avg memory" className="px-5 py-4 text-center font-medium tabular-nums text-white/60">{formatMemory(submission.memory)}</td>
+                  <td role="cell" data-label="Submitted" className="px-6 py-4 text-center text-xs text-white/30">{formatTimestamp(submission.createdAt)}</td>
                 </tr>
               );
             })}

@@ -41,6 +41,15 @@
   --brand-accent: #a9b8ff;
 }
 
+.mobile-nav-dropdown.dropdown { position: static; }
+.mobile-nav-dropdown > .mobile-nav-menu {
+  inset: 100% 0 auto auto;
+  max-width: 100%;
+  max-height: calc(100dvh - 7rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 /* Keep every area scrollable while hiding browser scrollbar chrome. */
 * {
   scrollbar-width: none;
@@ -308,4 +317,3 @@ a.btn:hover {
       transform: scale(1.05);
     }
   }
-  

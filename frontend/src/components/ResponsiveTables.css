@@ -1,0 +1,85 @@
+/* Compact table layouts use the space available to the table, including sidebars. */
+.problem-records { container: problem-list / inline-size; }
+.submission-records { container: submission-list / inline-size; }
+
+@container problem-list (width < 44rem) {
+  .problem-records :is(table, tbody) { display: block; width: 100%; }
+  .problem-records thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .problem-records tbody tr {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "number title solved"
+      ". level level"
+      ". tags tags"
+      ". actions actions";
+    gap: 0.4rem 0.65rem;
+    align-items: start;
+    padding: 0.875rem;
+  }
+  .problem-records tbody td {
+    min-width: 0;
+    padding: 0;
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+  .problem-records tbody td:nth-child(1) { grid-area: number; }
+  .problem-records tbody td:nth-child(2) { grid-area: solved; }
+  .problem-records tbody td:nth-child(3) { grid-area: title; }
+  .problem-records tbody td:nth-child(4) { grid-area: tags; }
+  .problem-records tbody td:nth-child(5) { grid-area: level; }
+  .problem-records tbody td:nth-child(6) { grid-area: actions; margin-top: 0.25rem; }
+  .problem-records tbody td[colspan] { grid-area: 1 / 1 / 2 / -1; padding: 0.75rem; text-align: center; }
+  .problem-records tbody td:nth-child(3) > :is(a, button) {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+    text-align: left;
+  }
+  .problem-records tbody :is(td:nth-child(4), td:nth-child(6)) > div {
+    flex-flow: row wrap;
+    justify-content: flex-start;
+  }
+}
+
+@container submission-list (width < 66rem) {
+  .submission-records :is(table, tbody) { display: block; min-width: 0; width: 100%; }
+  .submission-records thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .submission-records tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem 1rem;
+    padding: 1rem;
+  }
+  .submission-records tbody td {
+    min-width: 0;
+    padding: 0;
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+  .submission-records td[data-label="Problem"] { grid-column: 1 / -1; }
+  .submission-records td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #b6c3db;
+    font: 500 0.6875rem/1.4 system-ui, sans-serif;
+    letter-spacing: 0.04em;
+    text-transform: none;
+  }
+}

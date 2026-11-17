@@ -761,9 +761,9 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
   };
 
   return (
-    <div className={`${embedded ? "lg:h-full lg:overflow-hidden" : "h-screen overflow-hidden"} w-full bg-[#111e36] text-white`}>
-      <div className={`flex w-full flex-col ${embedded ? "lg:h-full" : "h-full"}`}>
-        <div className={`flex flex-col ${embedded ? "lg:min-h-0 lg:flex-1" : "min-h-0 flex-1"}`}>
+    <div className={`${embedded ? "xl:h-full xl:overflow-hidden" : "xl:h-dvh xl:overflow-hidden"} w-full bg-[#111e36] text-white`}>
+      <div className="flex w-full flex-col xl:h-full">
+        <div className="flex flex-col xl:min-h-0 xl:flex-1">
           <div className="flex shrink-0 items-center justify-between gap-5 border-b border-white/10 bg-[#162540] px-5 py-4 sm:px-8 lg:px-10">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/30">Problem builder</p>
@@ -782,10 +782,10 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
 
           <form
             onSubmit={handleSubmit(onSubmit, handleInvalidForm)}
-            className={`create-problem-form grid lg:grid-cols-[280px_minmax(0,1fr)] ${embedded ? "lg:min-h-0 lg:flex-1 lg:grid-rows-1 lg:overflow-hidden" : "min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] overflow-hidden lg:grid-rows-1"}`}
+            className="create-problem-form grid xl:min-h-0 xl:flex-1 xl:grid-cols-[240px_minmax(0,1fr)] xl:grid-rows-1 xl:overflow-hidden"
           >
-            <aside className={`${embedded ? "lg:overflow-y-auto" : "overflow-y-auto"} border-b border-white/10 bg-[#14213d] px-4 py-5 lg:border-b-0 lg:border-r lg:px-5`}>
-              <div className="mb-6 flex items-center justify-between lg:block">
+            <aside className="min-w-0 border-b border-white/10 bg-[#14213d] px-3 py-3 sm:px-4 xl:overflow-y-auto xl:border-b-0 xl:border-r xl:px-5 xl:py-5">
+              <div className="mb-2 flex items-center justify-between xl:mb-6 xl:block">
                 <button
                   type="button"
                   onClick={() => onBack ? onBack() : navigation("/problems")}
@@ -793,10 +793,10 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
                 >
                   <ArrowLeft className="h-4 w-4" /> {embedded ? "Overview" : "Problems"}
                 </button>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/25 lg:mt-7 lg:px-3">Sections</p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/25 xl:mt-7 xl:px-3">Sections</p>
               </div>
 
-              <nav className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 lg:gap-0" aria-label="Problem form sections">
+              <nav className="grid grid-cols-2 gap-1 sm:grid-cols-4 xl:grid-cols-1 xl:gap-0" aria-label="Problem form sections">
                 {formTabs.map((tab) => {
                   const isActive = activeTab === tab.id;
                   const hasError = tabHasError(tab.id);
@@ -806,7 +806,7 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id)}
-                      className={`group flex min-h-14 items-center gap-3 border-l-2 px-3 py-2.5 text-left transition-colors ${
+                      className={`group flex min-h-10 min-w-0 items-center gap-2 border-l-2 px-2 py-2 xl:min-h-14 xl:px-3 text-left transition-colors ${
                         isActive
                           ? "border-white bg-white/[0.05] text-white"
                           : "border-transparent text-white/40 hover:bg-white/[0.025] hover:text-white/75"
@@ -815,10 +815,10 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
                     >
                       <span className="min-w-0">
                         <span className="flex items-center gap-2 text-sm font-semibold">
-                          <span className="truncate">{tab.label}</span>
+                          <span>{tab.label}</span>
                           {hasError && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" aria-label="Section has an error" />}
                         </span>
-                        <span className="mt-0.5 hidden truncate text-xs font-normal text-white/30 lg:block">{tab.caption}</span>
+                        <span className="mt-0.5 hidden truncate text-xs font-normal text-white/30 xl:block">{tab.caption}</span>
                       </span>
                     </button>
                   );
@@ -826,8 +826,8 @@ const CreateProblemForm = ({ embedded = false, onBack, onCreated }) => {
               </nav>
             </aside>
 
-            <div className={`flex min-w-0 flex-col ${embedded ? "lg:min-h-0 lg:overflow-hidden" : "min-h-0 overflow-hidden"}`}>
-              <div className={`${embedded ? "lg:min-h-0 lg:flex-1 lg:overflow-y-auto" : "min-h-0 flex-1 overflow-y-auto"} p-5 sm:p-8 lg:p-10`}>
+            <div className="flex min-w-0 flex-col xl:min-h-0 xl:overflow-hidden">
+              <div className="xl:min-h-0 xl:flex-1 xl:overflow-y-auto p-5 sm:p-8 lg:p-10">
                 <div className="mb-8">
                   <div>
                     <h1 className="text-2xl font-semibold tracking-[-0.04em] sm:text-3xl">{activeTabDetails.label}</h1>

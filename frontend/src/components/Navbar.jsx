@@ -38,7 +38,7 @@ const Navbar = ({ variant = "default" }) => {
         )}
 
         <div className="flex shrink-0 items-center gap-2.5">
-          <div className={`dropdown dropdown-end ${isProblemsPage ? "md:hidden" : "lg:hidden"}`}>
+          <div className="dropdown mobile-nav-dropdown lg:hidden">
             <button
               type="button"
               tabIndex={0}
@@ -47,7 +47,7 @@ const Navbar = ({ variant = "default" }) => {
             >
               <Menu className="h-4.5 w-4.5" />
             </button>
-            <div tabIndex={0} className="dropdown-content z-[60] mt-3 w-64 rounded-2xl border border-white/10 bg-[#192b49] p-2 text-sm text-white shadow-2xl shadow-black/60">
+            <div tabIndex={0} className="dropdown-content mobile-nav-menu z-[60] mt-3 w-64 rounded-2xl border border-white/10 bg-[#192b49] p-2 text-sm text-white shadow-2xl shadow-black/60">
               {isProblemsPage ? (
                 <>
                   <Link to="/problems" className="flex h-11 items-center rounded-xl px-3 font-medium text-white transition-colors hover:bg-white/[0.06]">Problems</Link>
@@ -78,7 +78,7 @@ const Navbar = ({ variant = "default" }) => {
           </div>
 
           {isProblemsPage && (
-            <div className="mr-5 hidden items-center gap-8 font-mono text-sm font-semibold uppercase tracking-[0.06em] md:flex">
+            <div className="mr-5 hidden items-center gap-8 font-mono text-sm font-semibold uppercase tracking-[0.06em] lg:flex">
               <Link to="/problems" className="text-white">Problems</Link>
               <span className="cursor-default text-white/45" title="Discussion is coming soon">Discussion</span>
               <span className="cursor-default text-white/45" title="Contest is coming soon">Contest</span>
@@ -123,7 +123,7 @@ const Navbar = ({ variant = "default" }) => {
                     <User className="h-6 w-6" />
                   )}
                 </button>
-                <div tabIndex={0} className="dropdown-content z-[1] mt-3 w-72 overflow-hidden rounded-2xl border border-white/10 bg-[#192b49] p-2 text-white shadow-2xl shadow-black/60">
+                <div tabIndex={0} className="dropdown-content z-[1] mt-3 max-h-[calc(100dvh-7rem)] w-72 max-w-[calc(100dvw-3rem)] overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-[#192b49] p-2 text-white shadow-2xl shadow-black/60">
                   <div className="flex items-center gap-3 px-3 py-3">
                     <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-sm font-semibold text-black">
                       {authUser.image ? (

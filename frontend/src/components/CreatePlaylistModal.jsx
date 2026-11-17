@@ -34,10 +34,10 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSubmit }) => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="create-playlist-title"
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[#192b49] text-white shadow-[0_28px_90px_rgba(0,0,0,0.65)]"
+        className="max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-[#192b49] text-white shadow-[0_28px_90px_rgba(0,0,0,0.65)]"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <header className="flex items-start justify-between gap-6 border-b border-white/[0.08] px-6 py-5 sm:px-7">
+        <header className="flex items-start justify-between gap-3 border-b border-white/[0.08] px-4 py-4 sm:gap-6 sm:px-7 sm:py-5">
           <div>
             <h2 id="create-playlist-title" className="text-xl font-semibold tracking-[-0.025em]">Create playlist</h2>
             <p className="mt-1.5 text-sm text-white/35">Build a focused collection for your practice.</p>
@@ -52,7 +52,7 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSubmit }) => {
           </button>
         </header>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="px-6 py-6 sm:px-7">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="px-4 py-4 sm:px-7 sm:py-6">
           <div>
             <label htmlFor="playlist-name" className="text-xs font-medium text-white/65">Playlist name</label>
             <input

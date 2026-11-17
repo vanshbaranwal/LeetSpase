@@ -12,6 +12,10 @@ import {
   ListChecks,
   LoaderCircle,
   MessageSquare,
+  PanelBottom,
+  PanelBottomClose,
+  PanelLeft,
+  PanelLeftClose,
   Play,
   RotateCcw,
   Share2,
@@ -25,6 +29,7 @@ import { useExecutionStore } from "../store/useExecutionStore";
 import { useSubmissionStore } from "../store/useSubmissionStore";
 import Submission from "../components/Submission";
 import SubmissionsList from "../components/SubmissionList";
+import WorkspaceDivider from "../components/WorkspaceDivider";
 
 const difficultyStyles = {
   EASY: "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
@@ -40,6 +45,39 @@ const tabs = [
 ];
 
 const solutionLanguageOrder = ["PYTHON", "JAVA", "JAVASCRIPT"];
+
+const workspaceLayoutKey = "leetspase:problem-workspace-layout";
+const problemSplit = { min: 24, max: 72, defaultValue: 41 };
+const editorSplit = { min: 24, max: 84, defaultValue: 66 };
+const dividerSize = "10px";
+
+const readWorkspaceLayout = () => {
+  const defaults = {
+    problemWidth: problemSplit.defaultValue,
+    editorHeight: editorSplit.defaultValue,
+    showProblem: true,
+    showConsole: true,
+  };
+
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(workspaceLayoutKey));
+    if (!saved) return defaults;
+
+    const readSize = (size, { min, max, defaultValue }) =>
+      Number.isFinite(size) ? Math.min(max, Math.max(min, Math.round(size))) : defaultValue;
+
+    return {
+      problemWidth: readSize(saved.problemWidth, problemSplit),
+      editorHeight: readSize(saved.editorHeight, editorSplit),
+      showProblem: saved.showProblem !== false,
+      showConsole: saved.showConsole !== false,
+    };
+  } catch {
+    return defaults;
+  }
+};
+
+const splitTracks = (size) => `minmax(0, ${size}fr) ${dividerSize} minmax(0, ${100 - size}fr)`;
 
 const formatLanguage = (language) => {
   if (language === "JAVASCRIPT") return "JavaScript";
@@ -109,6 +147,9 @@ const ProblemPage = () => {
   const [editorialLanguage, setEditorialLanguage] = useState("PYTHON");
   const [copied, setCopied] = useState(false);
   const [copiedSolution, setCopiedSolution] = useState(false);
+  const consoleRef = useRef(null);
+  const [layout, setLayout] = useState(readWorkspaceLayout);
+  const { problemWidth, editorHeight, showProblem, showConsole } = layout;
   const draftKey = useMemo(
     () => getDraftKey(authUser?.id, id, selectedLanguage, problem?.isDemo),
     [authUser?.id, id, selectedLanguage, problem?.isDemo]
@@ -182,6 +223,32 @@ const ProblemPage = () => {
     if (activeTab === "submissions" && id) getSubmissionForProblem(id);
   }, [activeTab, id, getSubmissionForProblem]);
 
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(workspaceLayoutKey, JSON.stringify(layout));
+    } catch {
+      // Layout controls still work if browser storage is unavailable.
+    }
+  }, [layout]);
+
+  useEffect(() => {
+    if (executionResult && showConsole && !window.matchMedia("(min-width: 64rem)").matches) {
+      consoleRef.current?.scrollIntoView({ block: "nearest" });
+    }
+  }, [executionResult, showConsole]);
+
+  const setPanelSize = (panel, size) => {
+    setLayout((current) => current[panel] === size ? current : { ...current, [panel]: size });
+  };
+
+  const togglePanel = (panel) => {
+    setLayout((current) => ({ ...current, [panel]: !current[panel] }));
+  };
+
+  const revealConsole = () => {
+    setLayout((current) => current.showConsole ? current : { ...current, showConsole: true });
+  };
+
   const handleLanguageChange = (language) => {
     const nextDraftKey = getDraftKey(authUser?.id, id, language, problem?.isDemo);
     const savedDraft = readDraft(nextDraftKey);
@@ -198,12 +265,13 @@ const ProblemPage = () => {
 
   const handleRunCode = async () => {
     const languageId = getLanguageId(selectedLanguage);
-    await runCode(code, languageId, id);
+    if (await runCode(code, languageId, id)) revealConsole();
   };
 
   const handleSubmitCode = async () => {
     const languageId = getLanguageId(selectedLanguage);
     const submitted = await submitCode(code, languageId, id);
+    if (submitted) revealConsole();
     if (submitted && activeTab === "submissions") {
       await getSubmissionForProblem(id);
     }
@@ -405,12 +473,15 @@ const ProblemPage = () => {
           </section>
         )}
 
-        <section>
-          <SectionLabel>Hints</SectionLabel>
-          <div className={`mt-4 whitespace-pre-wrap rounded-2xl border border-white/[0.08] bg-[#14213d] p-4 text-sm leading-6 ${problem.hints ? "text-white/58" : "text-white/32"}`}>
+        <details key={id} className="group overflow-hidden rounded-2xl border border-white/[0.08] bg-[#14213d]">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-medium text-white/75 transition-colors hover:bg-white/[0.04] hover:text-white focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#a9b8ff] [&::-webkit-details-marker]:hidden">
+            Hints
+            <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-white/50 transition-transform group-open:rotate-180 motion-reduce:transition-none" />
+          </summary>
+          <div className={`whitespace-pre-wrap [overflow-wrap:anywhere] border-t border-white/[0.08] p-4 text-sm leading-6 ${problem.hints ? "text-white/58" : "text-white/45"}`}>
             {problem.hints || "No hints are available for this problem."}
           </div>
-        </section>
+        </details>
       </div>
     );
   };
@@ -429,6 +500,22 @@ const ProblemPage = () => {
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5">
+          <PanelToggle
+            show={showProblem}
+            label="problem panel"
+            controls="problem-details"
+            onClick={() => togglePanel("showProblem")}
+            openIcon={PanelLeftClose}
+            closedIcon={PanelLeft}
+          />
+          <PanelToggle
+            show={showConsole}
+            label="test cases and results"
+            controls="problem-console-content"
+            onClick={() => togglePanel("showConsole")}
+            openIcon={PanelBottomClose}
+            closedIcon={PanelBottom}
+          />
           <div className="relative">
             <button type="button" onClick={handleShare} className="grid h-9 w-9 place-items-center rounded-xl text-white/40 transition-colors hover:bg-white/[0.06] hover:text-white" aria-label={copied ? "Problem link copied to clipboard" : "Copy problem link"}>
               {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Share2 className="h-4 w-4" />}
@@ -456,119 +543,169 @@ const ProblemPage = () => {
         </div>
       </header>
 
-      <main className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:grid-cols-[minmax(360px,41%)_minmax(0,59%)] lg:overflow-hidden">
-        <section className="flex min-h-[620px] flex-col border-b border-white/[0.08] bg-[#162540] lg:min-h-0 lg:border-b-0 lg:border-r">
+      <main
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:grid lg:grid-cols-[var(--workspace-columns)] lg:overflow-hidden"
+        style={{ "--workspace-columns": showProblem ? splitTracks(problemWidth) : "minmax(0, 1fr)" }}
+      >
+        <section id="problem-details" hidden={!showProblem} className={`${showProblem ? "flex" : "hidden"} min-w-0 shrink-0 flex-col border-b border-white/[0.08] bg-[#162540] lg:min-h-0 lg:border-b-0`}>
           <div className="flex h-12 shrink-0 items-center gap-1 overflow-x-auto border-b border-white/[0.08] px-2">
             {tabs.map(({ id: tabId, label, icon: Icon }) => (
-              <button key={tabId} type="button" onClick={() => setActiveTab(tabId)} className={`relative flex h-full shrink-0 items-center gap-2 px-3 text-xs font-medium transition-colors ${activeTab === tabId ? "text-white" : "text-white/38 hover:text-white/70"}`}>
-                <Icon className="h-3.5 w-3.5" />
+              <button key={tabId} type="button" onClick={() => setActiveTab(tabId)} className={`relative flex h-full shrink-0 items-center gap-2 px-2 text-xs sm:px-3 font-medium transition-colors ${activeTab === tabId ? "text-white" : "text-white/38 hover:text-white/70"}`}>
+                <Icon className="hidden h-3.5 w-3.5 sm:block" />
                 {label}
                 {activeTab === tabId && <span className="absolute inset-x-3 bottom-0 h-px bg-white" />}
               </button>
             ))}
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-7">{renderTabContent()}</div>
+          <div className="min-h-0 flex-1 overflow-auto px-5 py-6 sm:px-7">{renderTabContent()}</div>
         </section>
 
-        <section className="flex min-h-[760px] flex-col bg-[#111e36] lg:min-h-0">
-          <div className="flex h-11 shrink-0 items-center justify-between border-b border-white/[0.08] px-4">
-            <div className="flex items-center gap-2 text-xs font-medium text-white/55">
-              <TerminalSquare className="h-3.5 w-3.5" />
-              Code
-              <span className="h-1 w-1 rounded-full bg-white/20" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-white/25">{formatLanguage(selectedLanguage)}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <LanguageSelector
-                languages={Object.keys(problem.codeSnippet || {})}
-                value={selectedLanguage}
-                onChange={handleLanguageChange}
-                compact
-                className="sm:hidden"
-              />
-              <button type="button" onClick={handleResetCode} className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-white/32 transition-colors hover:bg-white/[0.05] hover:text-white/65">
-                <RotateCcw className="h-3 w-3" /> Reset code
-              </button>
-            </div>
-          </div>
+        {showProblem && (
+          <WorkspaceDivider
+            label="Resize problem panel"
+            controls="problem-details"
+            orientation="vertical"
+            value={problemWidth}
+            onChange={(value) => setPanelSize("problemWidth", value)}
+            className="hidden lg:grid"
+            {...problemSplit}
+          />
+        )}
 
-          <div className="min-h-[380px] flex-1 overflow-hidden bg-[#14213d]">
-            <Editor
-              height="100%"
-              language={selectedLanguage.toLowerCase()}
-              theme="vs-dark"
-              value={code}
-              onChange={handleCodeChange}
-              beforeMount={(monaco) => {
-                monaco.editor.defineTheme("leetspase-dark", {
-                  base: "vs-dark",
-                  inherit: true,
-                  rules: [],
-                  colors: {
-                    "editor.background": "#14213d",
-                    "editorGutter.background": "#14213d",
-                    "editorLineNumber.foreground": "#3f3f46",
-                    "editorLineNumber.activeForeground": "#a1a1aa",
-                    "editor.lineHighlightBackground": "#203451",
-                    "editor.selectionBackground": "#333333",
-                  },
-                });
-              }}
-              onMount={(_, monaco) => monaco.editor.setTheme("leetspase-dark")}
-              options={{
-                minimap: { enabled: false },
-                fontSize: 14,
-                fontFamily: "JetBrains Mono, Fira Code, Consolas, monospace",
-                fontLigatures: true,
-                lineHeight: 23,
-                lineNumbers: "on",
-                tabSize: 4,
-                insertSpaces: true,
-                detectIndentation: false,
-                padding: { top: 18, bottom: 18 },
-                roundedSelection: false,
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                renderLineHighlight: "line",
-                overviewRulerBorder: false,
-                hideCursorInOverviewRuler: true,
-              }}
-            />
-          </div>
-
-          <div className="flex h-[34%] min-h-[235px] shrink-0 flex-col border-t border-white/[0.08] bg-[#162540]">
-            <div className="flex h-11 shrink-0 items-center justify-between border-b border-white/[0.07] px-4">
+        <div
+          className={`grid min-h-0 min-w-0 shrink-0 grid-rows-[var(--workspace-rows)] bg-[#111e36] lg:h-full ${showConsole ? "h-[max(620px,calc(100dvh-4rem))]" : "h-[calc(100dvh-4rem)]"}`}
+          style={{ "--workspace-rows": showConsole ? splitTracks(editorHeight) : "minmax(0, 1fr) 2.75rem" }}
+        >
+          <section id="problem-editor" className="flex min-h-0 min-w-0 flex-col">
+            <div className="flex h-11 shrink-0 items-center justify-between border-b border-white/[0.08] px-4">
               <div className="flex items-center gap-2 text-xs font-medium text-white/55">
-                <ListChecks className="h-3.5 w-3.5" />
-                {executionResult ? `${lastAction === "submit" ? "Submission" : "Run"} result` : "Test cases"}
+                <TerminalSquare className="h-3.5 w-3.5" />
+                Code
+                <span className="h-1 w-1 rounded-full bg-white/20" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-white/25">{formatLanguage(selectedLanguage)}</span>
               </div>
-              {!executionResult && <span className="text-[10px] uppercase tracking-[0.12em] text-white/25">Sample cases</span>}
+              <div className="flex items-center gap-1">
+                <LanguageSelector
+                  languages={Object.keys(problem.codeSnippet || {})}
+                  value={selectedLanguage}
+                  onChange={handleLanguageChange}
+                  compact
+                  className="sm:hidden"
+                />
+                <button type="button" onClick={handleResetCode} className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-white/32 transition-colors hover:bg-white/[0.05] hover:text-white/65">
+                  <RotateCcw className="h-3 w-3" /> Reset code
+                </button>
+              </div>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto p-4">
-              {executionResult ? (
-                <Submission submission={executionResult} />
-              ) : testcases.length ? (
-                <div>
-                  <div className="flex items-center gap-2 overflow-x-auto">
-                    {testcases.map((_, index) => (
-                      <button key={index} type="button" onClick={() => setSelectedCase(index)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${activeCaseIndex === index ? "bg-white text-black" : "bg-white/[0.045] text-white/40 hover:text-white/70"}`}>
-                        Case {index + 1}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <ConsoleValue label="Input" value={activeTestCase?.input} onCopy={() => navigator.clipboard.writeText(String(activeTestCase?.input || ""))} />
-                    <ConsoleValue label="Expected output" value={activeTestCase?.output} onCopy={() => navigator.clipboard.writeText(String(activeTestCase?.output || ""))} />
-                  </div>
+
+            <div className="min-h-0 min-w-0 flex-1 overflow-hidden bg-[#14213d]">
+              <Editor
+                height="100%"
+                language={selectedLanguage.toLowerCase()}
+                theme="vs-dark"
+                value={code}
+                onChange={handleCodeChange}
+                beforeMount={(monaco) => {
+                  monaco.editor.defineTheme("leetspase-dark", {
+                    base: "vs-dark",
+                    inherit: true,
+                    rules: [],
+                    colors: {
+                      "editor.background": "#14213d",
+                      "editorGutter.background": "#14213d",
+                      "editorLineNumber.foreground": "#3f3f46",
+                      "editorLineNumber.activeForeground": "#a1a1aa",
+                      "editor.lineHighlightBackground": "#203451",
+                      "editor.selectionBackground": "#333333",
+                    },
+                  });
+                }}
+                onMount={(_, monaco) => monaco.editor.setTheme("leetspase-dark")}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  fontFamily: "JetBrains Mono, Fira Code, Consolas, monospace",
+                  fontLigatures: true,
+                  lineHeight: 23,
+                  lineNumbers: "on",
+                  tabSize: 4,
+                  insertSpaces: true,
+                  detectIndentation: false,
+                  padding: { top: 18, bottom: 18 },
+                  roundedSelection: false,
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  renderLineHighlight: "line",
+                  overviewRulerBorder: false,
+                  hideCursorInOverviewRuler: true,
+                }}
+              />
+            </div>
+          </section>
+
+          {showConsole && (
+            <WorkspaceDivider
+              label="Resize code editor"
+              controls="problem-editor"
+              orientation="horizontal"
+              value={editorHeight}
+              onChange={(value) => setPanelSize("editorHeight", value)}
+              {...editorSplit}
+            />
+          )}
+
+          <section id="problem-console" ref={consoleRef} className={`flex min-h-0 min-w-0 flex-col bg-[#162540]${showConsole ? "" : " border-t border-white/[0.08]"}`}>
+              <div className="flex h-11 shrink-0 items-center justify-between border-b border-white/[0.07] px-4">
+                <div className="flex items-center gap-2 text-xs font-medium text-white/55">
+                  <ListChecks className="h-3.5 w-3.5" />
+                  {executionResult ? `${lastAction === "submit" ? "Submission" : "Run"} result` : "Test cases"}
                 </div>
-              ) : (
-                <p className="text-sm text-white/35">No sample test cases are available.</p>
-              )}
-            </div>
-          </div>
-        </section>
+                {showConsole && !executionResult && <span className="text-[10px] uppercase tracking-[0.12em] text-white/25">Sample cases</span>}
+              </div>
+              <div id="problem-console-content" hidden={!showConsole} className="min-h-0 flex-1 overflow-y-auto p-4">
+                {executionResult ? (
+                  <Submission submission={executionResult} />
+                ) : testcases.length ? (
+                  <div>
+                    <div className="flex items-center gap-2 overflow-x-auto">
+                      {testcases.map((_, index) => (
+                        <button key={index} type="button" onClick={() => setSelectedCase(index)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${activeCaseIndex === index ? "bg-white text-black" : "bg-white/[0.045] text-white/40 hover:text-white/70"}`}>
+                          Case {index + 1}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <ConsoleValue label="Input" value={activeTestCase?.input} onCopy={() => navigator.clipboard.writeText(String(activeTestCase?.input || ""))} />
+                      <ConsoleValue label="Expected output" value={activeTestCase?.output} onCopy={() => navigator.clipboard.writeText(String(activeTestCase?.output || ""))} />
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-white/35">No sample test cases are available.</p>
+                )}
+              </div>
+          </section>
+        </div>
       </main>
     </div>
+  );
+};
+
+const PanelToggle = ({ show, label, controls, onClick, openIcon: OpenIcon, closedIcon: ClosedIcon }) => {
+  const Icon = show ? OpenIcon : ClosedIcon;
+  const action = `${show ? "Hide" : "Show"} ${label}`;
+
+  return (
+    <button
+      type="button"
+      aria-label={action}
+      aria-expanded={show}
+      aria-controls={controls}
+      title={action}
+      onClick={onClick}
+      className={`grid h-9 w-8 place-items-center rounded-lg transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-[#a9b8ff] ${show ? "text-white/60" : "bg-[#a9b8ff]/10 text-[#a9b8ff]"}`}
+    >
+      <Icon aria-hidden="true" className="h-4 w-4" />
+    </button>
   );
 };
 

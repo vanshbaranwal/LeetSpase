@@ -86,3 +86,7 @@
 @keyframes ls-week-trend{0%,30%,100%{opacity:.6;transform:translate(0,0)}40%,80%{opacity:1;transform:translate(2px,-2px)}}
 @media(prefers-reduced-motion:reduce){.ls-track-week i.is-active,.ls-track-week i.is-active svg,.ls-track-summary-icon,.ls-track-trend{animation:none!important}.ls-track-week i.is-active{background:#a9b8ff;border-color:#a9b8ff}.ls-track-week i.is-active svg{opacity:1}}
 .ls-preview-caption{justify-content:center;text-align:center}
+
+@media (max-width: 40rem) {
+  .ls-track-week i { width: 100%; max-width: 1.5rem; height: auto; aspect-ratio: 1; }
+}
