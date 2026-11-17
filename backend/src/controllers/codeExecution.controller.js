@@ -42,7 +42,7 @@ const validateTestCases = (testCases) => {
     }
 };
 
-const getSampleTestCases = (testCases) => Array.isArray(testCases)
+export const getSampleTestCases = (testCases) => Array.isArray(testCases)
     ? testCases
         .filter((testCase) =>
             testCase &&
@@ -53,7 +53,7 @@ const getSampleTestCases = (testCases) => Array.isArray(testCases)
         .map(({ input, output }) => ({ input, output }))
     : [];
 
-const executeTestCases = async(sourceCode, languageId, testCases) => {
+export const executeTestCases = async(sourceCode, languageId, testCases) => {
     validateTestCases(testCases);
 
     const judgeSubmissions = testCases.map(({ input, output }) => ({
@@ -96,7 +96,7 @@ const serializeMetrics = (results, field) => {
     return values.some(Boolean) ? JSON.stringify(values) : null;
 };
 
-const formatExecutionResult = ({
+export const formatExecutionResult = ({
     id = null,
     problemId,
     sourceCode,
@@ -125,6 +125,63 @@ const formatExecutionResult = ({
         time: result.time
     }))
 });
+
+export const saveExecutionSubmission = async (transaction, {
+    userId, problemId, sourceCode, language, testCases, allPassed, detailedResults,
+}) => {
+    const savedSubmission = await transaction.submission.create({
+        data: {
+            userId,
+            problemId,
+            sourceCode,
+            language,
+            stdin: testCases.map(({ input }) => input).join("\n"),
+            stdout: JSON.stringify(detailedResults.map(({ stdout }) => stdout)),
+            stderr: detailedResults.some(({ stderr }) => stderr)
+                ? JSON.stringify(detailedResults.map(({ stderr }) => stderr))
+                : null,
+            compileOutput: detailedResults.some(({ compileOutput }) => compileOutput)
+                ? JSON.stringify(detailedResults.map(({ compileOutput }) => compileOutput))
+                : null,
+            status: allPassed ? "accepted" : "wrong answer",
+            memory: serializeMetrics(detailedResults, "memory"),
+            time: serializeMetrics(detailedResults, "time")
+        }
+    });
+
+    await transaction.testCaseResult.createMany({
+        data: detailedResults.map((result) => ({
+            submissionId: savedSubmission.id,
+            testCase: result.testCase,
+            passed: result.passed,
+            stdout: result.stdout,
+            expected: result.expected,
+            stderr: result.stderr,
+            compileOutput: result.compileOutput,
+            status: result.status,
+            memory: result.memory,
+            time: result.time
+        }))
+    });
+
+    if(allPassed){
+        await transaction.problemSolved.upsert({
+            where: {
+                userId_problemId: {
+                    userId,
+                    problemId
+                }
+            },
+            update: {},
+            create: {
+                userId,
+                problemId
+            }
+        });
+    }
+
+    return savedSubmission;
+};
 
 const sendExecutionError = (res, error, action) => {
     console.error(`error while ${action} code: `, error);
@@ -179,61 +236,10 @@ export const submitCode = async(req, res) => {
         const hiddenTestCases = problem.testcases.map(({ input, output }) => ({ input, output }));
         const { allPassed, detailedResults } = await executeTestCases(source_code, language_id, hiddenTestCases);
 
-        const submission = await db.$transaction(async(transaction) => {
-            const savedSubmission = await transaction.submission.create({
-                data: {
-                    userId: req.user.id,
-                    problemId,
-                    sourceCode: source_code,
-                    language,
-                    stdin: hiddenTestCases.map(({ input }) => input).join("\n"),
-                    stdout: JSON.stringify(detailedResults.map(({ stdout }) => stdout)),
-                    stderr: detailedResults.some(({ stderr }) => stderr)
-                        ? JSON.stringify(detailedResults.map(({ stderr }) => stderr))
-                        : null,
-                    compileOutput: detailedResults.some(({ compileOutput }) => compileOutput)
-                        ? JSON.stringify(detailedResults.map(({ compileOutput }) => compileOutput))
-                        : null,
-                    status: allPassed ? "accepted" : "wrong answer",
-                    memory: serializeMetrics(detailedResults, "memory"),
-                    time: serializeMetrics(detailedResults, "time")
-                }
-            });
-
-            await transaction.testCaseResult.createMany({
-                data: detailedResults.map((result) => ({
-                    submissionId: savedSubmission.id,
-                    testCase: result.testCase,
-                    passed: result.passed,
-                    stdout: result.stdout,
-                    expected: result.expected,
-                    stderr: result.stderr,
-                    compileOutput: result.compileOutput,
-                    status: result.status,
-                    memory: result.memory,
-                    time: result.time
-                }))
-            });
-
-            if(allPassed){
-                await transaction.problemSolved.upsert({
-                    where: {
-                        userId_problemId: {
-                            userId: req.user.id,
-                            problemId
-                        }
-                    },
-                    update: {},
-                    create: {
-                        userId: req.user.id,
-                        problemId
-                    }
-                });
-            }
-
-            return savedSubmission;
-        });
-
+        const submission = await db.$transaction((tx) => saveExecutionSubmission(tx, {
+            userId: req.user.id, problemId, sourceCode: source_code, language,
+            testCases: hiddenTestCases, allPassed, detailedResults,
+        }));
         return res.status(200).json({
             success: true,
             message: allPassed ? "solution accepted" : "solution submitted",

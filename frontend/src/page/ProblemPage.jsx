@@ -30,6 +30,8 @@ import { useSubmissionStore } from "../store/useSubmissionStore";
 import Submission from "../components/Submission";
 import SubmissionsList from "../components/SubmissionList";
 import WorkspaceDivider from "../components/WorkspaceDivider";
+import SpaseEditor from "../spases/SpaseEditor";
+import SpaseResults from "../spases/SpaseResults";
 
 const difficultyStyles = {
   EASY: "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
@@ -121,8 +123,14 @@ const removeDraft = (draftKey) => {
   }
 };
 
-const ProblemPage = () => {
-  const { id } = useParams();
+const ProblemPage = ({ sharedSpase }) => {
+  const { id: routeId } = useParams();
+  const id = sharedSpase?.spase.problemId ?? routeId;
+  const canEditSpase = sharedSpase?.isLive && sharedSpase.access.canEdit;
+  const canLeadSpase = sharedSpase?.isLive && sharedSpase.access.isHost;
+  const spaseJob = sharedSpase?.sharedJob;
+  const spaseResultKey = spaseJob ? `${spaseJob.id}:${spaseJob.state}` : null;
+  const [dismissedSpaseResult, setDismissedSpaseResult] = useState(null);
   const { authUser } = useAuthStore();
   const { getProblemById, problem, isProblemLoading } = useProblemStore();
   const {
@@ -142,7 +150,8 @@ const ProblemPage = () => {
 
   const [code, setCode] = useState("");
   const [activeTab, setActiveTab] = useState("description");
-  const [selectedLanguage, setSelectedLanguage] = useState("JAVASCRIPT");
+  const [ownLanguage, setSelectedLanguage] = useState("JAVASCRIPT");
+  const selectedLanguage = sharedSpase?.spase.language ?? ownLanguage;
   const [selectedCase, setSelectedCase] = useState(0);
   const [editorialLanguage, setEditorialLanguage] = useState("PYTHON");
   const [copied, setCopied] = useState(false);
@@ -150,7 +159,11 @@ const ProblemPage = () => {
   const consoleRef = useRef(null);
   const consoleContentRef = useRef(null);
   const [layout, setLayout] = useState(readWorkspaceLayout);
-  const { problemWidth, editorHeight, showProblem, showConsole } = layout;
+  const { problemWidth, editorHeight, showProblem } = layout;
+  const showConsole = layout.showConsole || Boolean(spaseResultKey && spaseResultKey !== dismissedSpaseResult);
+  const isSharedWorkspace = Boolean(sharedSpase);
+  const EditorComponent = isSharedWorkspace ? SpaseEditor : Editor;
+  const visibleResult = spaseResultKey || executionResult;
   const draftKey = useMemo(
     () => getDraftKey(authUser?.id, id, selectedLanguage, problem?.isDemo),
     [authUser?.id, id, selectedLanguage, problem?.isDemo]
@@ -213,12 +226,12 @@ const ProblemPage = () => {
   }, [id, getProblemById, clearResult]);
 
   useEffect(() => {
-    if (problem) {
+    if (problem && !isSharedWorkspace) {
       const savedDraft = readDraft(draftKey);
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCode(savedDraft ?? getEditorDefaultCode(problem, selectedLanguage));
     }
-  }, [draftKey, problem, selectedLanguage]);
+  }, [draftKey, problem, selectedLanguage, isSharedWorkspace]);
 
   useEffect(() => {
     if (activeTab === "submissions" && id) getSubmissionForProblem(id);
@@ -233,22 +246,27 @@ const ProblemPage = () => {
   }, [layout]);
 
   useEffect(() => {
-    if (executionResult && consoleContentRef.current) {
+    if (visibleResult && consoleContentRef.current) {
       consoleContentRef.current.scrollTop = 0;
     }
-  }, [executionResult]);
+  }, [visibleResult]);
 
   useEffect(() => {
-    if (executionResult && showConsole && !window.matchMedia("(min-width: 64rem)").matches) {
+    if (visibleResult && showConsole && !window.matchMedia("(min-width: 64rem)").matches) {
       consoleRef.current?.scrollIntoView({ block: "start" });
     }
-  }, [executionResult, showConsole]);
+  }, [visibleResult, showConsole]);
 
   const setPanelSize = (panel, size) => {
     setLayout((current) => current[panel] === size ? current : { ...current, [panel]: size });
   };
 
   const togglePanel = (panel) => {
+    if (panel === "showConsole" && spaseResultKey) {
+      setDismissedSpaseResult(showConsole ? spaseResultKey : null);
+      setLayout((current) => ({ ...current, showConsole: !showConsole }));
+      return;
+    }
     setLayout((current) => ({ ...current, [panel]: !current[panel] }));
   };
 
@@ -257,6 +275,10 @@ const ProblemPage = () => {
   };
 
   const handleLanguageChange = (language) => {
+    if (sharedSpase) {
+      if (canLeadSpase) void sharedSpase.action("spase:problem", { problemId: id, language });
+      return;
+    }
     const nextDraftKey = getDraftKey(authUser?.id, id, language, problem?.isDemo);
     const savedDraft = readDraft(nextDraftKey);
     setSelectedLanguage(language);
@@ -270,12 +292,25 @@ const ProblemPage = () => {
     saveDraft(draftKey, nextCode);
   };
 
+  const executeInSpase = (mode) => sharedSpase.action("spase:execute", {
+    mode, requestId: crypto.randomUUID(), problemId: id,
+    language: selectedLanguage, revision: sharedSpase.spase.revision,
+  });
+
   const handleRunCode = async () => {
+    if (sharedSpase) {
+      if (canEditSpase) await executeInSpase("run");
+      return;
+    }
     const languageId = getLanguageId(selectedLanguage);
     if (await runCode(code, languageId, id)) revealConsole();
   };
 
   const handleSubmitCode = async () => {
+    if (sharedSpase) {
+      if (canEditSpase) await executeInSpase("submit");
+      return;
+    }
     const languageId = getLanguageId(selectedLanguage);
     const submitted = await submitCode(code, languageId, id);
     if (submitted) revealConsole();
@@ -312,9 +347,9 @@ const ProblemPage = () => {
     }
   };
 
-  if (isProblemLoading || !problem) {
+  if (isProblemLoading || !problem || (sharedSpase && problem.id !== id)) {
     return (
-      <div className="grid min-h-screen w-full place-items-center bg-[#111e36] text-white">
+      <div className={`grid w-full place-items-center bg-[#111e36] text-white ${sharedSpase ? "min-h-0 flex-1" : "min-h-screen"}`}>
         <div className="flex flex-col items-center gap-4">
           <div className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-[#192b49]">
             <LoaderCircle className="h-5 w-5 animate-spin text-white/70" />
@@ -494,7 +529,7 @@ const ProblemPage = () => {
   };
 
   return (
-    <div className="flex h-dvh w-full flex-col overflow-hidden bg-[#111e36] text-white">
+    <div className={`flex w-full flex-col overflow-hidden bg-[#111e36] text-white ${sharedSpase ? "min-h-0 flex-1" : "h-dvh"}`}>
       <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.08] bg-[#101d34] px-3 sm:px-4">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <Link to="/problems" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-white/55 transition-colors hover:bg-white/[0.06] hover:text-white" aria-label="Back to problems">
@@ -533,17 +568,17 @@ const ProblemPage = () => {
               </span>
             )}
           </div>
-          <LanguageSelector
+          {(!sharedSpase || canLeadSpase) && <LanguageSelector
             languages={Object.keys(problem.codeSnippet || {})}
             value={selectedLanguage}
             onChange={handleLanguageChange}
             className="ml-1 hidden sm:block"
-          />
-          <button type="button" onClick={handleRunCode} disabled={isRunning || isSubmitting} className="ml-1 inline-flex h-9 items-center gap-2 rounded-xl bg-white px-3.5 text-xs font-semibold text-black transition-colors hover:bg-[#e8e0d3] disabled:cursor-wait disabled:opacity-55">
+          />}
+          <button type="button" onClick={handleRunCode} disabled={sharedSpase ? !canEditSpase : isRunning || isSubmitting} className="ml-1 inline-flex h-9 items-center gap-2 rounded-xl bg-white px-3.5 text-xs font-semibold text-black transition-colors hover:bg-[#e8e0d3] disabled:cursor-wait disabled:opacity-55">
             {isRunning && <LoaderCircle className="h-3.5 w-3.5 animate-spin" />}
             <span>Run</span>
           </button>
-          <button type="button" onClick={handleSubmitCode} disabled={isRunning || isSubmitting} className="inline-flex h-9 items-center gap-2 rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-3.5 text-xs font-semibold text-emerald-200 transition-colors hover:bg-emerald-300/15 disabled:cursor-wait disabled:opacity-50">
+          <button type="button" onClick={handleSubmitCode} disabled={sharedSpase ? !canEditSpase : isRunning || isSubmitting} className="inline-flex h-9 items-center gap-2 rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-3.5 text-xs font-semibold text-emerald-200 transition-colors hover:bg-emerald-300/15 disabled:cursor-wait disabled:opacity-50">
             {isSubmitting && <LoaderCircle className="h-3.5 w-3.5 animate-spin" />}
             <span>Submit</span>
           </button>
@@ -592,26 +627,25 @@ const ProblemPage = () => {
                 <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-white/25">{formatLanguage(selectedLanguage)}</span>
               </div>
               <div className="flex items-center gap-1">
-                <LanguageSelector
+                {(!sharedSpase || canLeadSpase) && <LanguageSelector
                   languages={Object.keys(problem.codeSnippet || {})}
                   value={selectedLanguage}
                   onChange={handleLanguageChange}
                   compact
                   className="sm:hidden"
-                />
-                <button type="button" onClick={handleResetCode} className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-white/32 transition-colors hover:bg-white/[0.05] hover:text-white/65">
+                />}
+                {!sharedSpase && <button type="button" onClick={handleResetCode} className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-white/32 transition-colors hover:bg-white/[0.05] hover:text-white/65">
                   <RotateCcw className="h-3 w-3" /> Reset code
-                </button>
+                </button>}
               </div>
             </div>
 
             <div className="min-h-0 min-w-0 flex-1 overflow-hidden bg-[#14213d]">
-              <Editor
+              <EditorComponent
                 height="100%"
                 language={selectedLanguage.toLowerCase()}
                 theme="vs-dark"
-                value={code}
-                onChange={handleCodeChange}
+                {...(sharedSpase ? { sharedSpase } : { value: code, onChange: handleCodeChange })}
                 beforeMount={(monaco) => {
                   monaco.editor.defineTheme("leetspase-dark", {
                     base: "vs-dark",
@@ -665,12 +699,14 @@ const ProblemPage = () => {
               <div className="flex h-11 shrink-0 items-center justify-between border-b border-white/[0.07] px-4">
                 <div className="flex items-center gap-2 text-xs font-medium text-white/55">
                   <ListChecks className="h-3.5 w-3.5" />
-                  {executionResult ? `${lastAction === "submit" ? "Submission" : "Run"} result` : "Test cases"}
+                  {spaseJob ? "Shared results" : executionResult ? `${lastAction === "submit" ? "Submission" : "Run"} result` : "Test cases"}
                 </div>
-                {showConsole && !executionResult && <span className="text-[10px] uppercase tracking-[0.12em] text-white/25">Sample cases</span>}
+                {showConsole && !visibleResult && <span className="text-[10px] uppercase tracking-[0.12em] text-white/25">Sample cases</span>}
               </div>
               <div id="problem-console-content" ref={consoleContentRef} hidden={!showConsole} className="min-h-0 flex-1 overflow-y-auto p-4">
-                {executionResult ? (
+                {spaseJob ? (
+                  <SpaseResults job={spaseJob} queued={sharedSpase.pendingJobs} history={sharedSpase.jobs} spase={sharedSpase.spase} />
+                ) : executionResult ? (
                   <Submission key={`${lastAction}-${executionResult.createdAt}`} submission={executionResult} />
                 ) : testcases.length ? (
                   <div>

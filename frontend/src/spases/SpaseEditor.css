@@ -1,0 +1,55 @@
+
+.spase-color-0 { --spase-color: #f4ede0; }
+.spase-color-1 { --spase-color: #79e7b5; }
+.spase-color-2 { --spase-color: #ffd47d; }
+.spase-color-3 { --spase-color: #f9a8d4; }
+.spase-color-4 { --spase-color: #76d7ff; }
+
+.spase-participant {
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--spase-color, #d5ddec) 14%, transparent);
+  background: color-mix(in srgb, var(--spase-color, #d5ddec) 6%, transparent);
+}
+
+.spase-participant[data-host="true"] {
+  border-color: color-mix(in srgb, var(--spase-color, #f4ede0) 30%, transparent);
+  background: linear-gradient(
+    105deg,
+    color-mix(in srgb, var(--spase-color, #f4ede0) 14%, transparent),
+    color-mix(in srgb, var(--spase-color, #f4ede0) 5%, transparent)
+  );
+  box-shadow: inset 0 1px 0 rgb(244 237 224 / 8%);
+}
+
+.spase-participant-name {
+  color: var(--spase-color, #f4ede0);
+}
+
+.spase-participant-avatar {
+  border-color: color-mix(in srgb, var(--spase-color, #d5ddec) 55%, transparent);
+  background: color-mix(in srgb, var(--spase-color, #d5ddec) 16%, transparent);
+  color: var(--spase-color, #d5ddec);
+}
+
+.monaco-editor .spase-editor-selection {
+  background: color-mix(in srgb, var(--spase-color, #d5ddec) 26%, transparent);
+}
+
+.monaco-editor .spase-editor-caret {
+  border-inline-start: 2px solid var(--spase-color, #d5ddec);
+}
+
+.monaco-editor .spase-editor-cursor {
+  max-inline-size: 14rem;
+  overflow: hidden;
+  padding: 3px 8px;
+  border-radius: 5px 5px 5px 2px;
+  background: var(--spase-color, #d5ddec);
+  box-shadow: 0 0 0 1px #101d34, 0 2px 6px rgb(0 0 0 / 35%);
+  color: #101d34;
+  font: 700 13px/1.25 system-ui, sans-serif;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  z-index: 1;
+}

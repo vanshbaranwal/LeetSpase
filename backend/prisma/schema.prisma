@@ -47,10 +47,12 @@ model User {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
-  problems      Problem[]
-  submission    Submission[]
-  problemSolved ProblemSolved[]
-  playlists     Playlist[]
+  problems         Problem[]
+  submission       Submission[]
+  problemSolved    ProblemSolved[]
+  playlists        Playlist[]
+  hostedSpases     CodingSpase[]
+  spaseMemberships CodingSpaseMember[]
 }
 
 model Problem {
@@ -86,6 +88,8 @@ model Problem {
   solvedBy          ProblemSolved[]
   problemsPlaylists ProblemInPlaylist[]
   dailyChallenges   DailyChallenge[]
+  activeSpases      CodingSpase[]
+  spaseDocuments    CodingSpaseDocument[]
 }
 
 model DailyChallenge {
@@ -184,4 +188,82 @@ model ProblemInPlaylist {
   problem  Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
   @@unique([playListId, problemId])
+}
+
+enum CodingSpaseGuestMode {
+  EDITOR
+  VIEWER
+}
+
+model CodingSpase {
+  id        String               @id @default(uuid())
+  code      String?              @unique @db.VarChar(5)
+  hostId    String
+  guestMode CodingSpaseGuestMode
+  problemId String?
+  language  String?
+  revision  Int                  @default(0)
+  createdAt DateTime             @default(now())
+  closedAt  DateTime?
+
+  host      User                  @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  problem   Problem?              @relation(fields: [problemId], references: [id], onDelete: SetNull)
+  members   CodingSpaseMember[]
+  documents CodingSpaseDocument[]
+  jobs      CodingSpaseJob[]
+}
+
+model CodingSpaseMember {
+  spaseId       String
+  userId        String
+  sessionId     String?
+  reservedUntil DateTime
+  removedAt     DateTime?
+  colorIndex    Int?
+
+  spase CodingSpase @relation(fields: [spaseId], references: [id], onDelete: Cascade)
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([spaseId, userId])
+}
+
+model CodingSpaseDocument {
+  spaseId   String
+  problemId String
+  language  String
+  state     Bytes
+
+  spase   CodingSpase @relation(fields: [spaseId], references: [id], onDelete: Cascade)
+  problem Problem     @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@id([spaseId, problemId, language])
+}
+
+enum CodingSpaseJobState {
+  QUEUED
+  RUNNING
+  FINISHED
+  FAILED
+}
+
+model CodingSpaseJob {
+  id         String              @id @default(uuid())
+  spaseId    String
+  requestId  String
+  userId     String
+  actorName  String
+  problemId  String
+  language   String
+  mode       String
+  sourceCode String
+  state      CodingSpaseJobState @default(QUEUED)
+  result     Json?
+  error      String?
+  createdAt  DateTime            @default(now())
+  startedAt  DateTime?
+
+  spase CodingSpase @relation(fields: [spaseId], references: [id], onDelete: Cascade)
+
+  @@unique([spaseId, userId, requestId])
+  @@index([spaseId, state, createdAt])
 }

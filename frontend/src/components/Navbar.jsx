@@ -74,12 +74,14 @@ const Navbar = ({ variant = "default" }) => {
                   <a href="/#about" className="flex h-11 items-center rounded-xl px-3 font-medium text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white">About</a>
                 </>
               )}
+              {authUser && <Link to="/spases" className={`flex h-11 items-center rounded-xl px-3 font-medium transition-colors hover:bg-white/[0.06] ${isProblemsPage ? "text-white" : "text-white/65 hover:text-white"}`}>Spases</Link>}
             </div>
           </div>
 
           {isProblemsPage && (
             <div className="mr-5 hidden items-center gap-8 font-mono text-sm font-semibold uppercase tracking-[0.06em] lg:flex">
               <Link to="/problems" className="text-white">Problems</Link>
+              {authUser && <Link to="/spases" className="text-white">Spases</Link>}
               <span className="cursor-default text-white/45" title="Discussion is coming soon">Discussion</span>
               <span className="cursor-default text-white/45" title="Contest is coming soon">Contest</span>
               {dailyProblem ? (

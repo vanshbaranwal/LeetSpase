@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 import HomePage from "./page/HomePage";
@@ -14,6 +14,15 @@ import ProblemPage from "./page/ProblemPage";
 import ProblemsPage from "./page/ProblemsPage";
 import AdminDashboard from "./page/AdminDashboard";
 import ProfilePage from "./page/ProfilePage";
+import SpasesPage from "./page/SpasesPage";
+import CodingSpasePage from "./page/CodingSpasePage";
+
+const LegacySpaseRedirect = () => {
+  const { spaseId } = useParams();
+  const { search, hash } = useLocation();
+  const path = spaseId ? `/spases/${encodeURIComponent(spaseId)}` : "/spases";
+  return <Navigate to={path + search + hash} replace />;
+};
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -57,6 +66,9 @@ const App = () => {
           />
         </Route>
 
+        <Route path="/spases" element={authUser ? <SpasesPage /> : <Navigate to="/login" />} />
+        <Route path="/rooms" element={<LegacySpaseRedirect />} />
+
         <Route
           path="/login"
           element={!authUser ? <LoginPage /> : <Navigate to="/problems" />}
@@ -73,9 +85,15 @@ const App = () => {
         />
 
         <Route
+          path="/spases/:spaseId"
+          element={authUser ? <CodingSpasePage /> : <Navigate to="/login" />}
+        />
+        <Route
           path="/profile"
           element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
         />
+
+        <Route path="/rooms/:spaseId" element={<LegacySpaseRedirect />} />
 
         <Route element={<AdminRoute />}>
           <Route

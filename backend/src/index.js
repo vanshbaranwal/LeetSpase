@@ -1,3 +1,4 @@
+import { createServer } from "node:http";
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
@@ -11,9 +12,14 @@ import playlistRoutes from "./routes/playlist.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import profileRoutes from "./routes/profile.routes.js";
 
+import { attachCodingSpases } from "./spases/spase.socket.js";
+import { spaseRoutes } from "./routes/spase.routes.js";
+
 dotenv.config();
 
 const app = express();
+const server = createServer(app);
+const { finishPreviousSession } = attachCodingSpases(server);
 
 app.use(
     cors({
@@ -48,13 +54,15 @@ app.use("/api/v1/playlist", playlistRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/profile", profileRoutes);
 
+app.use("/api/v1/spases", spaseRoutes(finishPreviousSession));
+
 async function startServer(){
     try {
         await db.$connect();
 
         console.log("database connection successful!");
 
-        app.listen(process.env.PORT, () => {
+        server.listen(process.env.PORT, () => {
             console.log(`the server is running on the port: ${process.env.PORT}`);
         });
 
