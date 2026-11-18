@@ -1,3 +1,4 @@
+import { getAdminSpases, getAdminSpaseDetails } from "../controllers/adminSpase.controller.js";
 import express from "express";
 import {
     getAdminOverview,
@@ -12,6 +13,9 @@ import { authMiddleware, checkAdmin } from "../middleware/auth.middleware.js";
 const adminRoutes = express.Router();
 
 adminRoutes.use(authMiddleware, checkAdmin);
+
+adminRoutes.get("/spases", getAdminSpases);
+adminRoutes.get("/spases/:spaseId", getAdminSpaseDetails);
 
 adminRoutes.get("/overview", getAdminOverview);
 adminRoutes.get("/users", getAdminUsers);

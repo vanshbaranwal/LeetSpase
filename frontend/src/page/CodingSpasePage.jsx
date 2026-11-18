@@ -1,7 +1,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check, Copy, LoaderCircle, Users, X } from "lucide-react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { useProblemStore } from "../store/useProblemStore";
 import { participantColorClass, useCodingSpase } from "../spases/useCodingSpase";
 import SpaseProblemPicker from "../spases/SpaseProblemPicker";
@@ -24,7 +24,8 @@ function CodingSpase({ spaseId }) {
   const spase = workspace?.spase;
   const { problems, getAllProblems, isProblemsLoading } = useProblemStore();
   const [copied, setCopied] = useState(false);
-const [isExiting, setIsExiting] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+  const [isEndingSpase, setIsEndingSpase] = useState(false);
   const [exitFailed, setExitFailed] = useState(false);
   const exitDialog = useRef(null);
   const cancelExitButton = useRef(null);
@@ -33,14 +34,15 @@ const [isExiting, setIsExiting] = useState(false);
   const leaveSpase = async () => {
     if (!isLive || isExiting) return;
     setIsExiting(true);
+    setIsEndingSpase(access.isHost);
     setExitFailed(false);
     try {
       const completed = await action(access.isHost ? "spase:end" : "spase:leave");
       if (!completed) {
+        setIsEndingSpase(false);
         if (access.isHost) setExitFailed(true);
-      } else if (access.isHost) {
-        exitDialog.current?.close();
       } else {
+        exitDialog.current?.close();
         navigate("/spases", { replace: true });
       }
     } finally {
@@ -72,6 +74,7 @@ const [isExiting, setIsExiting] = useState(false);
   };
 
   if (ended) {
+    if (isEndingSpase) return <Navigate to="/spases" replace />;
     return (
       <main className="grid min-h-dvh w-full place-items-center bg-[#111e36] p-6 text-center text-white">
         <div>
@@ -131,6 +134,7 @@ const [isExiting, setIsExiting] = useState(false);
                   <li
                     key={member.id}
                     data-host={member.role === "HOST"}
+                    data-away={!member.online}
                     className={`spase-participant flex min-h-10 max-w-52 min-w-0 items-center gap-2 py-1 pl-1.5 pr-2 ${participantColorClass(member.colorIndex)}`}
                   >
                     <SpaseParticipantAvatar name={member.name} image={member.image} online={member.online} />

@@ -1,3 +1,4 @@
+import { endSpase, closeVisits } from "../spases/spase.history.js";
 import bcrypt from "bcryptjs";
 import { db } from "../libs/db.js";
 
@@ -373,7 +374,18 @@ export const deleteAccount = async (req, res) => {
             }
         }
 
-        await db.user.delete({ where: { id: req.user.id } });
+        await db.$transaction(async (tx) => {
+            // Lock in a stable order, matching socket mutations before deleting membership rows.
+            const spases = await tx.$queryRaw`SELECT s.* FROM "CodingSpase" s
+                WHERE s."closedAt" IS NULL AND (s."hostId" = ${req.user.id} OR EXISTS (
+                    SELECT 1 FROM "CodingSpaseMember" m WHERE m."spaseId" = s."id" AND m."userId" = ${req.user.id}
+                )) ORDER BY s."id" FOR UPDATE`;
+            for (const spase of spases) {
+                if (spase.hostId === req.user.id) await endSpase(tx, spase, "HOST_ACCOUNT_DELETED", req.user.id);
+                else await closeVisits(tx, spase.id, "ACCOUNT_DELETED", { userId: req.user.id });
+            }
+            await tx.user.delete({ where: { id: req.user.id } });
+        });
         res.clearCookie("jwt", {
             httpOnly: true,
             sameSite: "strict",

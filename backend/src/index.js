@@ -19,14 +19,20 @@ dotenv.config();
 
 const app = express();
 const server = createServer(app);
-const { finishPreviousSession } = attachCodingSpases(server);
+let isReady = false;
+const { finishPreviousSession, startExpiry } = attachCodingSpases(server, { isReady: () => isReady });
 
 app.use(
     cors({
-        origin: process.env.FRONTEND_URL,
+        origin: process.env.FRONTEND_URL?.split(",").map((origin) => origin.trim()).filter(Boolean) ?? [],
         credentials: true
     })
 );
+
+app.use((req, res, next) => {
+    if (!isReady) return res.status(503).set("Retry-After", "1").json({ message: "The backend is starting. Please retry shortly." });
+    next();
+});
 
 app.use(express.json());
 app.use(cookieParser());
@@ -59,15 +65,23 @@ app.use("/api/v1/spases", spaseRoutes(finishPreviousSession));
 async function startServer(){
     try {
         await db.$connect();
-
-        console.log("database connection successful!");
-
-        server.listen(process.env.PORT, () => {
-            console.log(`the server is running on the port: ${process.env.PORT}`);
+        // Bind first: a duplicate process must not reset presence in a live backend.
+        await new Promise((resolve, reject) => {
+            const onError = (error) => reject(error.code === "EADDRINUSE"
+                ? new Error(`Port ${process.env.PORT} is already in use. Stop the existing backend before starting another copy.`)
+                : error);
+            server.once("error", onError);
+            server.listen(process.env.PORT, "0.0.0.0", () => {
+                server.off("error", onError);
+                resolve();
+            });
         });
+        await startExpiry();
+        isReady = true;
+        console.log(`Database connected; backend listening on port ${process.env.PORT}.`);
 
     } catch (error) {
-        console.error("database connetion failed: ", error.message);
+        console.error("Backend startup failed:", error.message);
         process.exit(1);
     }
 };

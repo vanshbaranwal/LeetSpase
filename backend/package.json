@@ -8,7 +8,9 @@
     "validate:foundations": "node scripts/validate-foundation-problems.js foundation-problems.postman_data.json",
     "validate:easy-dsa": "node scripts/validate-foundation-problems.js easy-dsa-problems.postman_data.json",
     "validate:medium-dsa": "node scripts/validate-foundation-problems.js medium-dsa-problems.postman_data.json",
-    "validate:hard-dsa": "node scripts/validate-foundation-problems.js hard-dsa-problems.postman_data.json"
+    "validate:hard-dsa": "node scripts/validate-foundation-problems.js hard-dsa-problems.postman_data.json",
+    "validate:spases": "node scripts/validate-spase-history.js",
+    "validate:spase-migrations": "node scripts/validate-spase-migrations.js"
   },
   "keywords": [],
   "author": "",

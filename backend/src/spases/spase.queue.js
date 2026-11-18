@@ -20,10 +20,11 @@ export async function enqueueSpaseJob(tx, spase, identity, member, payload) {
     const active = await tx.codingSpaseJob.count({ where: { spaseId: spase.id, state: { in: ["QUEUED", "RUNNING"] } } });
     if (active >= MAX_ACTIVE_JOBS) throw spaseError(409, "QUEUE_FULL", "The shared queue is full. Wait for a result.");
     const sourceCode = await getSnapshot(tx, spase, payload);
+    const problem = await tx.problem.findUnique({ where: { id: spase.problemId }, select: { title: true } });
     await tx.codingSpaseJob.create({
         data: {
             spaseId: spase.id, requestId, userId: identity.userId, actorName: member.displayName,
-            problemId: spase.problemId, language: spase.language, mode, sourceCode,
+            problemId: spase.problemId, problemTitle: problem?.title, language: spase.language, mode, sourceCode,
         },
     });
 }
@@ -41,7 +42,7 @@ export function startSpaseQueue(io, channel) {
             const wait = maxRunMs - (Date.now() - running.startedAt.getTime());
             if (wait > 0) return { wait };
             await tx.codingSpaseJob.update({ where: { id: running.id }, data: {
-                state: "FAILED", error: "The judge connection was interrupted. Run the code again.",
+                state: "FAILED", completedAt: new Date(), error: "The judge connection was interrupted. Run the code again.",
             } });
         }
         const job = await tx.codingSpaseJob.findFirst({
@@ -80,8 +81,10 @@ export function startSpaseQueue(io, channel) {
                     testCases, allPassed, detailedResults,
                 });
                 result = {
+                    ...JSON.parse(JSON.stringify(formatExecutionResult({
+                        id: saved.id, problemId, language: judgeLanguage, allPassed, detailedResults, createdAt: saved.createdAt,
+                    }))),
                     submissionId: saved.id,
-                    status: allPassed ? "accepted" : "wrong answer",
                     passed: detailedResults.filter(({ passed }) => passed).length,
                     total: detailedResults.length,
                 };
@@ -91,7 +94,7 @@ export function startSpaseQueue(io, channel) {
                 });
                 result = JSON.parse(JSON.stringify(formatted));
             }
-            await tx.codingSpaseJob.update({ where: { id }, data: { state: "FINISHED", result } });
+            await tx.codingSpaseJob.update({ where: { id }, data: { state: "FINISHED", result, completedAt: new Date() } });
         });
     };
 
@@ -116,7 +119,7 @@ export function startSpaseQueue(io, channel) {
                     if (!error.status) console.error("Coding spase execution failed", error);
                     await db.codingSpaseJob.updateMany({
                         where: { id: job.id, state: "RUNNING" },
-                        data: { state: "FAILED", error: error.status ? error.message : "CodeBox could not complete this request." },
+                        data: { state: "FAILED", completedAt: new Date(), error: error.status ? error.message : "CodeBox could not complete this request." },
                     });
                 }
                 await emitJobs(spaseId);

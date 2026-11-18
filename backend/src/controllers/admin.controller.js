@@ -1,3 +1,4 @@
+import { getSpaseTotals } from "./adminSpase.controller.js";
 import axios from "axios";
 import { db } from "../libs/db.js";
 
@@ -9,7 +10,7 @@ export const getAdminOverview = async (req, res) => {
     try {
         const activeSince = getActiveSince();
 
-        const [users, problems, submissions, activeUsers, acceptedSubmissions] = await Promise.all([
+        const [users, problems, submissions, activeUsers, acceptedSubmissions, spases] = await Promise.all([
             db.user.count(),
             db.problem.count(),
             db.submission.count(),
@@ -24,6 +25,7 @@ export const getAdminOverview = async (req, res) => {
                     status: { equals: "Accepted", mode: "insensitive" },
                 },
             }),
+            getSpaseTotals(),
         ]);
 
         return res.status(200).json({
@@ -34,6 +36,7 @@ export const getAdminOverview = async (req, res) => {
                 submissions,
                 activeUsers,
                 acceptedSubmissions,
+                spases,
             },
         });
     } catch (error) {

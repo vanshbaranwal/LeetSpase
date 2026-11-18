@@ -14,12 +14,14 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useAdminStore } from "../store/useAdminStore";
+import AdminSpases from "../components/AdminSpases";
 import CreateProblemForm from "../components/CreateProblemForm";
 
 const navItems = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "users", label: "Users", icon: Users },
   { id: "submissions", label: "Submissions", icon: FileCode2 },
+  { id: "spases", label: "Spases", icon: Code2 },
   { id: "system", label: "System status", icon: Activity },
   { id: "add-problem", label: "Add problem", icon: Plus },
 ];
@@ -260,6 +262,15 @@ const AdminDashboard = () => {
                   ))}
                 </div>
               </div>
+
+              <section className="mt-8" aria-label="Spase totals">
+                <button type="button" onClick={() => setActiveSection("spases")} className="mb-4 text-sm font-semibold text-[#a9b8ff] hover:underline">Spases · View history →</button>
+                <div className="grid grid-cols-2 gap-y-6 border-y border-white/10 py-6 sm:grid-cols-4">
+                  {[["Total Spases", "total"], ["Active", "active"], ["Ended", "ended"], ["Inactive", "inactive"]].map(([label, key]) => (
+                    <div key={key} className="px-4 text-center"><p className="text-xs text-white/55">{label}</p><p className="mt-2 text-2xl font-semibold tabular-nums">{overview?.spases?.[key] ?? "—"}</p></div>
+                  ))}
+                </div>
+              </section>
 
               <div className="mt-10 border-y border-white/10 xl:grid xl:grid-cols-[1.1fr_0.9fr] xl:divide-x xl:divide-white/10">
                 <section className="py-7 xl:pr-10">
@@ -547,6 +558,8 @@ const AdminDashboard = () => {
               </div>
             </section>
           )}
+
+          {activeSection === "spases" && <AdminSpases />}
 
           {activeSection === "system" && (
             <section>

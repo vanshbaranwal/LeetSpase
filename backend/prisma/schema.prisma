@@ -47,12 +47,17 @@ model User {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
-  problems         Problem[]
-  submission       Submission[]
-  problemSolved    ProblemSolved[]
-  playlists        Playlist[]
-  hostedSpases     CodingSpase[]
-  spaseMemberships CodingSpaseMember[]
+  problems          Problem[]
+  submission        Submission[]
+  problemSolved     ProblemSolved[]
+  playlists         Playlist[]
+  hostedSpases      CodingSpase[]            @relation("SpaseHost")
+  createdSpases     CodingSpase[]            @relation("SpaseCreator")
+  endedSpases       CodingSpase[]            @relation("SpaseEnder")
+  spaseParticipants CodingSpaseParticipant[]
+  spaseActivities   CodingSpaseActivity[]
+  spaseJobs         CodingSpaseJob[]
+  spaseMemberships  CodingSpaseMember[]
 }
 
 model Problem {
@@ -90,6 +95,7 @@ model Problem {
   dailyChallenges   DailyChallenge[]
   activeSpases      CodingSpase[]
   spaseDocuments    CodingSpaseDocument[]
+  spaseActivities   CodingSpaseActivity[]
 }
 
 model DailyChallenge {
@@ -196,21 +202,38 @@ enum CodingSpaseGuestMode {
 }
 
 model CodingSpase {
-  id        String               @id @default(uuid())
-  code      String?              @unique @db.VarChar(5)
-  hostId    String
-  guestMode CodingSpaseGuestMode
-  problemId String?
-  language  String?
-  revision  Int                  @default(0)
-  createdAt DateTime             @default(now())
-  closedAt  DateTime?
+  id               String               @id @default(uuid())
+  code             String?              @unique @db.VarChar(5)
+  hostId           String?
+  creatorId        String?
+  creatorKnown     Boolean              @default(true)
+  endedById        String?
+  historyStartedAt DateTime             @default(now())
+  guestMode        CodingSpaseGuestMode
+  problemId        String?
+  language         String?
+  revision         Int                  @default(0)
+  createdAt        DateTime             @default(now())
+  closedAt         DateTime?
+  emptySince       DateTime?            @default(now())
+  lastOccupiedAt   DateTime?
+  closeReason      String?
 
-  host      User                  @relation(fields: [hostId], references: [id], onDelete: Cascade)
-  problem   Problem?              @relation(fields: [problemId], references: [id], onDelete: SetNull)
-  members   CodingSpaseMember[]
-  documents CodingSpaseDocument[]
-  jobs      CodingSpaseJob[]
+  host         User?                    @relation("SpaseHost", fields: [hostId], references: [id], onDelete: SetNull)
+  creator      User?                    @relation("SpaseCreator", fields: [creatorId], references: [id], onDelete: SetNull)
+  endedBy      User?                    @relation("SpaseEnder", fields: [endedById], references: [id], onDelete: SetNull)
+  participants CodingSpaseParticipant[]
+  visits       CodingSpaseVisit[]
+  activities   CodingSpaseActivity[]
+  problem      Problem?                 @relation(fields: [problemId], references: [id], onDelete: SetNull)
+  members      CodingSpaseMember[]
+  documents    CodingSpaseDocument[]
+  jobs         CodingSpaseJob[]
+
+  @@index([closedAt, emptySince])
+  @@index([createdAt, id])
+  @@index([hostId, createdAt])
+  @@index([creatorId])
 }
 
 model CodingSpaseMember {
@@ -247,23 +270,78 @@ enum CodingSpaseJobState {
 }
 
 model CodingSpaseJob {
-  id         String              @id @default(uuid())
-  spaseId    String
-  requestId  String
-  userId     String
-  actorName  String
-  problemId  String
-  language   String
-  mode       String
-  sourceCode String
-  state      CodingSpaseJobState @default(QUEUED)
-  result     Json?
-  error      String?
-  createdAt  DateTime            @default(now())
-  startedAt  DateTime?
+  id           String              @id @default(uuid())
+  spaseId      String
+  requestId    String
+  userId       String?
+  actorName    String
+  problemId    String
+  language     String
+  mode         String
+  sourceCode   String
+  state        CodingSpaseJobState @default(QUEUED)
+  result       Json?
+  error        String?
+  createdAt    DateTime            @default(now())
+  startedAt    DateTime?
+  completedAt  DateTime?
+  problemTitle String?
+  actor        User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   spase CodingSpase @relation(fields: [spaseId], references: [id], onDelete: Cascade)
 
   @@unique([spaseId, userId, requestId])
   @@index([spaseId, state, createdAt])
+}
+
+model CodingSpaseParticipant {
+  id             String             @id @default(uuid())
+  spaseId        String
+  participantKey String
+  userId         String?
+  legacy         Boolean            @default(false)
+  spase          CodingSpase        @relation(fields: [spaseId], references: [id], onDelete: Cascade)
+  user           User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  visits         CodingSpaseVisit[]
+
+  @@unique([spaseId, participantKey])
+  @@index([userId])
+}
+
+model CodingSpaseVisit {
+  id             String                 @id @default(uuid())
+  spaseId        String
+  participantId  String
+  sessionId      String
+  initialRole    String
+  role           String
+  joinedAt       DateTime               @default(now())
+  lastSeenAt     DateTime               @default(now())
+  disconnectedAt DateTime?
+  leftAt         DateTime?
+  leaveReason    String?
+  spase          CodingSpase            @relation(fields: [spaseId], references: [id], onDelete: Cascade)
+  participant    CodingSpaseParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([spaseId, joinedAt, id])
+  @@index([participantId, sessionId, leftAt])
+  @@index([leftAt, lastSeenAt])
+}
+
+model CodingSpaseActivity {
+  id           String      @id @default(uuid())
+  spaseId      String
+  actorId      String?
+  problemId    String?
+  problemTitle String
+  language     String
+  type         String
+  createdAt    DateTime    @default(now())
+  spase        CodingSpase @relation(fields: [spaseId], references: [id], onDelete: Cascade)
+  actor        User?       @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  problem      Problem?    @relation(fields: [problemId], references: [id], onDelete: SetNull)
+
+  @@index([spaseId, createdAt, id])
+  @@index([actorId])
+  @@index([problemId])
 }

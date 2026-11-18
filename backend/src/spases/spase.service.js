@@ -2,13 +2,15 @@
 import { randomInt, randomUUID } from "node:crypto";
 import * as Y from "yjs";
 import { db } from "../libs/db.js";
+import { closeEmptySpase, emptySpaseDeadline } from "./spase.expiry.js";
+import { closeVisits, touchVisit } from "./spase.history.js";
 import { getJudge0LanguageId } from "../libs/judge0.lib.js";
 
 const alphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 const hostColorIndex = 0;
 const memberColorIndexes = [1, 2, 3, 4];
 const capacity = memberColorIndexes.length + 1;
-const leaseMs = 90_000;
+const leaseMs = 60_000;
 export const maxUpdateBytes = 384 * 1024;
 const maxDocumentBytes = 2 * 1024 * 1024;
 
@@ -23,17 +25,28 @@ const memberKey = (spaseId, userId) => ({ spaseId_userId: { spaseId, userId } })
 const activeMembers = (spase, now) => ({
     spaseId: spase.id,
     removedAt: null,
-    OR: [{ userId: spase.hostId }, { reservedUntil: { gt: now } }],
+    OR: [...(spase.hostId ? [{ userId: spase.hostId }] : []), { reservedUntil: { gt: now } }],
 });
 
 export const isSpaseId = (value) => typeof value === "string" && /^[a-f\d]{8}(-[a-f\d]{4}){3}-[a-f\d]{12}$/i.test(value);
 
-export const withSpase = (spaseId, action) => db.$transaction(async (tx) => {
+const expiredSpase = Symbol("expired spase");
+
+export const withSpase = async (spaseId, action) => {
     if (!isSpaseId(spaseId)) throw spaseMissing();
-    const [spase] = await tx.$queryRaw`SELECT * FROM "CodingSpase" WHERE "id" = ${spaseId} FOR UPDATE`;
-    if (!spase || spase.closedAt) throw spaseMissing();
-    return action(tx, spase);
-});
+    const result = await db.$transaction(async (tx) => {
+        const [spase] = await tx.$queryRaw`SELECT * FROM "CodingSpase" WHERE "id" = ${spaseId} FOR UPDATE`;
+        if (!spase || spase.closedAt) throw spaseMissing();
+        const deadline = emptySpaseDeadline(spase);
+        if (deadline !== null && deadline <= Date.now()) {
+            await closeEmptySpase(tx, spase);
+            return expiredSpase;
+        }
+        return action(tx, spase);
+    });
+    if (result === expiredSpase) throw spaseMissing();
+    return result;
+};
 
 export const createSpase = async (userId, guestMode) => {
     if (!["EDITOR", "VIEWER"].includes(guestMode)) {
@@ -43,7 +56,7 @@ export const createSpase = async (userId, guestMode) => {
         const code = Array.from({ length: 5 }, () => alphabet[randomInt(alphabet.length)]).join("");
         try {
             return await db.codingSpase.create({
-                data: { code, hostId: userId, guestMode, members: { create: { userId, reservedUntil: newLease(), colorIndex: hostColorIndex } } },
+                data: { code, hostId: userId, creatorId: userId, guestMode, members: { create: { userId, reservedUntil: newLease(), colorIndex: hostColorIndex } } },
                 select: { id: true, code: true },
             });
         } catch (error) {
@@ -98,6 +111,7 @@ export const openSession = (spaseId, userId, requestedSessionId) => withSpase(sp
         return requestedSessionId;
     }
     const sessionId = randomUUID();
+    await closeVisits(tx, spase.id, "TAB_REPLACED", { userId });
     await reserve(tx, spase, userId, { mustExist: true, sessionId });
     return sessionId;
 });
@@ -117,11 +131,13 @@ export const requireSession = async (tx, spase, identity, permission) => {
 
 export const renewSession = (spaseId, identity) => withSpase(spaseId, async (tx, spase) => {
     await requireSession(tx, spase, identity);
+    await touchVisit(tx, spaseId, identity);
     return reserve(tx, spase, identity.userId, { mustExist: true });
 });
 
 export const removeMember = async (tx, spase, userId) => {
     if (userId === spase.hostId || !isSpaseId(userId)) throw accessDenied();
+    await closeVisits(tx, spase.id, "REMOVED", { userId });
     await tx.codingSpaseMember.updateMany({
         where: { spaseId: spase.id, userId, removedAt: null },
         data: { removedAt: new Date(), sessionId: null, reservedUntil: new Date(0) },
@@ -142,8 +158,13 @@ export const leaveSpase = async (tx, spase, userId, nextHostId) => {
             data: { colorIndex: hostColorIndex },
         });
         await tx.codingSpase.update({ where: { id: spase.id }, data: { hostId: nextHost.userId } });
+        await tx.codingSpaseVisit.updateMany({
+            where: { spaseId: spase.id, leftAt: null, participant: { participantKey: nextHost.userId } },
+            data: { role: "HOST" },
+        });
     }
 
+    await closeVisits(tx, spase.id, "LEFT", { userId });
     await tx.codingSpaseMember.update({
         where: memberKey(spase.id, userId),
         data: {
@@ -194,10 +215,10 @@ const requireDocument = (spase, target) => {
     return documentKey(spase);
 };
 
-export const chooseProblem = async (tx, spase, problemId, requestedLanguage) => {
+export const chooseProblem = async (tx, spase, problemId, requestedLanguage, actorId = spase.hostId) => {
     const problem = typeof problemId === "string" && await tx.problem.findUnique({
         where: { id: problemId },
-        select: { id: true, codeSnippet: true },
+        select: { id: true, title: true, codeSnippet: true },
     });
     if (!problem) throw spaseError(404, "PROBLEM_UNAVAILABLE", "That problem is unavailable.");
     const languages = Object.keys(problem.codeSnippet || {}).filter((language) => getJudge0LanguageId(language));
@@ -205,6 +226,10 @@ export const chooseProblem = async (tx, spase, problemId, requestedLanguage) => 
     if (!languages.includes(language)) throw spaseError(400, "INVALID_LANGUAGE", "Choose an available language.");
 
     const updatedSpase = await tx.codingSpase.update({ where: { id: spase.id }, data: { problemId, language, revision: { increment: 1 } } });
+    if (spase.problemId !== problemId || spase.language !== language) await tx.codingSpaseActivity.create({ data: {
+        spaseId: spase.id, actorId, problemId, problemTitle: problem.title, language,
+        type: spase.problemId === problemId ? "LANGUAGE_CHANGED" : "PROBLEM_SELECTED",
+    } });
     const where = documentKey(updatedSpase);
     const existing = await tx.codingSpaseDocument.findUnique({ where });
     if (existing) return { spase: spaseSummary(updatedSpase), document: existing.state };

@@ -6,8 +6,9 @@ export default function SpaseResults({ job, queued, history, spase }) {
   const isWorking = job.state === "RUNNING" || job.state === "QUEUED";
   const lastResult = isWorking ? history.find((item) => item.state === "FINISHED" || item.state === "FAILED") : job;
   const isAccepted = lastResult?.result?.status === "accepted";
-  const useSampleResults = lastResult?.mode === "run" && lastResult.state === "FINISHED";
-  const fromEarlierWorkspace = job.problemId !== spase.problemId || job.language !== spase.language;
+  const useDetailedResults = Array.isArray(lastResult?.result?.testCases) && lastResult.state === "FINISHED";
+  const resultWorkspace = lastResult ?? job;
+  const fromEarlierWorkspace = resultWorkspace.problemId !== spase.problemId || resultWorkspace.language !== spase.language;
   const Icon = job.state === "RUNNING" ? LoaderCircle :
     job.state === "QUEUED" ? Clock3 : isAccepted ? CheckCircle2 : XCircle;
   const action = job.mode === "run" ? "run" : "submit";
@@ -25,11 +26,11 @@ export default function SpaseResults({ job, queued, history, spase }) {
         </span>
         {queued > 0 && <span className="text-white/65">{queued} queued</span>}
       </div>
-      {fromEarlierWorkspace && <p className="text-white/65">Earlier workspace · {job.language}</p>}
+      {fromEarlierWorkspace && <p className="text-white/65">Earlier workspace · {resultWorkspace.language}</p>}
       {isWorking && lastResult && <h3 className="font-medium text-white/70">Last result · {lastResult.actorName}</h3>}
-      {useSampleResults && <Submission key={lastResult.id} submission={lastResult.result} />}
+      {useDetailedResults && <Submission key={lastResult.id} submission={lastResult.result} />}
       {lastResult?.state === "FAILED" && <p className="whitespace-pre-wrap text-red-200 [overflow-wrap:anywhere]">{lastResult.error}</p>}
-      {!useSampleResults && lastResult?.result && (
+      {!useDetailedResults && lastResult?.result && (
         <div className="flex flex-wrap items-baseline gap-3">
           <h3 className={`text-sm font-semibold ${isAccepted ? "text-emerald-300" : "text-red-200"}`}>
             {isAccepted ? "Accepted" : "Wrong answer"}

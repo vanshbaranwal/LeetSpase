@@ -1,4 +1,5 @@
 
+import { connectVisit, disconnectVisit, expireVisits, endSpase } from "./spase.history.js";
 import jwt from "jsonwebtoken";
 import { Server } from "socket.io";
 import { ticketOptions } from "../routes/spase.routes.js";
@@ -7,6 +8,7 @@ import {
     removeMember, renewSession, requireSession, spaseError, spaseSummary, withSpase,
 } from "./spase.service.js";
 import { enqueueSpaseJob, startSpaseQueue } from "./spase.queue.js";
+import { createSpaseExpiry } from "./spase.expiry.js";
 
 const channel = (spaseId) => `coding-spase:${spaseId}`;
 const memberKey = (spaseId, userId) => `${spaseId}:${userId}`;
@@ -18,17 +20,19 @@ const errorPayload = (error) => {
     };
 };
 
-export function attachCodingSpases(server) {
+export function attachCodingSpases(server, { isReady = () => true } = {}) {
     const origins = new Set(process.env.FRONTEND_URL?.split(",").map((value) => value.trim()).filter(Boolean));
     const io = new Server(server, {
         path: "/socket.io",
         transports: ["websocket"],
         cors: { origin: [...origins] },
-        allowRequest: (request, done) => done(null, origins.has(request.headers.origin)),
+        allowRequest: (request, done) => done(null, isReady() && origins.has(request.headers.origin)),
         maxHttpBufferSize: 512 * 1024,
     });
     const connected = new Map();
     const queue = startSpaseQueue(io, channel);
+    const expiry = createSpaseExpiry(withSpase, (spaseId) =>
+        [...connected.values()].some((socket) => socket.connected && socket.data.identity.spaseId === spaseId));
 
     const evict = (socket, code, message) => {
         socket.emit("spase:ended", { code, message });
@@ -43,6 +47,8 @@ export function attachCodingSpases(server) {
     };
 
     const publishMembers = (spaseId) => withSpase(spaseId, async (tx, spase) => {
+        await expiry.updatePresence(tx, spase);
+        await expireVisits(tx, spaseId);
         const members = await listMembers(tx, spase);
         const roster = members.map((member) => {
             const participant = connected.get(memberKey(spaseId, member.id));
@@ -117,7 +123,7 @@ export function attachCodingSpases(server) {
         }, () => { publishMembersSafely(spaseId); queue.kick(spaseId); });
 
         register("spase:problem", "host",
-            (tx, spase, payload) => chooseProblem(tx, spase, payload?.problemId, payload?.language),
+            (tx, spase, payload) => chooseProblem(tx, spase, payload?.problemId, payload?.language, userId),
             (selection) => io.to(spaseChannel).emit("spase:workspace", selection));
 
         register("spase:edit", "edit",
@@ -141,9 +147,7 @@ export function attachCodingSpases(server) {
             () => evict(socket, "SPASE_LEFT", "You left the spase."),
             { acknowledgeBeforeBroadcast: true });
 
-        register("spase:end", "host", async (tx) => {
-            await tx.codingSpase.update({ where: { id: spaseId }, data: { closedAt: new Date(), code: null } });
-        }, () => {
+        register("spase:end", "host", (tx, spase) => endSpase(tx, spase, "HOST_ENDED", userId), () => {
             io.to(spaseChannel).emit("spase:ended", { code: "SPASE_UNAVAILABLE", message: "The host ended the spase." });
             io.in(spaseChannel).disconnectSockets();
         }, { acknowledgeBeforeBroadcast: true });
@@ -179,7 +183,14 @@ export function attachCodingSpases(server) {
             if (connected.get(key) !== socket) return;
             connected.delete(key);
             io.to(spaseChannel).emit("spase:cursor-left", userId);
-            publishMembersSafely(spaseId);
+            void withSpase(spaseId, async (tx, spase) => {
+                // A reconnect may have won the lock while this disconnect waited.
+                if (connected.has(key)) return;
+                await disconnectVisit(tx, spaseId, identity);
+                await expiry.updatePresence(tx, spase);
+            }).then(() => publishMembersSafely(spaseId)).catch((error) => {
+                if (error.code !== "SPASE_UNAVAILABLE") console.error("Could not record disconnect", error);
+            });
         });
 
         void withSpase(spaseId, async (tx, spase) => {
@@ -192,6 +203,8 @@ export function attachCodingSpases(server) {
             socket.data.colorIndex = member.colorIndex;
             connected.set(key, socket);
             await socket.join(spaseChannel);
+            await connectVisit(tx, spase, identity);
+            await expiry.updatePresence(tx, spase);
         }).then(() => {
             if (socket.connected && connected.get(key) === socket) {
                 socket.emit("spase:ready");
@@ -203,5 +216,8 @@ export function attachCodingSpases(server) {
         });
     });
 
-    return { io, finishPreviousSession };
+    let stopExpiry;
+    io.engine.on("close", () => stopExpiry?.());
+    const startExpiry = async () => { stopExpiry = await expiry.start(); };
+    return { io, finishPreviousSession, startExpiry };
 }
