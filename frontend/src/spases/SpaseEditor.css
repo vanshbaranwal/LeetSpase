@@ -51,8 +51,8 @@
   padding: 3px 8px;
   border-radius: 5px 5px 5px 2px;
   background: var(--spase-color, #d5ddec);
-  box-shadow: 0 0 0 1px #101d34, 0 2px 6px rgb(0 0 0 / 35%);
-  color: #101d34;
+  box-shadow: 0 0 0 1px #0a0c11, 0 2px 6px rgb(0 0 0 / 35%);
+  color: #0a0c11;
   font: 700 13px/1.25 system-ui, sans-serif;
   pointer-events: none;
   text-overflow: ellipsis;

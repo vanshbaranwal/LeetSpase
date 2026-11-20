@@ -61,7 +61,7 @@ export default function SpaseProblemPicker({ problems, loading, currentId, disab
         onClick={open}
         aria-haspopup="dialog"
         aria-label={current ? `Choose a problem, current problem: ${current.title}` : undefined}
-        className="inline-flex min-h-9 items-center rounded-lg border border-white/15 bg-[#192b49] px-3 text-sm font-medium text-white hover:border-[#a9b8ff]/50 disabled:opacity-50"
+        className="inline-flex min-h-9 items-center rounded-lg border border-white/15 bg-[#13161d] px-3 text-sm font-medium text-white hover:border-[#3b82f6]/50 disabled:opacity-50"
       >
         Choose a problem
       </button>
@@ -69,7 +69,7 @@ export default function SpaseProblemPicker({ problems, loading, currentId, disab
       <dialog
         ref={dialog}
         aria-labelledby={titleId}
-        className="m-auto max-h-[85dvh] w-[calc(100%-2rem)] max-w-xl overflow-auto rounded-2xl border border-white/15 bg-[#192b49] text-white shadow-2xl backdrop:bg-[#080e1c]/75"
+        className="m-auto max-h-[85dvh] w-[calc(100%-2rem)] max-w-xl overflow-auto rounded-2xl border border-white/15 bg-[#13161d] text-white shadow-2xl backdrop:bg-[#0a0c11]/75"
       >
         <div className="space-y-3 border-b border-white/10 px-4 py-4 sm:px-5">
           <div className="flex items-center justify-between gap-2">
@@ -82,8 +82,8 @@ export default function SpaseProblemPicker({ problems, loading, currentId, disab
             event.preventDefault();
             void pick(filtered[0]?.id);
           }}>
-            <label className="flex min-h-11 items-center gap-2.5 rounded-lg border border-white/15 bg-[#101d34] px-3 focus-within:border-[#a9b8ff]">
-              <Search className="size-4 shrink-0 text-[#a9b8ff]" aria-hidden />
+            <label className="flex min-h-11 items-center gap-2.5 rounded-lg border border-white/15 bg-[#0a0c11] px-3 focus-within:border-[#3b82f6]">
+              <Search className="size-4 shrink-0 text-[#3b82f6]" aria-hidden />
               <input
                 type="search"
                 ref={search}
@@ -109,7 +109,7 @@ export default function SpaseProblemPicker({ problems, loading, currentId, disab
                 aria-pressed={difficulty === level}
                 onClick={() => setDifficulty(level)}
                 className={`min-h-8 rounded-md border px-2.5 text-xs font-medium ${difficulty === level
-                  ? "border-[#a9b8ff]/55 bg-[#a9b8ff]/15 text-[#d8deff]"
+                  ? "border-[#3b82f6]/55 bg-[#3b82f6]/15 text-[#93c5fd]"
                   : "border-white/12 text-white/70 hover:bg-white/8"}`}
               >
                 {displayDifficulty(level)}
@@ -142,7 +142,7 @@ export default function SpaseProblemPicker({ problems, loading, currentId, disab
                     <span className="block text-sm font-medium [overflow-wrap:anywhere]">{problem.title}</span>
                     {Boolean(problem.tags?.length) && <span className="mt-0.5 block text-xs text-white/55">{problem.tags.slice(0, 3).join(" · ")}</span>}
                   </span>
-                  {problem.id === currentId && <Check className="ml-auto size-4 shrink-0 text-[#a9b8ff]" aria-label="Current problem" />}
+                  {problem.id === currentId && <Check className="ml-auto size-4 shrink-0 text-[#3b82f6]" aria-label="Current problem" />}
                   {problem.difficulty && <span className={`shrink-0 text-xs font-medium ${difficultyColors[problem.difficulty] || "text-white/70"}`}>{displayDifficulty(problem.difficulty)}</span>}
                 </button>
               </li>

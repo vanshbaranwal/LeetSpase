@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
+import { registerCodeTheme } from "../lib/editorTheme";
 import {
   ArrowLeft,
   BookOpenText,
@@ -349,9 +350,9 @@ const ProblemPage = ({ sharedSpase }) => {
 
   if (isProblemLoading || !problem || (sharedSpase && problem.id !== id)) {
     return (
-      <div className={`grid w-full place-items-center bg-[#111e36] text-white ${sharedSpase ? "min-h-0 flex-1" : "min-h-screen"}`}>
+      <div className={`grid w-full place-items-center bg-[#13161d] text-white ${sharedSpase ? "min-h-0 flex-1" : "min-h-screen"}`}>
         <div className="flex flex-col items-center gap-4">
-          <div className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-[#192b49]">
+          <div className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-[#13161d]">
             <LoaderCircle className="h-5 w-5 animate-spin text-white/70" />
           </div>
           <p className="font-mono text-xs uppercase tracking-[0.18em] text-white/35">Loading workspace</p>
@@ -370,21 +371,21 @@ const ProblemPage = ({ sharedSpase }) => {
         <div className="space-y-8 pb-8">
           <section>
             <SectionLabel>Intuition</SectionLabel>
-            <div className={`mt-4 whitespace-pre-wrap rounded-2xl border border-white/[0.08] bg-[#14213d] p-5 text-sm leading-7 ${problem.intuition ? "text-white/62" : "text-white/32"}`}>
+            <div className={`mt-4 whitespace-pre-wrap rounded-2xl border border-white/[0.08] bg-[#0a0c11] p-5 text-sm leading-7 ${problem.intuition ? "text-white/62" : "text-white/32"}`}>
               {problem.intuition || "Intuition is not available for this problem."}
             </div>
           </section>
 
           <section>
             <SectionLabel>Approach</SectionLabel>
-            <div className={`mt-4 whitespace-pre-wrap rounded-2xl border border-white/[0.08] bg-[#14213d] p-5 text-sm leading-7 ${problem.editorial ? "text-white/62" : "text-white/32"}`}>
+            <div className={`mt-4 whitespace-pre-wrap rounded-2xl border border-white/[0.08] bg-[#0a0c11] p-5 text-sm leading-7 ${problem.editorial ? "text-white/62" : "text-white/32"}`}>
               {problem.editorial || "An approach is not available for this problem."}
             </div>
           </section>
 
           <section>
             <SectionLabel>Example Walkthrough</SectionLabel>
-            <div className={`mt-4 whitespace-pre-wrap rounded-2xl border border-white/[0.08] bg-[#14213d] p-5 text-sm leading-7 ${problem.walkthrough ? "text-white/62" : "text-white/32"}`}>
+            <div className={`mt-4 whitespace-pre-wrap rounded-2xl border border-white/[0.08] bg-[#0a0c11] p-5 text-sm leading-7 ${problem.walkthrough ? "text-white/62" : "text-white/32"}`}>
               {problem.walkthrough || "An example walkthrough is not available for this problem."}
             </div>
           </section>
@@ -392,13 +393,13 @@ const ProblemPage = ({ sharedSpase }) => {
           <section>
             <SectionLabel>Complexity Analysis</SectionLabel>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-white/[0.08] bg-[#14213d] p-5">
+              <div className="rounded-2xl border border-white/[0.08] bg-[#0a0c11] p-5">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/32">Time complexity</p>
                 <p className={`mt-3 whitespace-pre-wrap font-mono text-sm leading-6 ${problem.timeComplexity ? "text-emerald-300/80" : "text-white/28"}`}>
                   {problem.timeComplexity || "Not available for this problem."}
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/[0.08] bg-[#14213d] p-5">
+              <div className="rounded-2xl border border-white/[0.08] bg-[#0a0c11] p-5">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/32">Space complexity</p>
                 <p className={`mt-3 whitespace-pre-wrap font-mono text-sm leading-6 ${problem.spaceComplexity ? "text-sky-300/80" : "text-white/28"}`}>
                   {problem.spaceComplexity || "Not available for this problem."}
@@ -414,7 +415,7 @@ const ProblemPage = ({ sharedSpase }) => {
                 href={problem.youtubeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group mt-4 flex items-center justify-between gap-4 rounded-2xl border border-white/[0.08] bg-[#14213d] p-5 transition-colors hover:border-red-400/25 hover:bg-red-400/[0.035] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-300/50"
+                className="group mt-4 flex items-center justify-between gap-4 rounded-2xl border border-white/[0.08] bg-[#0a0c11] p-5 transition-colors hover:border-red-400/25 hover:bg-red-400/[0.035] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-300/50"
               >
                 <span className="flex min-w-0 items-center gap-4">
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-red-500/10 text-red-400 transition-colors group-hover:bg-red-500/15">
@@ -428,7 +429,7 @@ const ProblemPage = ({ sharedSpase }) => {
                 <ExternalLink className="h-4 w-4 shrink-0 text-white/28 transition-colors group-hover:text-red-300" />
               </a>
             ) : (
-              <div className="mt-4 flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-[#14213d] p-5 text-white/32">
+              <div className="mt-4 flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-[#0a0c11] p-5 text-white/32">
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/[0.035]">
                   <Play className="h-5 w-5" />
                 </span>
@@ -440,7 +441,7 @@ const ProblemPage = ({ sharedSpase }) => {
           <section>
             <SectionLabel>Reference Solutions</SectionLabel>
             {editorialLanguages.length > 0 ? (
-              <div className="mt-4 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#14213d]">
+              <div className="mt-4 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0c11]">
                 <div className="flex items-center justify-between gap-3 border-b border-white/[0.07] px-3 py-2.5">
                   <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
                     {editorialLanguages.map((language) => (
@@ -461,7 +462,7 @@ const ProblemPage = ({ sharedSpase }) => {
                 <pre className="max-h-[34rem] overflow-auto whitespace-pre p-5 font-mono text-[13px] leading-6 text-white/68"><code>{activeEditorialSolution}</code></pre>
               </div>
             ) : (
-              <div className="mt-4 rounded-2xl border border-white/[0.08] bg-[#14213d] p-5 text-sm leading-7 text-white/32">
+              <div className="mt-4 rounded-2xl border border-white/[0.08] bg-[#0a0c11] p-5 text-sm leading-7 text-white/32">
                 Reference solutions are not available for this problem.
               </div>
             )}
@@ -511,12 +512,12 @@ const ProblemPage = ({ sharedSpase }) => {
         {problem.constraints && (
           <section>
             <SectionLabel>Constraints</SectionLabel>
-            <pre className="mt-4 whitespace-pre-wrap rounded-2xl border border-white/[0.08] bg-[#14213d] p-4 font-mono text-[13px] leading-7 text-white/58">{problem.constraints}</pre>
+            <pre className="mt-4 whitespace-pre-wrap rounded-2xl border border-white/[0.08] bg-[#0a0c11] p-4 font-mono text-[13px] leading-7 text-white/58">{problem.constraints}</pre>
           </section>
         )}
 
-        <details key={id} className="group overflow-hidden rounded-2xl border border-white/[0.08] bg-[#14213d]">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-medium text-white/75 transition-colors hover:bg-white/[0.04] hover:text-white focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#a9b8ff] [&::-webkit-details-marker]:hidden">
+        <details key={id} className="group overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0c11]">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-medium text-white/75 transition-colors hover:bg-white/[0.04] hover:text-white focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#3b82f6] [&::-webkit-details-marker]:hidden">
             Hints
             <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-white/50 transition-transform group-open:rotate-180 motion-reduce:transition-none" />
           </summary>
@@ -529,8 +530,8 @@ const ProblemPage = ({ sharedSpase }) => {
   };
 
   return (
-    <div className={`flex w-full flex-col overflow-hidden bg-[#111e36] text-white ${sharedSpase ? "min-h-0 flex-1" : "h-dvh"}`}>
-      <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.08] bg-[#101d34] px-3 sm:px-4">
+    <div className={`flex w-full flex-col overflow-hidden bg-[#13161d] text-white ${sharedSpase ? "min-h-0 flex-1" : "h-dvh"}`}>
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.08] bg-[#0a0c11] px-3 sm:px-4">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <Link to="/problems" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-white/55 transition-colors hover:bg-white/[0.06] hover:text-white" aria-label="Back to problems">
             <ArrowLeft className="h-4 w-4" />
@@ -563,7 +564,7 @@ const ProblemPage = ({ sharedSpase }) => {
               {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Share2 className="h-4 w-4" />}
             </button>
             {copied && (
-              <span role="status" aria-live="polite" className="absolute right-0 top-full z-30 mt-2 whitespace-nowrap rounded-lg border border-emerald-300/15 bg-[#192b49] px-3 py-2 text-[11px] font-medium text-emerald-300 shadow-xl shadow-black/40">
+              <span role="status" aria-live="polite" className="absolute right-0 top-full z-30 mt-2 whitespace-nowrap rounded-lg border border-emerald-300/15 bg-[#13161d] px-3 py-2 text-[11px] font-medium text-emerald-300 shadow-xl shadow-black/40">
                 Copied to clipboard
               </span>
             )}
@@ -574,11 +575,11 @@ const ProblemPage = ({ sharedSpase }) => {
             onChange={handleLanguageChange}
             className="ml-1 hidden sm:block"
           />}
-          <button type="button" onClick={handleRunCode} disabled={sharedSpase ? !canEditSpase : isRunning || isSubmitting} className="ml-1 inline-flex h-9 items-center gap-2 rounded-xl bg-white px-3.5 text-xs font-semibold text-black transition-colors hover:bg-[#e8e0d3] disabled:cursor-wait disabled:opacity-55">
+          <button type="button" onClick={handleRunCode} disabled={sharedSpase ? !canEditSpase : isRunning || isSubmitting} className="ml-1 inline-flex h-9 items-center gap-2 rounded-xl bg-[#3b82f6] px-3.5 text-xs font-semibold text-black transition-colors hover:bg-[#93c5fd] disabled:cursor-wait disabled:opacity-55">
             {isRunning && <LoaderCircle className="h-3.5 w-3.5 animate-spin" />}
             <span>Run</span>
           </button>
-          <button type="button" onClick={handleSubmitCode} disabled={sharedSpase ? !canEditSpase : isRunning || isSubmitting} className="inline-flex h-9 items-center gap-2 rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-3.5 text-xs font-semibold text-emerald-200 transition-colors hover:bg-emerald-300/15 disabled:cursor-wait disabled:opacity-50">
+          <button type="button" onClick={handleSubmitCode} disabled={sharedSpase ? !canEditSpase : isRunning || isSubmitting} className="inline-flex h-9 items-center gap-2 rounded-xl border border-[#3b82f6]/45 bg-[#3b82f6]/10 px-3.5 text-xs font-semibold text-[#93c5fd] transition-colors hover:bg-[#3b82f6]/20 disabled:cursor-wait disabled:opacity-50">
             {isSubmitting && <LoaderCircle className="h-3.5 w-3.5 animate-spin" />}
             <span>Submit</span>
           </button>
@@ -589,7 +590,7 @@ const ProblemPage = ({ sharedSpase }) => {
         className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:grid lg:grid-cols-[var(--workspace-columns)] lg:overflow-hidden"
         style={{ "--workspace-columns": showProblem ? splitTracks(problemWidth) : "minmax(0, 1fr)" }}
       >
-        <section id="problem-details" hidden={!showProblem} className={`${showProblem ? "flex" : "hidden"} min-w-0 shrink-0 flex-col border-b border-white/[0.08] bg-[#162540] lg:min-h-0 lg:border-b-0`}>
+        <section id="problem-details" hidden={!showProblem} className={`${showProblem ? "flex" : "hidden"} min-w-0 shrink-0 flex-col border-b border-white/[0.08] bg-[#13161d] lg:min-h-0 lg:border-b-0`}>
           <div className="flex h-12 shrink-0 items-center gap-1 overflow-x-auto border-b border-white/[0.08] px-2">
             {tabs.map(({ id: tabId, label, icon: Icon }) => (
               <button key={tabId} type="button" onClick={() => setActiveTab(tabId)} className={`relative flex h-full shrink-0 items-center gap-2 px-2 text-xs sm:px-3 font-medium transition-colors ${activeTab === tabId ? "text-white" : "text-white/38 hover:text-white/70"}`}>
@@ -615,7 +616,7 @@ const ProblemPage = ({ sharedSpase }) => {
         )}
 
         <div
-          className={`grid min-h-0 min-w-0 shrink-0 grid-rows-[var(--workspace-rows)] bg-[#111e36] lg:h-full ${showConsole ? "h-[max(620px,calc(100dvh-4rem))]" : "h-[calc(100dvh-4rem)]"}`}
+          className={`grid min-h-0 min-w-0 shrink-0 grid-rows-[var(--workspace-rows)] bg-[#13161d] lg:h-full ${showConsole ? "h-[max(620px,calc(100dvh-4rem))]" : "h-[calc(100dvh-4rem)]"}`}
           style={{ "--workspace-rows": showConsole ? splitTracks(editorHeight) : "minmax(0, 1fr) 2.75rem" }}
         >
           <section id="problem-editor" className="flex min-h-0 min-w-0 flex-col">
@@ -640,27 +641,13 @@ const ProblemPage = ({ sharedSpase }) => {
               </div>
             </div>
 
-            <div className="min-h-0 min-w-0 flex-1 overflow-hidden bg-[#14213d]">
+            <div className="min-h-0 min-w-0 flex-1 overflow-hidden bg-[#0a0c11]">
               <EditorComponent
                 height="100%"
                 language={selectedLanguage.toLowerCase()}
-                theme="vs-dark"
+                theme="leetspase-dark"
                 {...(sharedSpase ? { sharedSpase } : { value: code, onChange: handleCodeChange })}
-                beforeMount={(monaco) => {
-                  monaco.editor.defineTheme("leetspase-dark", {
-                    base: "vs-dark",
-                    inherit: true,
-                    rules: [],
-                    colors: {
-                      "editor.background": "#14213d",
-                      "editorGutter.background": "#14213d",
-                      "editorLineNumber.foreground": "#3f3f46",
-                      "editorLineNumber.activeForeground": "#a1a1aa",
-                      "editor.lineHighlightBackground": "#203451",
-                      "editor.selectionBackground": "#333333",
-                    },
-                  });
-                }}
+                beforeMount={registerCodeTheme}
                 onMount={(_, monaco) => monaco.editor.setTheme("leetspase-dark")}
                 options={{
                   minimap: { enabled: false },
@@ -677,6 +664,7 @@ const ProblemPage = ({ sharedSpase }) => {
                   scrollBeyondLastLine: false,
                   automaticLayout: true,
                   renderLineHighlight: "line",
+                  bracketPairColorization: { enabled: false },
                   overviewRulerBorder: false,
                   hideCursorInOverviewRuler: true,
                 }}
@@ -695,7 +683,7 @@ const ProblemPage = ({ sharedSpase }) => {
             />
           )}
 
-          <section id="problem-console" ref={consoleRef} className={`flex min-h-0 min-w-0 flex-col bg-[#162540]${showConsole ? "" : " border-t border-white/[0.08]"}`}>
+          <section id="problem-console" ref={consoleRef} className={`flex min-h-0 min-w-0 flex-col bg-[#13161d]${showConsole ? "" : " border-t border-white/[0.08]"}`}>
               <div className="flex h-11 shrink-0 items-center justify-between border-b border-white/[0.07] px-4">
                 <div className="flex items-center gap-2 text-xs font-medium text-white/55">
                   <ListChecks className="h-3.5 w-3.5" />
@@ -745,7 +733,7 @@ const PanelToggle = ({ show, label, controls, onClick, openIcon: OpenIcon, close
       aria-controls={controls}
       title={action}
       onClick={onClick}
-      className={`grid h-9 w-8 place-items-center rounded-lg transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-[#a9b8ff] ${show ? "text-white/60" : "bg-[#a9b8ff]/10 text-[#a9b8ff]"}`}
+      className={`grid h-9 w-8 place-items-center rounded-lg transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-[#3b82f6] ${show ? "text-white/60" : "bg-[#3b82f6]/10 text-[#3b82f6]"}`}
     >
       <Icon aria-hidden="true" className="h-4 w-4" />
     </button>
@@ -788,7 +776,7 @@ const LanguageSelector = ({ languages, value, onChange, compact = false, classNa
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className={`flex items-center justify-between gap-3 bg-[#203451] font-medium text-white/72 transition-colors hover:bg-[#191919] hover:text-white ${compact ? "h-8 min-w-28 rounded-lg px-2.5 text-[11px]" : "h-9 min-w-36 rounded-xl px-3 text-xs"}`}
+        className={`flex items-center justify-between gap-3 bg-[#1b2029] font-medium text-white/72 transition-colors hover:bg-[#13161d] hover:text-white ${compact ? "h-8 min-w-28 rounded-lg px-2.5 text-[11px]" : "h-9 min-w-36 rounded-xl px-3 text-xs"}`}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
@@ -797,7 +785,7 @@ const LanguageSelector = ({ languages, value, onChange, compact = false, classNa
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-[80] min-w-40 overflow-hidden rounded-xl border border-white/[0.09] bg-[#192b49] p-1.5 shadow-2xl shadow-black/70" role="listbox" aria-label="Programming language">
+        <div className="absolute right-0 top-[calc(100%+8px)] z-[80] min-w-40 overflow-hidden rounded-xl border border-white/[0.09] bg-[#13161d] p-1.5 shadow-2xl shadow-black/70" role="listbox" aria-label="Programming language">
           {languages.map((language) => {
             const isSelected = language === value;
             return (

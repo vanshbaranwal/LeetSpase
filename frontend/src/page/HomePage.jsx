@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  ArrowRight, Code2, Heart, Play, Terminal,
-} from "lucide-react";
+import { ArrowRight, Play, Terminal } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import LanguageBrandIcon from "../components/LanguageBrandIcon";
 import LandingShowcase from "../components/LandingShowcase";
 import HeroBackdrop from "../components/HeroBackdrop";
+import LandingFooter from "../components/LandingFooter";
+import { codeColors } from "../lib/editorTheme";
 
 const languageExamples = {
   PYTHON: {
@@ -58,14 +58,14 @@ const languageTabActiveStyles = {
 };
 
 const syntaxColors = {
-  comment: "#008000",
-  string: "#A31515",
-  number: "#098658",
-  keyword: "#AF00DB",
-  declaration: "#0000FF",
-  type: "#267F99",
-  function: "#795E26",
-  literal: "#0000FF",
+  comment: codeColors.comment,
+  string: codeColors.string,
+  number: codeColors.number,
+  keyword: codeColors.keyword,
+  declaration: codeColors.keyword,
+  type: codeColors.type,
+  function: codeColors.function,
+  literal: codeColors.number,
 };
 
 const commonSyntaxRules = [
@@ -149,7 +149,7 @@ const highlightCodeLine = (line, language) => {
 
 const HomePage = () => {
   const { authUser } = useAuthStore();
-  const [selectedLanguage, setSelectedLanguage] = useState("PYTHON");
+  const [selectedLanguage, setSelectedLanguage] = useState("JAVA");
   const activeExample = languageExamples[selectedLanguage];
 
   return (
@@ -159,18 +159,18 @@ const HomePage = () => {
         <div className="landing-enter max-w-2xl">
           <h1 className="text-5xl font-semibold leading-[0.96] tracking-[-0.06em] sm:text-6xl lg:text-[4.5rem] xl:text-[5rem]">
             <span className="block">Your place to code.</span>
-            <span className="ls-hero-highlight mt-3 block text-[#c4ceff]">Practice. Improve. Prove.</span>
+            <span className="ls-hero-highlight mt-3 block text-[#93c5fd]">Practice. Improve. Prove.</span>
           </h1>
           <div className="mt-9">
             {authUser ? (
-              <Link to="/problems" className="group inline-flex h-12 items-center gap-3 rounded-full bg-[#a9b8ff] py-2 pl-6 pr-2 text-sm font-semibold text-[#14213d] transition-colors duration-200 hover:bg-[#c4ceff]">
+              <Link to="/problems" className="group inline-flex h-12 items-center gap-3 rounded-full bg-[#3b82f6] py-2 pl-6 pr-2 text-sm font-semibold text-[#0a0c11] transition-colors duration-200 hover:bg-[#93c5fd]">
                 Continue solving
                 <span className="grid h-8 w-8 place-items-center rounded-full bg-black/[0.08] transition-colors duration-200 group-hover:bg-black/[0.12]">
                   <ArrowRight className="h-4 w-4" />
                 </span>
               </Link>
             ) : (
-              <Link to="/problems" className="group inline-flex h-12 items-center gap-3 rounded-full bg-[#a9b8ff] py-2 pl-6 pr-2 text-sm font-semibold text-[#14213d] transition-colors duration-200 hover:bg-[#c4ceff]">
+              <Link to="/problems" className="group inline-flex h-12 items-center gap-3 rounded-full bg-[#3b82f6] py-2 pl-6 pr-2 text-sm font-semibold text-[#0a0c11] transition-colors duration-200 hover:bg-[#93c5fd]">
                 Start solving
                 <span className="grid h-8 w-8 place-items-center rounded-full bg-black/[0.08] transition-colors duration-200 group-hover:bg-black/[0.12]">
                   <ArrowRight className="h-4 w-4" />
@@ -181,7 +181,7 @@ const HomePage = () => {
         </div>
 
         <div className="ls-hero-editor relative mx-auto w-full max-w-xl">
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#111e36] shadow-2xl shadow-black/50">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#13161d] shadow-2xl shadow-black/50">
             <div className="flex border-b border-white/10 p-1.5 sm:p-2">
               {Object.entries(languageExamples).map(([key, language]) => (
                 <button
@@ -198,21 +198,19 @@ const HomePage = () => {
               ))}
             </div>
 
-            <div className="relative m-2 grid min-h-80 grid-cols-[42px_1fr] overflow-hidden rounded-xl border border-white/10 bg-[#1d304f] font-mono text-xs sm:m-3 sm:text-sm">
+            <div className="relative m-2 grid min-h-80 grid-cols-[42px_1fr] overflow-hidden rounded-xl border border-white/10 bg-[#1b2029] font-mono text-xs sm:m-3 sm:text-sm">
               <div className="select-none border-r border-white/5 bg-black/75 py-6 text-center leading-7 text-white/20">{activeExample.code.split("\n").map((_, index) => <div key={index}>{index + 1}</div>)}</div>
-              <pre key={selectedLanguage} className="landing-code-float overflow-auto bg-[#e8e0d3] p-6 leading-7 text-[#1d304f]"><code>{activeExample.code.split("\n").map((line, index) => <span key={index} className="ls-hero-code-line block min-h-7" style={{ "--line": index }}>{highlightCodeLine(line, selectedLanguage)}</span>)}</code></pre>
+              <pre key={selectedLanguage} className="landing-code-float overflow-auto bg-[#13161d] p-6 leading-7 text-[#f3f5f9]"><code>{activeExample.code.split("\n").map((line, index) => <span key={index} className="ls-hero-code-line block min-h-7" style={{ "--line": index }}>{highlightCodeLine(line, selectedLanguage)}</span>)}</code></pre>
             </div>
 
             <div className="flex items-center justify-between border-t border-white/10 bg-black/75 px-5 py-4">
               <span className="flex items-center gap-2 text-xs text-white/40"><Terminal className="h-4 w-4" /> {activeExample.label}</span>
-              <button
-                type="button"
-                disabled
-                title="Sign in and open a problem to run code"
-                className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-black opacity-40"
+              <Link
+                to="/problems"
+                className="inline-flex items-center gap-2 rounded-lg bg-[#3b82f6] px-3 py-2 text-xs font-semibold text-[#0a0c11] transition-colors hover:bg-[#93c5fd] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#93c5fd]"
               >
-                <Play className="h-3.5 w-3.5 fill-current" /> Run code
-              </button>
+                <Play className="h-3.5 w-3.5 fill-current" /> Try a problem
+              </Link>
             </div>
           </div>
         </div>
@@ -220,9 +218,7 @@ const HomePage = () => {
 
       <LandingShowcase authUser={authUser} />
 
-      <footer className="border-t border-white/10 px-6 py-10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 text-xs text-white/35 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-2"><Code2 className="h-4 w-4" /> © {new Date().getFullYear()} LeetSpase</div><p className="flex items-center gap-1.5 sm:justify-end">Made with <Heart className="h-4 w-4 fill-red-500 text-red-500" aria-label="love" /> by vanshbaranwal</p></div>
-      </footer>
+      <LandingFooter authUser={authUser} />
     </main>
   );
 };

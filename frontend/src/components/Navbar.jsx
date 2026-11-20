@@ -16,12 +16,12 @@ const Navbar = ({ variant = "default" }) => {
   }, [getProblemOfTheDay, isProblemsPage]);
 
   return (
-    <nav aria-label="Main navigation" className={`sticky top-0 z-50 w-full ${isProblemsPage ? "border-b border-white/10 bg-[#101d34] px-4 sm:px-5" : "px-4 pt-4 sm:px-6"}`}>
-      <div className={`relative mx-auto flex w-full items-center justify-between ${isProblemsPage ? "h-20 max-w-none" : "h-[68px] max-w-[1440px] rounded-2xl border border-[#a9b8ff]/15 bg-[#101d34]/95 px-4 shadow-[0_12px_40px_rgba(4,12,30,0.24)] backdrop-blur-xl sm:h-[76px] sm:px-6"}`}>
+    <nav aria-label="Main navigation" className={`sticky top-0 z-50 w-full ${isProblemsPage ? "border-b border-white/10 bg-[#0a0c11] px-4 sm:px-5" : "px-4 pt-4 sm:px-6"}`}>
+      <div className={`relative mx-auto flex w-full items-center justify-between ${isProblemsPage ? "h-20 max-w-none" : "h-[68px] max-w-[1440px] rounded-2xl border border-[#3b82f6]/15 bg-[#0a0c11]/95 px-4 shadow-[0_12px_40px_rgba(4,12,30,0.24)] backdrop-blur-xl sm:h-[76px] sm:px-6"}`}>
         <div className="flex min-w-0 items-center gap-8">
-          <Link to="/" className="group flex shrink-0 items-center gap-2.5" aria-label="LeetSpase home">
-            <Code2 className={`${isProblemsPage ? "h-8 w-8" : "h-7 w-7"} text-[#a9b8ff] transition-transform duration-300 group-hover:-rotate-6 motion-reduce:transition-none`} strokeWidth={2.3} />
-            <span className={`${isProblemsPage ? "hidden text-2xl sm:inline sm:text-3xl" : "text-xl sm:text-2xl"} font-semibold tracking-[-0.035em] text-white`}>
+          <Link to="/" onClick={() => { if (location.pathname === "/") window.scrollTo(0, 0); }} className="group flex shrink-0 items-center gap-2.5 max-[360px]:gap-1.5" aria-label="LeetSpase home">
+            <Code2 className={`${isProblemsPage ? "h-8 w-8" : "h-7 w-7 max-[360px]:h-5 max-[360px]:w-5"} text-[#3b82f6] transition-transform duration-300 group-hover:-rotate-6 motion-reduce:transition-none`} strokeWidth={2.3} />
+            <span className={`${isProblemsPage ? "hidden text-2xl sm:inline sm:text-3xl" : "text-xl sm:text-2xl max-[360px]:text-base"} font-semibold tracking-[-0.035em] text-white`}>
               LeetSpase
             </span>
           </Link>
@@ -30,14 +30,13 @@ const Navbar = ({ variant = "default" }) => {
 
         {!isProblemsPage && (
           <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex">
-            <a href="/#features" className="rounded-lg px-4 py-2.5 text-sm font-medium text-white/65 transition-colors hover:bg-white/[0.05] hover:text-white">Features</a>
             <a href="/#how-it-works" className="rounded-lg px-4 py-2.5 text-sm font-medium text-white/65 transition-colors hover:bg-white/[0.05] hover:text-white">How it works</a>
+            <a href="/#features" className="rounded-lg px-4 py-2.5 text-sm font-medium text-white/65 transition-colors hover:bg-white/[0.05] hover:text-white">Features</a>
             <Link to="/problems" className="rounded-lg px-4 py-2.5 text-sm font-medium text-white/65 transition-colors hover:bg-white/[0.05] hover:text-white">Problems</Link>
-            <a href="/#about" className="rounded-lg px-4 py-2.5 text-sm font-medium text-white/65 transition-colors hover:bg-white/[0.05] hover:text-white">About</a>
           </div>
         )}
 
-        <div className="flex shrink-0 items-center gap-2.5">
+        <div className="flex shrink-0 items-center gap-2.5 max-[360px]:gap-1.5">
           <div className="dropdown mobile-nav-dropdown lg:hidden">
             <button
               type="button"
@@ -47,7 +46,7 @@ const Navbar = ({ variant = "default" }) => {
             >
               <Menu className="h-4.5 w-4.5" />
             </button>
-            <div tabIndex={0} className="dropdown-content mobile-nav-menu z-[60] mt-3 w-64 rounded-2xl border border-white/10 bg-[#192b49] p-2 text-sm text-white shadow-2xl shadow-black/60">
+            <div tabIndex={0} className="dropdown-content mobile-nav-menu z-[60] mt-3 w-64 rounded-2xl border border-white/10 bg-[#13161d] p-2 text-sm text-white shadow-2xl shadow-black/60">
               {isProblemsPage ? (
                 <>
                   <Link to="/problems" className="flex h-11 items-center rounded-xl px-3 font-medium text-white transition-colors hover:bg-white/[0.06]">Problems</Link>
@@ -68,10 +67,9 @@ const Navbar = ({ variant = "default" }) => {
                 </>
               ) : (
                 <>
-                  <a href="/#features" className="flex h-11 items-center rounded-xl px-3 font-medium text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white">Features</a>
                   <a href="/#how-it-works" className="flex h-11 items-center rounded-xl px-3 font-medium text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white">How it works</a>
+                  <a href="/#features" className="flex h-11 items-center rounded-xl px-3 font-medium text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white">Features</a>
                   <Link to="/problems" className="flex h-11 items-center rounded-xl px-3 font-medium text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white">Problems</Link>
-                  <a href="/#about" className="flex h-11 items-center rounded-xl px-3 font-medium text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white">About</a>
                 </>
               )}
               {authUser && <Link to="/spases" className={`flex h-11 items-center rounded-xl px-3 font-medium transition-colors hover:bg-white/[0.06] ${isProblemsPage ? "text-white" : "text-white/65 hover:text-white"}`}>Spases</Link>}
@@ -108,7 +106,7 @@ const Navbar = ({ variant = "default" }) => {
           {authUser ? (
             <>
               {!isProblemsPage && (
-                <Link to="/problems" className="hidden rounded-xl bg-[#a9b8ff] px-5 py-3 text-sm font-semibold text-[#14213d] transition-colors hover:bg-[#c4ceff] sm:block">
+                <Link to="/problems" className="hidden rounded-xl bg-[#3b82f6] px-5 py-3 text-sm font-semibold text-[#0a0c11] transition-colors hover:bg-[#93c5fd] sm:block">
                   Start solving
                 </Link>
               )}
@@ -125,7 +123,7 @@ const Navbar = ({ variant = "default" }) => {
                     <User className="h-6 w-6" />
                   )}
                 </button>
-                <div tabIndex={0} className="dropdown-content z-[1] mt-3 max-h-[calc(100dvh-7rem)] w-72 max-w-[calc(100dvw-3rem)] overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-[#192b49] p-2 text-white shadow-2xl shadow-black/60">
+                <div tabIndex={0} className="dropdown-content z-[1] mt-3 max-h-[calc(100dvh-7rem)] w-72 max-w-[calc(100dvw-3rem)] overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-[#13161d] p-2 text-white shadow-2xl shadow-black/60">
                   <div className="flex items-center gap-3 px-3 py-3">
                     <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-sm font-semibold text-black">
                       {authUser.image ? (
@@ -183,11 +181,11 @@ const Navbar = ({ variant = "default" }) => {
             </>
           ) : (
             <div className={`flex items-center gap-2.5 text-sm font-semibold ${isProblemsPage ? "font-mono text-xs" : ""}`}>
-              <Link to="/login" className={isProblemsPage ? "rounded-md border border-white/10 bg-white/[0.06] px-4 py-3 text-white transition-colors hover:bg-white/10 sm:px-6" : "rounded-xl px-3 py-3 text-white/80 transition-colors hover:text-white sm:px-4"}>
+              <Link to="/login" className={isProblemsPage ? "rounded-md border border-white/10 bg-white/[0.06] px-4 py-3 text-white transition-colors hover:bg-white/10 sm:px-6" : "rounded-xl px-3 py-3 text-white/80 transition-colors hover:text-white sm:px-4 max-[360px]:px-1.5"}>
                 Sign in
               </Link>
               {!isProblemsPage && (
-                <Link to="/signup" className="hidden rounded-xl bg-[#a9b8ff] px-5 py-3 text-[#14213d] shadow-[0_6px_24px_rgba(169,184,255,0.16)] transition-colors hover:bg-[#c4ceff] sm:block">
+                <Link to="/signup" className="hidden rounded-xl bg-[#3b82f6] px-5 py-3 text-[#0a0c11] shadow-[0_6px_24px_rgba(59,130,246,0.16)] transition-colors hover:bg-[#93c5fd] sm:block">
                   Get started
                 </Link>
               )}

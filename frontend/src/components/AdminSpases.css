@@ -1,58 +1,58 @@
-.admin-spases { min-width: 0; color: #f4ede0; }
+.admin-spases { min-width: 0; color: #f3f5f9; }
 .admin-spases button, .admin-spases input, .admin-spases select { font: inherit; }
 .admin-spases button { cursor: pointer; }
 .admin-spases button:disabled { cursor: default; opacity: .4; }
-.admin-spases :focus-visible { outline: 2px solid #a9b8ff; outline-offset: 4px; }
+.admin-spases :focus-visible { outline: 2px solid #3b82f6; outline-offset: 4px; }
 .admin-spases h1 { font-size: clamp(1.8rem, 4vw, 2.25rem); font-weight: 600; letter-spacing: -.04em; margin: 0; }
 .admin-spases h2 { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 .75rem; }
 .admin-spase-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.75rem; }
-.admin-spase-heading p { margin-top: .5rem; color: #b1bed3; font-size: .875rem; }
-.admin-spase-refresh, .admin-spase-back { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 2.5rem; flex-shrink: 0; color: #c3cdf3; font-size: .8rem !important; }
-.admin-spase-refresh { padding: .5rem .9rem; border: 1px solid #ffffff25; border-radius: .6rem; }
+.admin-spase-heading p { margin-top: .5rem; color: #9aa4b2; font-size: .875rem; }
+.admin-spase-refresh, .admin-spase-back { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 2.5rem; flex-shrink: 0; color: #93c5fd; font-size: .8rem !important; }
+.admin-spase-refresh { padding: .5rem .9rem; border: 1px solid rgba(255,255,255,.09); border-radius: .6rem; }
 .admin-spase-back { margin-bottom: 1rem; }
 .admin-spase-totals { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); border-block: 1px solid #ffffff25; margin-bottom: 2rem; }
 .admin-spase-totals > * { text-align: left; padding: 1.25rem 1rem; }
 .admin-spase-totals > * + * { border-left: 1px solid #ffffff1a; }
 .admin-spase-totals span { display: block; font-size: .75rem; color: #aebcd4; }
 .admin-spase-totals strong { display: block; margin-top: .5rem; font-size: 2rem; font-weight: 600; font-variant-numeric: tabular-nums; }
-.admin-spase-totals button:hover { background: #a9b8ff09; }
+.admin-spase-totals button:hover { background: #3b82f609; }
 .admin-spase-filters { display: grid; grid-template-columns: minmax(12rem,2fr) repeat(3,minmax(0,1fr)); gap: .75rem; }
-.admin-spase-filters label { display: grid; gap: .5rem; min-width: 0; font-size: .75rem; color: #b1bed3; }
-.admin-spase-filters input, .admin-spase-filters select { width: 100%; min-width: 0; height: 2.75rem; padding: .6rem .7rem; border: 1px solid #ffffff25; border-radius: .5rem; background: #172741; color: #f4ede0; font-size: .8rem; color-scheme: dark; }
-.admin-spase-note { margin: 1rem 0 1.5rem; font-size: .75rem; line-height: 1.7; color: #aab7cd; }
+.admin-spase-filters label { display: grid; gap: .5rem; min-width: 0; font-size: .75rem; color: #9aa4b2; }
+.admin-spase-filters input, .admin-spase-filters select { width: 100%; min-width: 0; height: 2.75rem; padding: .6rem .7rem; border: 1px solid #ffffff25; border-radius: .5rem; background: #13161d; color: #f3f5f9; font-size: .8rem; color-scheme: dark; }
+.admin-spase-note { margin: 1rem 0 1.5rem; font-size: .75rem; line-height: 1.7; color: #9aa4b2; }
 .admin-spase-error { padding: .75rem 0; color: #fca5a5; font-size: .85rem; overflow-wrap: anywhere; }
-.admin-spase-loading { padding: .5rem 0; color: #a9b8ff; font-size: .8rem; }
+.admin-spase-loading { padding: .5rem 0; color: #3b82f6; font-size: .8rem; }
 .admin-spase-list { border-top: 1px solid #ffffff25; }
 .admin-spase-list-row { display: block; width: 100%; padding: 1.3rem .5rem; text-align: left; border-bottom: 1px solid #ffffff1a; transition: background .15s ease; }
-.admin-spase-list-row:hover { background: #a9b8ff08; }
+.admin-spase-list-row:hover { background: #3b82f608; }
 .admin-spase-list-title { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; font-size: .95rem; }
 .admin-spase-list-title strong { max-width: 100%; overflow-wrap: anywhere; font-weight: 600; }
-.admin-spase-id { font-family: ui-monospace, monospace; font-size: .7rem !important; color: #aab7cd; overflow-wrap: anywhere; }
-.admin-spase-status { display: inline-flex; padding: .2rem .5rem; border-radius: .3rem; border: 1px solid #ffffff25; text-transform: capitalize; font-size: .7rem; color: #b8c3d8; }
-.admin-spase-status[data-status="ACTIVE"], .admin-spase-status[data-status="FINISHED"] { color: #79e7b5; border-color: #79e7b540; }
+.admin-spase-id { font-family: ui-monospace, monospace; font-size: .7rem !important; color: #9aa4b2; overflow-wrap: anywhere; }
+.admin-spase-status { display: inline-flex; padding: .2rem .5rem; border-radius: .3rem; border: 1px solid #ffffff25; text-transform: capitalize; font-size: .7rem; color: #9aa4b2; }
+.admin-spase-status[data-status="ACTIVE"], .admin-spase-status[data-status="FINISHED"] { color: #10b981; border-color: #10b98140; }
 .admin-spase-status[data-status="INACTIVE"], .admin-spase-status[data-status="QUEUED"], .admin-spase-status[data-status="RUNNING"] { color: #ffd47d; border-color: #ffd47d40; }
 .admin-spase-status[data-status="FAILED"] { color: #fca5a5; border-color: #fca5a540; }
 .admin-spase-list-fields { display: grid; grid-template-columns: .6fr 1.4fr 1.4fr .6fr; gap: 1rem; margin-top: 1.25rem; }
 .admin-spase-field { min-width: 0; }
-.admin-spase-field dt { font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; color: #aab7cd; }
+.admin-spase-field dt { font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; color: #9aa4b2; }
 .admin-spase-field dd { font-size: .8rem; margin-top: .4rem; overflow-wrap: anywhere; line-height: 1.6; }
-.admin-spase-view { display: block; margin-top: 1rem; font-size: .75rem; color: #a9b8ff; }
-.admin-spase-pagination { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-block: 1rem; font-size: .75rem; color: #aab7cd; }
+.admin-spase-view { display: block; margin-top: 1rem; font-size: .75rem; color: #3b82f6; }
+.admin-spase-pagination { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-block: 1rem; font-size: .75rem; color: #9aa4b2; }
 .admin-spase-pagination > div { display: flex; gap: .5rem; }
 .admin-spase-pagination button { min-height: 2.5rem; padding: .5rem .8rem; border: 1px solid #ffffff25; border-radius: .4rem; }
-.admin-spase-empty { padding: 2rem 0; color: #aab7cd; font-size: .875rem; }
+.admin-spase-empty { padding: 2rem 0; color: #9aa4b2; font-size: .875rem; }
 .admin-spase-facts { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1.5rem; padding-block: 1.5rem; border-block: 1px solid #ffffff25; }
 .admin-spase-people { border-block: 1px solid #ffffff25; }
 .admin-spase-people li { padding: .8rem 0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem; font-size: .85rem; overflow-wrap: anywhere; }
 .admin-spase-people li + li { border-top: 1px solid #ffffff12; }
-.admin-spase-people small { font-size: .75rem; color: #aab7cd; }
+.admin-spase-people small { font-size: .75rem; color: #9aa4b2; }
 .admin-spase-tabs { display: flex; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid #ffffff25; margin-top: 1.5rem; }
-.admin-spase-tabs button { padding: .8rem .2rem; min-height: 2.75rem; font-size: .875rem; color: #aab7cd; border-bottom: 2px solid transparent; }
-.admin-spase-tabs button[aria-selected="true"] { color: #a9b8ff; border-color: #a9b8ff; }
+.admin-spase-tabs button { padding: .8rem .2rem; min-height: 2.75rem; font-size: .875rem; color: #9aa4b2; border-bottom: 2px solid transparent; }
+.admin-spase-tabs button[aria-selected="true"] { color: #3b82f6; border-color: #3b82f6; }
 .admin-spase-tabs span { font-size: .7rem; margin-left: .3rem; }
 .admin-spase-records article { padding-block: 1.25rem; border-bottom: 1px solid #ffffff1a; }
 .admin-spase-record-title { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem; font-size: .875rem; overflow-wrap: anywhere; }
-.admin-spase-record-title > span:not(.admin-spase-status) { font-size: .75rem; color: #aab7cd; }
+.admin-spase-record-title > span:not(.admin-spase-status) { font-size: .75rem; color: #9aa4b2; }
 .admin-spase-record-fields { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1.25rem; margin-top: 1rem; }
 @media (max-width: 760px) {
   .admin-spase-filters { grid-template-columns: repeat(2,minmax(0,1fr)); }

@@ -159,7 +159,7 @@ const ProblemsTable = ({
               <div
                 role="listbox"
                 aria-label="Filter problems by difficulty"
-                className="absolute left-0 top-[calc(100%+0.55rem)] z-40 w-48 overflow-hidden rounded-2xl border border-white/10 bg-[#203451] p-2 shadow-2xl shadow-black/60"
+                className="absolute left-0 top-[calc(100%+0.55rem)] z-40 w-48 overflow-hidden rounded-2xl border border-white/10 bg-[#1b2029] p-2 shadow-2xl shadow-black/60"
               >
                 {difficultyOptions.map((option) => {
                   const isSelected = difficulty === option;
@@ -205,7 +205,7 @@ const ProblemsTable = ({
             )}
           </div>
 
-          <label className="flex h-10 w-full min-w-0 items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.07] px-3.5 focus-within:border-[#a9b8ff]/65 focus-within:bg-white/[0.09] focus-within:ring-1 focus-within:ring-[#a9b8ff]/25 sm:w-56">
+          <label className="flex h-10 w-full min-w-0 items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.07] px-3.5 focus-within:border-[#3b82f6]/65 focus-within:bg-white/[0.09] focus-within:ring-1 focus-within:ring-[#3b82f6]/25 sm:w-56">
             <Search className="h-4 w-4 shrink-0 text-white/45" />
             <input
               type="search"
@@ -219,7 +219,7 @@ const ProblemsTable = ({
         </div>
         <button
           type="button"
-          className="inline-flex h-10 w-full items-center justify-center rounded-full border border-white bg-white px-5 text-sm font-semibold text-black shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-[#e8e0d3] hover:bg-[#e8e0d3] active:translate-y-0 sm:w-auto"
+          className="inline-flex h-10 w-full items-center justify-center rounded-full border border-[#3b82f6] bg-[#3b82f6] px-5 text-sm font-semibold text-black shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-[#93c5fd] hover:bg-[#93c5fd] active:translate-y-0 sm:w-auto"
           onClick={handleCreatePlaylistClick}
         >
           Create Playlist
@@ -338,7 +338,7 @@ const ProblemsTable = ({
                           {showSaveToPlaylist && (
                             <button
                               type="button"
-                              className="btn btn-sm rounded-full border border-white/10 bg-[#000000] text-[#FFFFFF] hover:border-white/20 hover:bg-[#172844] hover:text-[#FFFFFF]"
+                              className="btn btn-sm rounded-full border border-white/10 bg-[#13161d] text-[#FFFFFF] hover:border-white/20 hover:bg-[#13161d] hover:text-[#FFFFFF]"
                               onClick={() => handleAddToPlaylist(problem.id)}
                             >
                               <span>Save to Playlist</span>
@@ -372,7 +372,7 @@ const ProblemsTable = ({
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-problem-title"
-            className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#192b49] p-7 text-left shadow-2xl shadow-black sm:p-8"
+            className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#13161d] p-7 text-left shadow-2xl shadow-black sm:p-8"
             onClick={(event) => event.stopPropagation()}
           >
             <button
@@ -427,7 +427,7 @@ const ProblemsTable = ({
             role="dialog"
             aria-modal="true"
             aria-labelledby="auth-required-title"
-            className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#192b49] p-7 shadow-2xl shadow-black sm:p-8"
+            className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#13161d] p-7 shadow-2xl shadow-black sm:p-8"
             onClick={(event) => event.stopPropagation()}
           >
             <button
@@ -448,7 +448,7 @@ const ProblemsTable = ({
             </p>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
-              <Link to="/login" className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#e8e0d3]">
+              <Link to="/login" className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#3b82f6] px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#93c5fd]">
                 <LogIn className="h-4 w-4" /> Log in
               </Link>
               <Link to="/signup" className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-4 py-3 text-sm font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.05]">

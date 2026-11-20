@@ -76,10 +76,10 @@ function CodingSpase({ spaseId }) {
   if (ended) {
     if (isEndingSpase) return <Navigate to="/spases" replace />;
     return (
-      <main className="grid min-h-dvh w-full place-items-center bg-[#111e36] p-6 text-center text-white">
+      <main className="grid min-h-dvh w-full place-items-center bg-[#13161d] p-6 text-center text-white">
         <div>
           <h1 className="text-2xl font-semibold">{ended}</h1>
-          <Link to="/spases" className="mt-5 inline-block font-medium text-[#a9b8ff]">Back to Spases</Link>
+          <Link to="/spases" className="mt-5 inline-block font-medium text-[#3b82f6]">Back to Spases</Link>
         </div>
       </main>
     );
@@ -87,14 +87,14 @@ function CodingSpase({ spaseId }) {
 
   if (!spase || !access) {
     return (
-      <main className="grid min-h-dvh w-full place-items-center bg-[#111e36] p-6 text-center text-white">
+      <main className="grid min-h-dvh w-full place-items-center bg-[#13161d] p-6 text-center text-white">
         <div className="space-y-4">
           <p role="status" className="flex items-center justify-center gap-2">
             {connection === "connecting" && <LoaderCircle className="size-4 animate-spin" aria-hidden />}
             {notice || "Connecting to the spase…"}
           </p>
           {connection === "unavailable" && <button type="button" className={controlClass} onClick={reconnect}>Reconnect</button>}
-          <Link to="/spases" className="block text-sm text-[#a9b8ff]">Back to Spases</Link>
+          <Link to="/spases" className="block text-sm text-[#3b82f6]">Back to Spases</Link>
         </div>
       </main>
     );
@@ -104,8 +104,8 @@ function CodingSpase({ spaseId }) {
   const sharedJob = jobs.find((job) => job.state === "RUNNING") ?? pendingJobs.at(-1) ?? jobs[0];
 
   return (
-    <div className="flex h-dvh min-w-0 w-full flex-col overflow-hidden bg-[#111e36] text-white">
-      <header className="shrink-0 border-b border-white/10 bg-[#101d34] px-4 py-3 sm:px-6">
+    <div className="flex h-dvh min-w-0 w-full flex-col overflow-hidden bg-[#13161d] text-white">
+      <header className="shrink-0 border-b border-white/10 bg-[#0a0c11] px-4 py-3 sm:px-6">
         <div className="flex items-start gap-3 sm:items-center">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2 text-xs">
             <div className="flex shrink-0 items-center gap-2">
@@ -125,7 +125,7 @@ function CodingSpase({ spaseId }) {
                 notice={notice}
               />
             ) : (
-              <span className="rounded-md bg-[#a9b8ff]/10 px-2 py-1 text-[#c8d0ff]">{access.canEdit ? "Editor" : "View only"}</span>
+              <span className="rounded-md bg-[#3b82f6]/10 px-2 py-1 text-[#93c5fd]">{access.canEdit ? "Editor" : "View only"}</span>
             )}
             <div className="flex min-w-0 flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 text-white/65"><Users className="size-3.5" aria-hidden /> {members.length}/5</span>
@@ -140,7 +140,7 @@ function CodingSpase({ spaseId }) {
                     <SpaseParticipantAvatar name={member.name} image={member.image} online={member.online} />
                     <span className="spase-participant-name min-w-0 truncate text-xs leading-tight font-semibold" title={member.name}>{member.name}</span>
                     {member.role === "HOST" && (
-                      <span role="img" aria-label="Host" title="Host" className="ml-0.5 grid h-6 w-5.5 shrink-0 place-items-center rounded-[3px] bg-[#f4ede0] text-[11px] leading-none font-bold text-[#14213d]">H</span>
+                      <span role="img" aria-label="Host" title="Host" className="ml-0.5 grid h-6 w-5.5 shrink-0 place-items-center rounded-[3px] bg-[#f4ede0] text-[11px] leading-none font-bold text-[#0a0c11]">H</span>
                     )}
                     {access.isHost && member.role !== "HOST" && (
                       <button
@@ -181,7 +181,7 @@ function CodingSpase({ spaseId }) {
           ref={exitDialog}
           aria-labelledby="spase-exit-title"
           aria-describedby="spase-exit-description"
-          className="m-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-white/15 bg-[#192b49] p-5 text-white shadow-2xl backdrop:bg-[#080e1c]/75 sm:p-6"
+          className="m-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-white/15 bg-[#13161d] p-5 text-white shadow-2xl backdrop:bg-[#0a0c11]/75 sm:p-6"
         >
           <form onSubmit={(event) => {
             event.preventDefault();

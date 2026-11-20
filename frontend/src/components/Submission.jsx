@@ -75,7 +75,7 @@ const SubmissionResults = ({ submission }) => {
     <div className="@container min-w-0 text-sm">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
-          <h2 className={`flex min-w-0 items-start gap-2 font-semibold ${isAccepted ? "text-emerald-300" : "text-red-300"}`}>
+          <h2 className={`flex min-w-0 items-start gap-2 font-semibold ${isAccepted ? "text-[#10b981]" : "text-red-300"}`}>
             <VerdictIcon aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
             <span className="[overflow-wrap:anywhere]">{verdict}</span>
           </h2>
@@ -122,7 +122,7 @@ const SubmissionResults = ({ submission }) => {
                     <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs">
                       <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
                         <h4 className="font-semibold text-white/90">Case {testCase.number}</h4>
-                        <span className={`min-w-0 [overflow-wrap:anywhere] ${testCase.passed ? "text-emerald-300" : "text-red-300"}`}>
+                        <span className={`min-w-0 [overflow-wrap:anywhere] ${testCase.passed ? "text-[#10b981]" : "text-red-300"}`}>
                           {testCase.passed ? "Passed" : testCase.label}
                         </span>
                       </div>

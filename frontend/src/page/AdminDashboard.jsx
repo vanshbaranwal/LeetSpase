@@ -217,7 +217,7 @@ const AdminDashboard = () => {
 
   if (isLoading && !overview) {
     return (
-      <div className="grid min-h-screen w-full place-items-center bg-[#111e36] text-white">
+      <div className="grid min-h-screen w-full place-items-center bg-[#13161d] text-white">
         <div className="flex items-center gap-3 text-sm text-white/55">
           <LoaderCircle className="h-5 w-5 animate-spin" /> Loading admin dashboard
         </div>
@@ -226,8 +226,8 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className={`min-h-screen w-full bg-[#111e36] text-white ${activeSection === "add-problem" ? "xl:h-dvh xl:overflow-hidden" : ""}`}>
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#111e36]/95 backdrop-blur">
+    <div className={`min-h-screen w-full bg-[#13161d] text-white ${activeSection === "add-problem" ? "xl:h-dvh xl:overflow-hidden" : ""}`}>
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#13161d]/95 backdrop-blur">
         <div className="mx-auto flex h-20 w-full items-center justify-between px-5 sm:px-8">
           <Link to="/" className="flex items-center gap-3">
             <Code2 className="h-7 w-7" />
@@ -264,7 +264,7 @@ const AdminDashboard = () => {
               </div>
 
               <section className="mt-8" aria-label="Spase totals">
-                <button type="button" onClick={() => setActiveSection("spases")} className="mb-4 text-sm font-semibold text-[#a9b8ff] hover:underline">Spases · View history →</button>
+                <button type="button" onClick={() => setActiveSection("spases")} className="mb-4 text-sm font-semibold text-[#3b82f6] hover:underline">Spases · View history →</button>
                 <div className="grid grid-cols-2 gap-y-6 border-y border-white/10 py-6 sm:grid-cols-4">
                   {[["Total Spases", "total"], ["Active", "active"], ["Ended", "ended"], ["Inactive", "inactive"]].map(([label, key]) => (
                     <div key={key} className="px-4 text-center"><p className="text-xs text-white/55">{label}</p><p className="mt-2 text-2xl font-semibold tabular-nums">{overview?.spases?.[key] ?? "—"}</p></div>
@@ -340,11 +340,11 @@ const AdminDashboard = () => {
                   value={userQuery}
                   onChange={(event) => setUserQuery(event.target.value)}
                   placeholder="Search users"
-                  className="h-11 w-full rounded-full border border-white/10 bg-[#192b49] px-5 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/25 sm:w-72"
+                  className="h-11 w-full rounded-full border border-white/10 bg-[#13161d] px-5 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/25 sm:w-72"
                 />
               </div>
 
-              <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#192b49]">
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#13161d]">
                 <div className="divide-y divide-white/[0.07] xl:hidden">
                   {filteredUsers.map((user) => {
                     const presence = getUserPresence(user);
@@ -502,11 +502,11 @@ const AdminDashboard = () => {
                   value={submissionQuery}
                   onChange={(event) => setSubmissionQuery(event.target.value)}
                   placeholder="Search submissions"
-                  className="h-11 w-full rounded-full border border-white/10 bg-[#192b49] px-5 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/25 sm:w-72"
+                  className="h-11 w-full rounded-full border border-white/10 bg-[#13161d] px-5 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/25 sm:w-72"
                 />
               </div>
 
-              <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#192b49]">
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#13161d]">
                 <div className="submission-records overflow-x-auto">
                   <table role="table" className="w-full min-w-[1050px] text-left text-sm">
                     <thead role="rowgroup" className="border-b border-white/10 bg-black/20 text-xs uppercase tracking-[0.12em] text-white/35">
@@ -627,7 +627,7 @@ const AdminDashboard = () => {
           )}
         </main>
 
-        <aside className="order-first border-b border-white/10 bg-[#14213d] p-5 lg:order-none lg:sticky lg:top-20 lg:h-[calc(100dvh-5rem)] lg:overflow-y-auto lg:border-b-0 lg:border-l lg:p-6">
+        <aside className="order-first border-b border-white/10 bg-[#0a0c11] p-5 lg:order-none lg:sticky lg:top-20 lg:h-[calc(100dvh-5rem)] lg:overflow-y-auto lg:border-b-0 lg:border-l lg:p-6">
           <div className="flex items-center gap-3 border-b border-white/10 pb-5">
             <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-white font-semibold text-black">
               {authUser.image ? <img src={authUser.image} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" /> : (authUser.name?.[0] || "A").toUpperCase()}
@@ -657,7 +657,7 @@ const AdminDashboard = () => {
 
       {pendingRoleChange && (
         <div className="fixed inset-0 z-[75] grid place-items-center bg-black/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Confirm role change">
-          <div className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl border border-white/10 bg-[#192b49] p-5 shadow-2xl sm:p-6">
+          <div className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl border border-white/10 bg-[#13161d] p-5 shadow-2xl sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-white/35">Access control</p>
@@ -701,7 +701,7 @@ const AdminDashboard = () => {
 
       {selectedSubmission && (
         <div className="fixed inset-0 z-[70] grid place-items-center bg-black/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Submission details">
-          <div className="max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-[#192b49] p-6 shadow-2xl">
+          <div className="max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-[#13161d] p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-white/35">Submission details</p>

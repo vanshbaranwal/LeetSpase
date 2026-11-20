@@ -107,7 +107,7 @@ const SubmissionsList = ({ submissions, isLoading }) => {
         const codePanelId = `submission-code-${submission.id}`;
 
         return (
-          <article key={submission.id} className={`overflow-hidden rounded-2xl border bg-[#14213d] transition-colors ${isExpanded ? "border-white/[0.16]" : "border-white/[0.08] hover:border-white/[0.14]"}`}>
+          <article key={submission.id} className={`overflow-hidden rounded-2xl border bg-[#0a0c11] transition-colors ${isExpanded ? "border-white/[0.16]" : "border-white/[0.08] hover:border-white/[0.14]"}`}>
             <button
               type="button"
               onClick={() => setExpandedSubmissionId(isExpanded ? null : submission.id)}
@@ -116,11 +116,11 @@ const SubmissionsList = ({ submissions, isLoading }) => {
               aria-controls={codePanelId}
             >
               <span className="flex items-center gap-3">
-                <span className={`grid h-8 w-8 place-items-center rounded-lg ${isAccepted ? "bg-emerald-400/10 text-emerald-300" : "bg-red-400/10 text-red-300"}`}>
+                <span className={`grid h-8 w-8 place-items-center rounded-lg ${isAccepted ? "bg-[#10b981]/10 text-[#10b981]" : "bg-red-400/10 text-red-300"}`}>
                   {isAccepted ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
                 </span>
                 <span>
-                  <span className={`block text-sm font-semibold ${isAccepted ? "text-emerald-300" : "text-red-300"}`}>{statusLabel}</span>
+                  <span className={`block text-sm font-semibold ${isAccepted ? "text-[#10b981]" : "text-red-300"}`}>{statusLabel}</span>
                   <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.1em] text-white/28">{submission.language}</span>
                 </span>
               </span>
@@ -150,7 +150,7 @@ const SubmissionsList = ({ submissions, isLoading }) => {
                     className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.08] px-2.5 text-xs text-white/45 transition-colors hover:border-white/[0.16] hover:bg-white/[0.04] hover:text-white/75 disabled:cursor-not-allowed disabled:opacity-30"
                     aria-label="Copy submitted code"
                   >
-                    {copiedSubmissionId === submission.id ? <Check className="h-3.5 w-3.5 text-emerald-300" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copiedSubmissionId === submission.id ? <Check className="h-3.5 w-3.5 text-[#10b981]" /> : <Copy className="h-3.5 w-3.5" />}
                     {copiedSubmissionId === submission.id ? "Copied" : "Copy"}
                   </button>
                 </div>

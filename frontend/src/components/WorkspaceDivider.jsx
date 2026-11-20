@@ -77,11 +77,11 @@ const WorkspaceDivider = ({
       onLostPointerCapture={() => { dragStart.current = null; }}
       onKeyDown={handleKeyDown}
       onDoubleClick={() => resize(defaultValue)}
-      className={`group relative z-10 touch-none select-none place-items-center bg-[#111e36] outline-none hover:bg-[#203451] focus-visible:bg-[#203451] active:bg-[#203451] ${vertical ? "cursor-col-resize" : "cursor-row-resize"} ${className}`}
+      className={`group relative z-10 touch-none select-none place-items-center bg-[#13161d] outline-none hover:bg-[#1b2029] focus-visible:bg-[#1b2029] active:bg-[#1b2029] ${vertical ? "cursor-col-resize" : "cursor-row-resize"} ${className}`}
     >
       <span
         aria-hidden="true"
-        className={`rounded-full bg-[#a9b8ff]/35 group-hover:bg-[#a9b8ff] group-focus-visible:bg-[#a9b8ff] group-active:bg-[#a9b8ff] ${vertical ? "h-8 w-0.5" : "h-0.5 w-8"}`}
+        className={`rounded-full bg-[#3b82f6]/35 group-hover:bg-[#3b82f6] group-focus-visible:bg-[#3b82f6] group-active:bg-[#3b82f6] ${vertical ? "h-8 w-0.5" : "h-0.5 w-8"}`}
       />
     </div>
   );

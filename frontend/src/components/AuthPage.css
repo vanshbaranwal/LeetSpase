@@ -1,8 +1,8 @@
 .ls-auth-page {
-  --auth-accent: #a9b8ff;
-  --auth-text: #f4ede0;
-  --auth-muted: #a7b4cc;
-  --auth-border: #a9b8ff26;
+  --auth-accent: #3b82f6;
+  --auth-text: #f3f5f9;
+  --auth-muted: #9aa4b2;
+  --auth-border: rgba(255, 255, 255, .09);
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 16px;
@@ -10,7 +10,7 @@
   min-height: 100dvh;
   padding: 16px;
   color: var(--auth-text);
-  background: #101b31;
+  background: #0a0c11;
   color-scheme: dark;
 }
 
@@ -18,7 +18,7 @@
   display: flex;
   min-width: 0;
   flex-direction: column;
-  background: radial-gradient(ellipse at 0 0, #1a2a49, transparent 50%);
+  background: radial-gradient(ellipse at 0 0, #1b2029, transparent 50%);
 }
 
 .ls-auth-header {
@@ -45,7 +45,7 @@
   border: 1px solid var(--auth-border);
   border-radius: 10px;
   color: var(--auth-accent);
-  background: #a9b8ff0c;
+  background: #3b82f60c;
 }
 
 .ls-auth-home {
@@ -57,7 +57,7 @@
   transition: color .2s, background .2s;
 }
 
-.ls-auth-home:hover { color: var(--auth-text); background: #a9b8ff10; }
+.ls-auth-home:hover { color: var(--auth-text); background: #3b82f610; }
 
 .ls-auth-form-wrap {
   width: min(100%, 440px);
@@ -81,18 +81,18 @@
   padding-inline: 13px 5px;
   border: 1px solid var(--auth-border);
   border-radius: 11px;
-  background: #14223b;
+  background: #13161d;
   transition: border-color .2s, background .2s, box-shadow .2s;
 }
 
-.ls-auth-input > svg { flex-shrink: 0; color: #97a9ce; }
-.ls-auth-input:hover { border-color: #a9b8ff58; }
-.ls-auth-input:focus-within { border-color: var(--auth-accent); box-shadow: 0 0 0 3px #a9b8ff24; background: #172742; }
+.ls-auth-input > svg { flex-shrink: 0; color: #9aa4b2; }
+.ls-auth-input:hover { border-color: #3b82f658; }
+.ls-auth-input:focus-within { border-color: var(--auth-accent); box-shadow: 0 0 0 3px #3b82f624; background: #1b2029; }
 .ls-auth-input[data-invalid="true"] { border-color: #ffa6ac; }
 .ls-auth-input input { width: 100%; min-width: 0; min-height: 50px; padding-inline-end: 7px; border: 0; outline: none; color: var(--auth-text); background: transparent; font-size: 1rem; }
-.ls-auth-input input::placeholder { color: #8797b3; }
-.ls-auth-input input:autofill { box-shadow: 0 0 0 100px #172742 inset; }
-.ls-auth-input input:-webkit-autofill { -webkit-text-fill-color: var(--auth-text); box-shadow: 0 0 0 100px #172742 inset; }
+.ls-auth-input input::placeholder { color: #9aa4b2; }
+.ls-auth-input input:autofill { box-shadow: 0 0 0 100px #1b2029 inset; }
+.ls-auth-input input:-webkit-autofill { -webkit-text-fill-color: var(--auth-text); box-shadow: 0 0 0 100px #1b2029 inset; }
 
 .ls-auth-password-toggle {
   display: grid;
@@ -106,7 +106,7 @@
   transition: background .2s, color .2s;
 }
 
-.ls-auth-password-toggle:hover { color: #e1e7ff; background: #a9b8ff15; }
+.ls-auth-password-toggle:hover { color: #e1e7ff; background: #3b82f615; }
 .ls-auth-hint, .ls-auth-field-error { margin-top: 6px; font-size: .75rem; line-height: 1.4; }
 .ls-auth-hint { margin-top: 0; color: var(--auth-muted); }
 .ls-auth-field-error { color: #ffb8bc; }
@@ -134,7 +134,7 @@
   gap: 9px;
   padding: 10px 14px;
   border-radius: 11px;
-  color: #101b31;
+  color: #0a0c11;
   background: var(--auth-accent);
   font-size: .9375rem;
   font-weight: 700;
@@ -142,7 +142,7 @@
   transition: background .2s, box-shadow .2s;
 }
 
-.ls-auth-submit:hover:enabled { background: #c8d2ff; box-shadow: 0 5px 24px #a9b8ff33; }
+.ls-auth-submit:hover:enabled { background: #93c5fd; box-shadow: 0 5px 24px #3b82f633; }
 .ls-auth-submit:disabled { opacity: .68; cursor: wait; }
 .ls-auth-spinner { animation: ls-auth-spin .8s linear infinite; }
 
@@ -166,7 +166,7 @@
 }
 
 .ls-auth-alternative { margin-top: 17px; color: var(--auth-muted); text-align: center; font-size: .8125rem; }
-.ls-auth-alternative a { border-radius: 3px; color: #c8d3ff; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }
+.ls-auth-alternative a { border-radius: 3px; color: #93c5fd; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }
 .ls-auth-alternative a:hover { color: #f1f3ff; }
 .ls-auth-page :is(a, button):focus-visible { outline: 2px solid var(--auth-accent); outline-offset: 3px; }
 
@@ -180,23 +180,23 @@
   padding: clamp(28px, 4vw, 74px);
   border: 1px solid var(--auth-border);
   border-radius: 22px;
-  background: #142342;
+  background: #13161d;
 }
 
 .ls-auth-visual .ls-hero-backdrop { width: 100%; }
 .ls-auth-visual-inner { width: min(100%, 460px); animation: ls-auth-enter .55s .08s ease-out both; }
-.ls-auth-visual-label { color: #b5c4ff; font-size: .6875rem; font-weight: 700; letter-spacing: .15em; }
+.ls-auth-visual-label { color: #93c5fd; font-size: .6875rem; font-weight: 700; letter-spacing: .15em; }
 .ls-auth-visual h2 { margin: 14px 0; font-size: clamp(2.3rem, 4.3vw, 4.4rem); font-weight: 650; letter-spacing: -.06em; line-height: 1.03; }
-.ls-auth-visual h2 em { color: #c5cfff; font-style: normal; }
+.ls-auth-visual h2 em { color: #93c5fd; font-style: normal; }
 .ls-auth-visual-inner > p:last-of-type { max-width: 330px; color: #bdc9df; font-size: .9375rem; line-height: 1.6; }
 
 .ls-auth-editor {
   overflow: hidden;
   margin-top: clamp(24px, 5vh, 48px);
-  border: 1px solid #b9c7ff35;
+  border: 1px solid #93c5fd35;
   border-radius: 15px;
-  background: #101b30eb;
-  box-shadow: 0 24px 50px #070f236e;
+  background: #13161deb;
+  box-shadow: 0 24px 50px #13161d6e;
 }
 
 .ls-auth-editor-header, .ls-auth-editor-result { display: flex; align-items: center; gap: 8px; padding: 13px 16px; font-size: .8125rem; }
@@ -208,11 +208,11 @@
 .ls-auth-editor-code i { color: #8294b3; font-style: normal; }
 .ls-auth-editor-code code { white-space: pre; }
 .ls-auth-editor-code em { color: #c9b7ff; font-style: normal; }
-.ls-auth-editor-code b { color: #b1c8ff; font-weight: 400; }
+.ls-auth-editor-code b { color: #93c5fd; font-weight: 400; }
 .ls-auth-editor-code strong { color: #f1cd90; font-weight: 400; }
-.ls-auth-editor-result { justify-content: space-between; border-top: 1px solid #8ae2bc2c; color: #a7efd0; background: #70dab210; }
+.ls-auth-editor-result { justify-content: space-between; border-top: 1px solid rgba(16,185,129,.18); color: #10b981; background: rgba(16,185,129,.06); }
 .ls-auth-editor-result span { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; }
-.ls-auth-editor-result small { color: #b5c8ce; font-size: .6875rem; }
+.ls-auth-editor-result small { color: #9aa4b2; font-size: .6875rem; }
 
 .ls-auth-signup { padding: 12px; }
 .ls-auth-signup .ls-auth-header { padding-top: 4px; }

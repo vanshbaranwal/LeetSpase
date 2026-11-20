@@ -137,7 +137,7 @@ const GoogleAuthButton = () => {
       <div ref={buttonRef} className="flex w-full justify-center" />
 
       {isGoogleLoggingIn && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-full border border-white/15 bg-[#14223b]">
+        <div className="absolute inset-0 flex items-center justify-center rounded-full border border-white/15 bg-[#13161d]">
           <Loader2 className="h-5 w-5 animate-spin" />
           <span className="ml-2 text-sm">Signing in with Google...</span>
         </div>

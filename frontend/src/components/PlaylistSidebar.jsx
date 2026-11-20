@@ -55,12 +55,12 @@ const PlaylistSidebar = ({
         aria-expanded={filtersOpen}
         aria-controls="problem-library-filters"
         onClick={() => setFiltersOpen((open) => !open)}
-        className="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#172844] px-4 text-sm font-semibold lg:hidden"
+        className="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#13161d] px-4 text-sm font-semibold lg:hidden"
       >
         Playlists and tags
         <ChevronDown aria-hidden="true" className={filtersOpen ? "size-4 rotate-180" : "size-4"} />
       </button>
-      <div id="problem-library-filters" className={`${filtersOpen ? "block" : "hidden"} mt-2 w-full min-w-0 rounded-2xl border border-white/10 bg-[#172844]/90 p-3 text-center shadow-2xl shadow-black/25 lg:mt-0 lg:block lg:max-h-[calc(100dvh-8rem)] lg:overflow-y-auto`}>
+      <div id="problem-library-filters" className={`${filtersOpen ? "block" : "hidden"} mt-2 w-full min-w-0 rounded-2xl border border-white/10 bg-[#13161d]/90 p-3 text-center shadow-2xl shadow-black/25 lg:mt-0 lg:block lg:max-h-[calc(100dvh-8rem)] lg:overflow-y-auto`}>
         <div className="px-2 pb-2 pt-1">
           <p className="text-sm font-semibold text-white">Playlists</p>
         </div>

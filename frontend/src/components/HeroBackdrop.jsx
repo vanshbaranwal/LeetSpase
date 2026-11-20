@@ -28,22 +28,22 @@ export default function HeroBackdrop() {
       <svg className="ls-hero-backdrop-art" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice" focusable="false">
         <defs>
           <linearGradient id={`${id}-silk`} x1="0%" y1="92%" x2="100%" y2="12%">
-            <stop stopColor="#6688f1" stopOpacity="0" />
-            <stop offset=".42" stopColor="#7d8ffc" stopOpacity=".19" />
-            <stop offset=".7" stopColor="#5c8af3" stopOpacity=".13" />
-            <stop offset="1" stopColor="#92b3ff" stopOpacity=".05" />
+            <stop stopColor="#3b82f6" stopOpacity="0" />
+            <stop offset=".42" stopColor="#3b82f6" stopOpacity=".19" />
+            <stop offset=".7" stopColor="#3b82f6" stopOpacity=".13" />
+            <stop offset="1" stopColor="#93c5fd" stopOpacity=".05" />
           </linearGradient>
           <linearGradient id={`${id}-wire`} gradientUnits="userSpaceOnUse" x1="100" y1="670" x2="1480" y2="65">
-            <stop stopColor="#a1b6ff" stopOpacity="0" />
-            <stop offset=".29" stopColor="#899cff" stopOpacity=".5" />
-            <stop offset=".56" stopColor="#a6aaff" stopOpacity=".9" />
-            <stop offset=".85" stopColor="#9bd2ff" stopOpacity=".75" />
-            <stop offset="1" stopColor="#90c5ff" stopOpacity=".1" />
+            <stop stopColor="#93c5fd" stopOpacity="0" />
+            <stop offset=".29" stopColor="#3b82f6" stopOpacity=".5" />
+            <stop offset=".56" stopColor="#93c5fd" stopOpacity=".9" />
+            <stop offset=".85" stopColor="#93c5fd" stopOpacity=".75" />
+            <stop offset="1" stopColor="#93c5fd" stopOpacity=".1" />
           </linearGradient>
           <radialGradient id={`${id}-spark`}>
-            <stop stopColor="#c7dbff" stopOpacity=".75" />
-            <stop offset=".3" stopColor="#9eb9ff" stopOpacity=".28" />
-            <stop offset="1" stopColor="#8aabff" stopOpacity="0" />
+            <stop stopColor="#93c5fd" stopOpacity=".75" />
+            <stop offset=".3" stopColor="#93c5fd" stopOpacity=".28" />
+            <stop offset="1" stopColor="#3b82f6" stopOpacity="0" />
           </radialGradient>
         </defs>
         <path d="M-110 666 C152 706 404 651 617 514 S847 216 1036 112 S1334 100 1550 -36 L1550 105 C1334 242 1200 181 1036 251 S817 528 617 696 S152 874 -110 751Z" fill={paint("silk")} />
@@ -65,8 +65,8 @@ export default function HeroBackdrop() {
           {[[664, 612], [1108, 105], [1388, 494]].map(([x, y]) => (
             <g key={x} transform={`translate(${x} ${y})`}>
               <circle r="15" fill={paint("spark")} />
-              <path d="M-6 0H6M0-6V6" stroke="#b4cbff" strokeWidth=".65" />
-              <circle r="1.9" fill="#e1ebff" />
+              <path d="M-6 0H6M0-6V6" stroke="#93c5fd" strokeWidth=".65" />
+              <circle r="1.9" fill="#f3f5f9" />
             </g>
           ))}
         </g>

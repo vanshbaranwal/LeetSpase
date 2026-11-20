@@ -32,7 +32,7 @@ export default function SpaseResults({ job, queued, history, spase }) {
       {lastResult?.state === "FAILED" && <p className="whitespace-pre-wrap text-red-200 [overflow-wrap:anywhere]">{lastResult.error}</p>}
       {!useDetailedResults && lastResult?.result && (
         <div className="flex flex-wrap items-baseline gap-3">
-          <h3 className={`text-sm font-semibold ${isAccepted ? "text-emerald-300" : "text-red-200"}`}>
+          <h3 className={`text-sm font-semibold ${isAccepted ? "text-[#10b981]" : "text-red-200"}`}>
             {isAccepted ? "Accepted" : "Wrong answer"}
           </h3>
           <p className="text-white/65">{lastResult.result.passed}/{lastResult.result.total} tests passed</p>
