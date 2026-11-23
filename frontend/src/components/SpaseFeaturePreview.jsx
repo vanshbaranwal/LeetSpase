@@ -17,7 +17,7 @@ export default function SpaseFeaturePreview() {
       <div className="ls-sfp-window">
         <div className="ls-sfp-topbar">
           <div className="ls-sfp-identity"><Code2 size={16} /><strong>Spase</strong><span className="ls-sfp-invite">Q7M4P <Copy size={11} /></span></div>
-          <span className="ls-sfp-count"><Users size={13} /> 4/5</span>
+          <span className="ls-sfp-count"><Users size={13} /> 5/5</span>
         </div>
 
         <div className="ls-sfp-session">
@@ -27,6 +27,7 @@ export default function SpaseFeaturePreview() {
             <span className="ls-sfp-person ls-sfp-mint"><i>R</i><b>Rudraksha</b></span>
             <span className="ls-sfp-person ls-sfp-amber"><i>A</i><b>Ayan</b></span>
             <span className="ls-sfp-person ls-sfp-blue"><i>Y</i><b>Yogii</b></span>
+            <span className="ls-sfp-person ls-sfp-pink"><i>G</i><b>Gungun</b></span>
           </div>
         </div>
 

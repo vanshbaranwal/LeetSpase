@@ -70,6 +70,8 @@
 .ls-sfp-amber i { background: #ffd47d; color: #0a0c11; }
 .ls-sfp-blue { color: #76d7ff; }
 .ls-sfp-blue i { background: #76d7ff; color: #0a0c11; }
+.ls-sfp-pink { color: #f9a8d4; }
+.ls-sfp-pink i { background: #f9a8d4; color: #0a0c11; }
 
 .ls-sfp-editor { min-width: 0; background: #0a0c11; }
 .ls-sfp-editor-head { height: 31px; padding: 0 14px; border-bottom: 1px solid rgba(255, 255, 255, .07); color: #9aa4b2; font-size: 9px; }
