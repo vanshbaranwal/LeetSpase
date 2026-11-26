@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Play, Terminal } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
@@ -150,10 +150,25 @@ const highlightCodeLine = (line, language) => {
 const HomePage = () => {
   const { authUser } = useAuthStore();
   const [selectedLanguage, setSelectedLanguage] = useState("JAVA");
+  const landingRef = useRef(null);
+
+  useEffect(() => {
+    if (!("IntersectionObserver" in window)) return;
+
+    const sections = landingRef.current?.querySelectorAll(".ls-hero-motion, .ls-showcase, .ls-bento");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(({ target, isIntersecting }) => {
+        target.dataset.motionActive = String(isIntersecting);
+      });
+    }, { rootMargin: "160px 0px" });
+
+    sections?.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
   const activeExample = languageExamples[selectedLanguage];
 
   return (
-    <main className="w-full overflow-hidden text-white">
+    <main ref={landingRef} className="w-full overflow-hidden text-white">
       <section className="ls-hero-motion relative mx-auto grid min-h-[calc(100dvh-96px)] max-w-7xl items-center gap-12 px-6 py-14 sm:py-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-14 lg:px-8 lg:py-16">
         <HeroBackdrop />
         <div className="landing-enter max-w-2xl">

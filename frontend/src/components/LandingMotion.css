@@ -14,7 +14,7 @@
 @keyframes ls-hero-line { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 
 .ls-stage.ls-demo { padding: clamp(14px, 3.5vw, 42px); isolation: isolate; background: radial-gradient(ellipse at 60% 105%, rgba(59,130,246,.18) 0%, transparent 58%), #13161d; }
-.ls-demo-aurora { position: absolute; inset: -25%; z-index: -1; opacity: .36; pointer-events: none; background: conic-gradient(from 200deg, transparent, #3b82f6 13%, transparent 23%, transparent 58%, #3b82f6 72%, transparent 83%); filter: blur(75px); animation: ls-demo-orbit 14s linear infinite; }
+.ls-demo-aurora { position: absolute; inset: -25%; z-index: -1; pointer-events: none; background: radial-gradient(ellipse at 35% 55%, rgba(59,130,246,.18), transparent 48%), radial-gradient(ellipse at 75% 40%, rgba(147,197,253,.11), transparent 45%); }
 .ls-demo-window { z-index: 1; }
 .ls-demo .ls-work-submit { animation: none; }
 .ls-demo .ls-action-lit { color: #0a0c11; background: #93c5fd; animation: ls-demo-click .75s ease-out both; }
@@ -54,7 +54,6 @@
 .ls-demo-progress { position: absolute; inset: auto 0 0; height: 3px; background: #b8c6ff24; border-radius: 9px; overflow: hidden; }
 .ls-demo-progress i { display: block; height: 100%; background: #3b82f6; transition: width .45s ease; }
 .ls-demo[data-playing="false"] :is(.ls-demo-aurora, .ls-demo-type, .ls-demo-caret, .ls-action-lit, .ls-demo-hop-arrow) { animation-play-state: paused; }
-@keyframes ls-demo-orbit { to { transform: rotate(1turn); } }
 @keyframes ls-demo-type { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
 @keyframes ls-demo-rise { from { opacity: .25; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @keyframes ls-demo-click { from { transform: scale(.93); box-shadow: 0 0 0 6px #3b82f650; } to { transform: none; box-shadow: 0 0 22px #3b82f655; } }
@@ -77,4 +76,16 @@
 @media (prefers-reduced-motion: reduce) {
   .ls-hero-motion *, .ls-demo *, .ls-demo[data-step="0"] .ls-demo-type, .ls-demo .ls-action-lit { animation: none !important; transition: none !important; }
   .ls-hero-highlight { color: #93c5fd; background: none; }
+}
+
+/* Pause decorative loops after their section leaves the viewport. */
+:is(.ls-hero-motion, .ls-showcase, .ls-bento)[data-motion-active="false"],
+:is(.ls-hero-motion, .ls-showcase, .ls-bento)[data-motion-active="false"] *,
+:is(.ls-hero-motion, .ls-showcase, .ls-bento)[data-motion-active="false"] *::before,
+:is(.ls-hero-motion, .ls-showcase, .ls-bento)[data-motion-active="false"] *::after {
+  animation-play-state: paused !important;
+}
+
+@media (max-width: 767px) {
+  .ls-hero-motion .landing-code-float { animation: none; will-change: auto; }
 }

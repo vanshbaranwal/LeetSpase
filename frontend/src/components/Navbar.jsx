@@ -17,7 +17,7 @@ const Navbar = ({ variant = "default" }) => {
 
   return (
     <nav aria-label="Main navigation" className={`sticky top-0 z-50 w-full ${isProblemsPage ? "border-b border-white/10 bg-[#0a0c11] px-4 sm:px-5" : "px-4 pt-4 sm:px-6"}`}>
-      <div className={`relative mx-auto flex w-full items-center justify-between ${isProblemsPage ? "h-20 max-w-none" : "h-[68px] max-w-[1440px] rounded-2xl border border-[#3b82f6]/15 bg-[#0a0c11]/95 px-4 shadow-[0_12px_40px_rgba(4,12,30,0.24)] backdrop-blur-xl sm:h-[76px] sm:px-6"}`}>
+      <div className={`relative mx-auto flex w-full items-center justify-between ${isProblemsPage ? "h-20 max-w-none" : "h-[68px] max-w-[1440px] rounded-2xl border border-[#3b82f6]/15 bg-[#0a0c11] px-4 shadow-[0_12px_40px_rgba(4,12,30,0.24)] sm:h-[76px] sm:px-6"}`}>
         <div className="flex min-w-0 items-center gap-8">
           <Link to="/" onClick={() => { if (location.pathname === "/") window.scrollTo(0, 0); }} className="group flex shrink-0 items-center gap-2.5 max-[360px]:gap-1.5" aria-label="LeetSpase home">
             <Code2 className={`${isProblemsPage ? "h-8 w-8" : "h-7 w-7 max-[360px]:h-5 max-[360px]:w-5"} text-[#3b82f6] transition-transform duration-300 group-hover:-rotate-6 motion-reduce:transition-none`} strokeWidth={2.3} />

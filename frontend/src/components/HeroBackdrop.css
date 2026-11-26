@@ -44,7 +44,6 @@
   stroke-dasharray: 9 91;
   stroke-dashoffset: 12;
   opacity: 0;
-  filter: drop-shadow(0 0 4px #93c5fd);
   animation: ls-hero-signal 4.1s .2s cubic-bezier(.36,.09,.38,.97) both;
 }
 

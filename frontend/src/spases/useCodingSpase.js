@@ -84,7 +84,7 @@ export function useCodingSpase(spaseId) {
 
     const socket = io(socketUrl, {
       autoConnect: false,
-      transports: ["websocket"],
+      transports: ["polling", "websocket"],
       auth: (callback) => {
         void requestTicket().then(({ ticket }) => {
           if (active && !terminal) callback({ ticket });
@@ -111,6 +111,7 @@ export function useCodingSpase(spaseId) {
       setJobs(state.jobs);
       setInitialAccess({ canEdit: state.canEdit, isHost: state.isHost });
       setConnection("live");
+      setNotice("");
     };
 
     socket.on("spase:ready", () => {
@@ -154,10 +155,13 @@ export function useCodingSpase(spaseId) {
       }
     });
     socket.on("connect_error", (error) => {
-      if (terminalCodes.includes(error.data?.code)) end(error);
-      else if (!socket.active) {
+      if (terminalCodes.includes(error.data?.code)) {
+        end(error);
+      } else {
         setConnection("unavailable");
-        setNotice(error.message);
+        setNotice(socket.active
+          ? "Could not connect to the spase. Retrying automatically…"
+          : error.message || "Could not connect to the spase. Try again.");
       }
     });
     socket.connect();

@@ -24,7 +24,7 @@ export function attachCodingSpases(server, { isReady = () => true } = {}) {
     const origins = new Set(process.env.FRONTEND_URL?.split(",").map((value) => value.trim()).filter(Boolean));
     const io = new Server(server, {
         path: "/socket.io",
-        transports: ["websocket"],
+        transports: ["polling", "websocket"],
         cors: { origin: [...origins] },
         allowRequest: (request, done) => done(null, isReady() && origins.has(request.headers.origin)),
         maxHttpBufferSize: 512 * 1024,
